@@ -22,9 +22,18 @@ __status__ = "Prototype"
 
 
 # FUNCTIONS ===================================================================
-def load() -> pd.DataFrame:
+def load_andy() -> pd.DataFrame:
+    """Return useable data cleaned by Andy for preliminary analysis."""
+    data = pd.read_csv(PATHS.data.andyinput)
+    data = data.drop(columns=['Unnamed: 0'])
+    data['time2'] = data.time**2
+    data['time2_lag'] = data.time_lag**2
+    return data
+
+
+def load_sunny() -> pd.DataFrame:
     """Return useable data for preliminary analysis."""
-    data = pd.read_csv(PATHS.data.input)
+    data = pd.read_csv(PATHS.data.sunnyinput)
     # Subset of data between 1945 and 2005
     data = data.loc[(data.Year >= 1945) & (data.Year <= 2005)]
     data['time'] = data.time - 44

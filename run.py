@@ -22,8 +22,9 @@ __status__ = "Prototype"
 
 # FUNCTIONS ===================================================================
 def main():
-    data = bd.load()
-    print(data.head())
+    data_andy = bd.load_andy()
+    print(data_andy.head())
+    est.estimation_andy(data_andy)
 
 
 # MAIN ========================================================================
