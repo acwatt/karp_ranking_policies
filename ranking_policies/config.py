@@ -37,13 +37,16 @@ class Data:
     def __init__(self, data_dir):
         self.root = data_dir
         self.sunny = self.root / 'sunny'
+        self.andy = self.root / 'andy'
         self.tables = self.root / 'tables'
         self.temp = self.root / 'temp'
         # Lookup tables
         self.lookup_jpg = self.tables / 'tbl_jpg_lookup.csv'
         self.lookup_fips = self.tables / 'tbl_fips_lookup.csv'
         # Data files
-        self.input = self.sunny / 'clean' / 'grouped_nation.1751_2014.csv'
+        self.sunnyinput = self.sunny / 'clean' / 'grouped_nation.1751_2014.csv'
+        self.andyinput = self.andy / 'clean' / 'ts_allYears_nation.1751_2014.csv'
+
 
 # FUNCTIONS --------------------------
 
