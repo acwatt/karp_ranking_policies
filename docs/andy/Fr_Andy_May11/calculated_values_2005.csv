@@ -1,0 +1,7 @@
+variable,estimate,s.e.,sample,
+ratio k,56.94877294,NA,1945-2005,
+sigma2 / B1^2,10249.92423,9.653037312,1945-2005,
+(n-1)/n * 1/B1^2 * sigm2_u,583720.6075,40.72219518,1945-2005,Ignore this line because it did not use the GLS estimator
+B0,-5348.952969,2044.02864,1945-2005,
+var_b0,657936.3636,NA,1945-2005,
+b_0USA-B0,870.2841607,NA,1945-2005,

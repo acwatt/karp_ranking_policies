@@ -1,0 +1,169 @@
+%2multibyte Version: 5.50.0.2960 CodePage: 65001
+
+\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Version=5.50.0.2960}
+%TCIDATA{Codepage=65001}
+%TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
+%TCIDATA{BibliographyScheme=Manual}
+%TCIDATA{Created=Monday, May 25, 2020 14:30:56}
+%TCIDATA{LastRevised=Thursday, May 28, 2020 19:02:38}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=40 LaTeX article.cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\noindent\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+%\input{tcilatex}f\texttt{}
+
+\begin{document}
+
+
+\bigskip 
+
+\bigskip 
+
+\bigskip 
+
+\bigskip 
+
+$k\equiv \frac{\left( n-1\right) \sigma _{\mu }^{2}\left( n\right) }{n\sigma
+^{2}}$
+
+\bigskip 
+
+From the file Calculated values 2005 the estimate using data up to 2005 is
+
+\bigskip 
+
+$\frac{\sigma ^{2}}{b^{2}}=10249$
+
+\bigskip 
+
+From the file "temp for Larry GLS.doc" the estimate of variance for the
+regional model is $\frac{\sigma _{\mu }^{2}}{b^{2}}=4333160$
+
+\bigskip 
+
+If I believed these two numbers I get $k\equiv \frac{\left( n-1\right)
+\sigma _{\mu }^{2}\left( n\right) }{n\sigma ^{2}}=1268.\,\allowbreak 365\,694
+$
+
+\bigskip 
+
+\bigskip 
+
+\begin{equation}
+\widehat{var\left( b_{0i}\right) }\equiv \left( \frac{1}{n}%
+\sum_{i}b_{0i}^{2}\right) -\left( \frac{1}{n}\sum_{i}b_{0i}^{{}}\right) ^{2}.
+\label{eq var b_0,i}
+\end{equation}
+
+\bigskip 
+
+The b\_i for the three regions Bric, Eu, and Other are (taken from the GLS
+estimation "temp for Larry GLS estimation"
+
+$b_{B}=4296$
+
+$b_{E}=2745$
+
+$b_{0}=4186$
+
+$\bigskip $
+
+The estimate from "calculated values 2005" of the intercept in the aggregate
+model is $\bigskip $
+
+$B_{0}=-5349$
+
+The missing region is Canada and US, call this $b_{N}$
+
+\bigskip 
+
+I have $-5349=\frac{4296+2745+4186+x}{4}$, Solution is: $-32\,623$
+
+\bigskip 
+
+\bigskip 
+
+\begin{enumerate}
+\item Indeed, I was using an old estimate,~$\frac{\sigma ^{2}}{b^{2}}%
+=1.61e+12$, not the one in the Feb 25 file,~$\frac{\sigma ^{2}}{b^{2}}=10249$%
+. Your GLS estimate is $\frac{\sigma _{\mu }^{2}}{nb^{2}}=4333159$. So the
+estimate of $k$ is 
+\[
+k=\left( n-1\right) \frac{\frac{\sigma _{\mu }^{2}}{nb^{2}}}{\frac{\sigma
+^{2}}{b^{2}}}=3\frac{4333159}{10249}=\allowbreak 425.\allowbreak 8
+\]%
+With this correction, the estimate of $k$ goes from being essentially 0 to
+426. It is possible that this number is correct. It means that absent trade,
+the quantity-based policy is not even in the running in the competition with
+taxes. This could well be the case.~ I had it in my mind that $k$ should be
+a number like 1.... but now I don't know why I thought that. There is no
+apparent upper bound on $k.$ The magnitude of $k$ still worries me, but you
+have assured me that you used the same units of emissions for both the
+regional and the aggregate models... That would be an easy source of error.
+
+\item You wrote "I just tried to calculate Eq. 25 of the March 5 manuscript,
+but realized this equation calls for the inverse of the Omega matrix.~
+However, I think the determinant of this matrix is zero, so its inverse does
+not exist." I think that you might be confusing the nxn matrix $\tilde{\Omega%
+}$ defined in the proof of Remark 1 (page 40 of the March 5 document) with
+the (n-1)x(n-1) matrix $\Omega $ defined above equation 25 on page 29. The
+former is indeed singular (as I note on page 40), but the inverse of the
+latter is 
+\[
+\Omega ^{-1}=\left( 
+\begin{array}{ccc}
+4-1 & -1 & -1 \\ 
+-1 & 4-1 & -1 \\ 
+-1 & -1 & 4-1%
+\end{array}%
+\right) ^{-1}=\left( 
+\begin{array}{ccc}
+\frac{1}{2} & \frac{1}{4} & \frac{1}{4} \\ 
+\frac{1}{4} & \frac{1}{2} & \frac{1}{4} \\ 
+\frac{1}{4} & \frac{1}{4} & \frac{1}{2}%
+\end{array}%
+\right) 
+\]%
+My main reason for wanting to calculate 25 was as a consistency check
+between your GLS estimation and my algebra. I am pretty confident that my
+algebra is correct, and you appear to be pretty confident that your
+estimation is correct. Given the amount of time that you have sunk into this
+project, I think that we can dispense with calculating 25.
+
+\item The region fixed effect in the file "temp for larry GLS" is actually $%
+\frac{b_{0i}-B_{0}}{b}$. (This incorrect labelling is something that you
+inherited from a mistake that I made early on.) The three numbers for
+regions B,E,O (BRIC, Europe, Other) are $4296.5$, $2745$, and $4185$ (from
+the file temp for larry GLS)
+\end{enumerate}
+
+\bigskip 
+
+\bigskip 
+
+\end{document}
