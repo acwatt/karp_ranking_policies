@@ -1,6 +1,25 @@
+## ---------------------------
+## R version 3.6.3 (2020-02-29)
+## Script name: reproducing_andy.R
+##
+## Purpose of script: reproduce Andy Hultgren's empirical work for this project
+##
+## Author: Aaron Watt
+## Email: aaron@acwatt.net
+##
+## Date Created: 2021-07-30
+##
+## ---------------------------
+## Notes:
+##
+
+
+## PACKAGES ====================================================================
 #install.packages("dummies")
 library(dummies)
 
+
+## PREPARE DATA ================================================================
 data <- read.csv("../../data/sunny/clean/grouped_nation.1751_2014.csv")
 
 # Take only years in [1945, 2005]
@@ -30,6 +49,8 @@ X <- cbind(b,t,t2)
 # Make vector of emissions (our y variable)
 e <- matrix(data=data$CO2, ncol=1)
 
+
+## ESTIMATION ==================================================================
 # Setings for estimation
 n <- 4  # number of regions
 T <- 60  # number of time periods (years)
