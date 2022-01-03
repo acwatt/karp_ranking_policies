@@ -1,0 +1,107 @@
+---
+title: "New Estimation after Statistics Consulting"
+author: "Aaron Watt"
+date: "1/2/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r R packages}
+library(JuliaCall)  # must load this to run Julia in R markdown
+```
+
+
+# New Estimation
+After consulting with the statistics folks about the estimation problem, Dr. Karp
+rederived the covariance matrix and FGLS covariance derivatives without 
+
+
+For loops are very fast in Julia -- about as fast as vectorized operations.
+Therefore, I will create the covariance matrix 
+
+```{julia Packages}
+# Loading packages can often take a long time, but Julia is very fast once packages are loaded
+using Zygote  # for reverse-mode auto-differentiation
+```
+
+```{julia Greek Letters for copying}
+α β γ μ ϵ ε ρ θ σ ∑
+# using "vee" for "nu" because they look identical
+```
+
+```{julia testing gradient function}
+h(x, y) = [3x^2  2x
+           y*x   y]
+norm(h(1,2), 2)  # Frobenius norm
+h(1,2).^2
+sum(h(1,2).^2)^0.5
+#gradient(h, 3.0, 5.0)
+```
+
+
+```{julia Building the covariance matrix}
+n = 2;
+A(ρ, σα, σμ) = 1/(1 - ρ^2)*σα^2 + (1 + ρ^2/(n*(1 - ρ^2)))*σμ^2;
+B(ρ, σα, σμ) = 1/(1 - ρ^2)*σα^2 + (ρ^2/(n*(1 - ρ^2)))*σμ^2;
+C(ρ, σα, σμ) = ρ/(1 - ρ^2)*σα^2 + (ρ/n + ρ^3/(n*(1 - ρ^2)))*σμ^2;
+E(ρ, σα, σμ) = ρ*C(ρ, σα, σμ);
+
+∑(ρ, σα, σμ) = 
+  [A(ρ, σα, σμ) B(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ) E(ρ, σα, σμ) E(ρ, σα, σμ)
+   B(ρ, σα, σμ) A(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ) E(ρ, σα, σμ) E(ρ, σα, σμ)
+   C(ρ, σα, σμ) C(ρ, σα, σμ) A(ρ, σα, σμ) B(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ)
+   C(ρ, σα, σμ) C(ρ, σα, σμ) B(ρ, σα, σμ) A(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ)
+   E(ρ, σα, σμ) E(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ) A(ρ, σα, σμ) B(ρ, σα, σμ)
+   E(ρ, σα, σμ) E(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ) B(ρ, σα, σμ) A(ρ, σα, σμ)];
+
+
+maximand(ρ, σα, σμ, v) = -(1/2)*( v' * inv(∑(ρ, σα, σμ)) * v + log(det(∑(ρ, σα, σμ))) )
+
+objective(ρ, σα, σμ, v) = norm(maximand(ρ, σα, σμ, v));
+
+objective(0.85, 1, 1, [1,1,1,1,1,1]')
+
+gradient(objective, 0.85, 1, 1)
+
+
+"""
+Notes:
+- need to figure out how to input the v vector
+- Check if gradient works
+- might need to calculate reverse-mode auto-differentiation of V
+- define step size
+- given v, maximize the objective!
+- then try simulated data
+"""
+```
+
+
+
+
+
+```{julia}
+[1 1 1]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
