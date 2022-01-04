@@ -2,14 +2,25 @@
 title: "New Estimation after Statistics Consulting"
 author: "Aaron Watt"
 date: "1/2/2022"
-output: pdf_document
+output: html_document
 ---
+<!--
+Note for running on non-linux machines: LiberationMono might not be available
+by default for the above monofont option. If that is the case, you might need to
+install LiberationMono font. FreeMono xunicode
+
+output:
+   pdf_document:
+     latex_engine: xelatex
+     extra_dependencies: ["xunicode"]
+monofont: FreeMono
+-->
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r R packages}
+```{r R packages, include=F}
 library(JuliaCall)  # must load this to run Julia in R markdown
 ```
 
@@ -22,72 +33,240 @@ rederived the covariance matrix and FGLS covariance derivatives without
 For loops are very fast in Julia -- about as fast as vectorized operations.
 Therefore, I will create the covariance matrix 
 
-```{julia Packages}
+```{julia Packages, include=F}
 # Loading packages can often take a long time, but Julia is very fast once packages are loaded
 using Zygote  # for reverse-mode auto-differentiation
+using Random  # Random numbers
+using Distributions
+using DataFrames
+using GLM  # OLS (lm) and GLS (glm)
+using LinearAlgebra  # Diagonal
+using StatsModels  # formulas and modelmatrix
 ```
 
-```{julia Greek Letters for copying}
-α β γ μ ϵ ε ρ θ σ ∑
+Julia's auto-complete greek letters:
+```{julia Greek Letters for copying, include=T, eval=F}
+α β γ μ ϵ ε ρ θ σ ∑ σᵤ σₐ v₀ vₜ vᵢₜ μ₀ σ₀ αₜ μᵢₜ  
 # using "vee" for "nu" because they look identical
+# using σₐ for σ_α and σᵤ for σ_μ for simplicity
 ```
 
-```{julia testing gradient function}
+
+```{julia testing gradient function, cache=T, eval=F}
 h(x, y) = [3x^2  2x
-           y*x   y]
-norm(h(1,2), 2)  # Frobenius norm
-h(1,2).^2
-sum(h(1,2).^2)^0.5
-#gradient(h, 3.0, 5.0)
+           y*x   y];
+g(x,y) = norm(h(x,y), 2);  # Frobenius norm
+gradient(g, 3.0, 5.0)
+# (17.98546210945497, 1.5694120514358614)
 ```
 
 
-```{julia Building the covariance matrix}
+```{julia Building the covariance matrix, cache=T}
 n = 2;
-A(ρ, σα, σμ) = 1/(1 - ρ^2)*σα^2 + (1 + ρ^2/(n*(1 - ρ^2)))*σμ^2;
-B(ρ, σα, σμ) = 1/(1 - ρ^2)*σα^2 + (ρ^2/(n*(1 - ρ^2)))*σμ^2;
-C(ρ, σα, σμ) = ρ/(1 - ρ^2)*σα^2 + (ρ/n + ρ^3/(n*(1 - ρ^2)))*σμ^2;
-E(ρ, σα, σμ) = ρ*C(ρ, σα, σμ);
+A(ρ, σₐ, σᵤ) = 1/(1 - ρ^2)*σₐ^2 + (1 + ρ^2/(n*(1 - ρ^2)))*σᵤ^2;
+B(ρ, σₐ, σᵤ) = 1/(1 - ρ^2)*σₐ^2 + (ρ^2/(n*(1 - ρ^2)))*σᵤ^2;
+C(ρ, σₐ, σᵤ) = ρ/(1 - ρ^2)*σₐ^2 + (ρ/n + ρ^3/(n*(1 - ρ^2)))*σᵤ^2;
+E(ρ, σₐ, σᵤ) = ρ*C(ρ, σₐ, σᵤ);
 
-∑(ρ, σα, σμ) = 
-  [A(ρ, σα, σμ) B(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ) E(ρ, σα, σμ) E(ρ, σα, σμ)
-   B(ρ, σα, σμ) A(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ) E(ρ, σα, σμ) E(ρ, σα, σμ)
-   C(ρ, σα, σμ) C(ρ, σα, σμ) A(ρ, σα, σμ) B(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ)
-   C(ρ, σα, σμ) C(ρ, σα, σμ) B(ρ, σα, σμ) A(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ)
-   E(ρ, σα, σμ) E(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ) A(ρ, σα, σμ) B(ρ, σα, σμ)
-   E(ρ, σα, σμ) E(ρ, σα, σμ) C(ρ, σα, σμ) C(ρ, σα, σμ) B(ρ, σα, σμ) A(ρ, σα, σμ)];
+∑(ρ, σₐ, σᵤ) = 
+  [A(ρ, σₐ, σᵤ) B(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) E(ρ, σₐ, σᵤ) E(ρ, σₐ, σᵤ)
+   B(ρ, σₐ, σᵤ) A(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) E(ρ, σₐ, σᵤ) E(ρ, σₐ, σᵤ)
+   C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) A(ρ, σₐ, σᵤ) B(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ)
+   C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) B(ρ, σₐ, σᵤ) A(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ)
+   E(ρ, σₐ, σᵤ) E(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) A(ρ, σₐ, σᵤ) B(ρ, σₐ, σᵤ)
+   E(ρ, σₐ, σᵤ) E(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) B(ρ, σₐ, σᵤ) A(ρ, σₐ, σᵤ)];
 
+maximand(ρ, σₐ, σᵤ, v) = -(1/2)*( v' * inv(∑(ρ, σₐ, σᵤ)) * v + log(det(∑(ρ, σₐ, σᵤ))) );
 
-maximand(ρ, σα, σμ, v) = -(1/2)*( v' * inv(∑(ρ, σα, σμ)) * v + log(det(∑(ρ, σα, σμ))) )
+objective(ρ, σₐ, σᵤ, v) = norm(maximand(ρ, σₐ, σᵤ, v));
 
-objective(ρ, σα, σμ, v) = norm(maximand(ρ, σα, σμ, v));
+objective(0.85, 1, 1, [1,1,1,1,1,1])
 
-objective(0.85, 1, 1, [1,1,1,1,1,1]')
-
-gradient(objective, 0.85, 1, 1)
-
-
-"""
+gradient(objective, 0.85, 1, 1, [1,1,1,1,1,1])
+```
 Notes:
-- need to figure out how to input the v vector
-- Check if gradient works
 - might need to calculate reverse-mode auto-differentiation of V
 - define step size
 - given v, maximize the objective!
 - then try simulated data
+
+
+
+
+
+```{julia Simulation settings, results = 'hide'}
+Random.seed!(1234);
+
+N = 2  # Number of regions
+T = 3  # Number of time periods
+min_year = 1945;
+max_year = min_year + T;
+Tvec = 1:T;
+
+# Initial conditions
+v₀ = 0.0  # initial emissions shock
+μ₀ = 0  # mean of region-specific fixed effect distribution
+σ₀ = 10 # SD of region-specific fixed effect distribution
+```
+
+```{julia Simulated data function}
 """
+    dgp(ρ, σₐ, σᵤ, μ₀, σ₀, β, N, T)
+
+Return simulated data from the data generating process given paramters.
+@param ρ: float in [0,1], decay rate of AR1 emissions process
+@param σₐ: float >0, SD of year-specific emissions shock 
+@param σᵤ: float >0, SD of region-year-specific emissions shock
+@param μ₀: float, mean of region-specific fixed effect distribution
+@param σ₀: float >0, SD of region-specific fixed effect distribution
+@param β: 2-vector, linear and quadratic time trend parameters
+""";
+function dgp(ρ, σₐ, σᵤ, μ₀, σ₀, β, N, T)
+    Random.seed!(1234)
+    b = 1
+    
+    # Get region-specific fixed effects
+    b₀ = rand(Distributions.Normal(μ₀, σ₀), N)
+    
+    # Random shocks
+    αₜ = rand(Distributions.Normal(0, σₐ), T)
+    μᵢₜ = rand(Distributions.Normal(0, σᵤ), N*T)
+    # assume μᵢₜ is stacked region first:
+    # i.e. (i,t=1,1; i,t=2,1; ...; i,t=N-1,T; i,t=N,T)
+    
+    # Fill in the aggregate shocks
+    vₜ = [v₀]; vᵢₜ = [];
+    for t in 1:T
+        s = 0  # this period's sum of shocks
+        for i in 1:N
+            # Note that vₜ index starts at 1 instead of 0, so it's ahead of the others
+            append!(vᵢₜ, ρ*vₜ[t] + αₜ[t] + μᵢₜ[(t-1)*N+i])
+            s += last(vᵢₜ)
+        end
+        append!(vₜ, s/N)  # Aggregate shock = average of this period's shocks
+    end
+    
+    
+    data = DataFrame(t = repeat(1:T, inner=N),
+                     i = string.(repeat(1:N, outer=T)),
+                     b₀ᵢ = repeat(b₀, outer=T),
+                     αₜ = repeat(αₜ, inner=N),
+                     μᵢₜ = μᵢₜ,
+                     vᵢₜ = vᵢₜ,
+                     vₜ = repeat(vₜ[2:(T+1)], inner=N))
+    
+    # Generate the resulting emissions
+    data.eᵢₜ = (1/b)*(data.b₀ᵢ + β[1]*data.t + β[1]*data.t.^2 + data.vᵢₜ)
+    
+    return(data)
+end;
+
+```
+
+```{julia Generate data, eval=T}
+# Generate data
+ρ=0.85; σₐ=1; σᵤ=1; β=[1, 0.1];
+data = dgp(ρ, σₐ, σᵤ, μ₀, σ₀, β, N, T)
+
+```
+
+```{julia GLS Function}
+"""
+    mygls(formula, df, W)
+
+@param formula: StatsModels formula for the linear regression model
+@param df: dataframe with columns corresponding to the variables in formula
+@param W: nxn weighting matrix, n = length(df)
+@param n: number of units
+Bruce Hansen Econometrics (2021) section 17.15 Feasible GLS
+Greene Ed 7
+rsusmel lecture notes: bauer.uh.edu/rsusmel/phd/ec1-11.pdf
+"""
+function mygls(formula, df, W, n)
+    X = StatsModels.modelmatrix(formula.rhs, df);
+    y = StatsModels.modelmatrix(formula.lhs, df)
+    XX = inv(X'X)                                                             #'
+    XWX = X'*inv(W)*X                                                         #'
+    N, k = size(X)
+    β = inv(XWX) * (X'*inv(W)*y)                                              #'
+    yhat = X*β
+    resid = y - yhat
+    XeX = X'*Diagonal(vec(resid.^2))*X                                        #'
+    # Variance estimators
+    # Hansen eq 4.16 (sandwich estimator)
+    s = XX * XWX * XX
+    s_root = diag(s).^0.5
+    # White estimator (rsusmel pg 11)
+    HC0 = XX * XeX * XX
+    HC0_root = diag(HC0).^0.5
+    # Greene (9-13)
+    βvar = inv(XWX) / (N - n - k)
+    βse = diag(βvar).^0.5
+    
+    # TODO: Add Newey-West HAC SE estimator.
+    #   pg. 20 of bauer.uh.edu/rsusmel/phd/ec1-11.pdf
+    return(Dict(:β => β,
+                :βse => βse,
+                :yhat => yhat,
+                :resid => resid,
+                :βvar => βvar,
+                :HC0 => HC0_root,
+                :sandwich => s_root))
+end
+```
+
+
+
+```{julia iterations}
+# Generate data
+n = 2
+ρ=0.85; σₐ=1; σᵤ=1; β=[1, 0.1]; 
+data = dgp(ρ, σₐ, σᵤ, μ₀, σ₀, β, n, T);
+# Initialize the variance matrix (identity matrix = OLS in first iteration)
+V = Diagonal(ones(length(data.eᵢₜ)));
+linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2);
+
+# Step 1: GLS
+gls = glm(linear_formula, data, Normal(), IdentityLink(), wts=ones(length(data.eᵢₜ)))
+gls2 = mygls(linear_formula, data, V, n)
+data.e_hat = predict(gls);
+data.resid = data.eᵢₜ - data.e_hat;
+
+# Step 2
+
+```
+
+
+```{r}
+julia_eval('data')
 ```
 
 
 
 
+# Larry's Suggested Algorithm
 
-```{julia}
-[1 1 1]
+1. Estimate $\beta = (\{b_{0i}\}_i, a_1, a_2)$ (the region-specific effects and
+the common time trend) using OLS, i.e. detrend and demean the data.
+```{julia First OLS run}
+
+```
+
+2. Using the resulting residuals (i.e. replacing $\mathbf{v}$ with $\mathbf{\tilde{v}}$)
+```{julia Maximize likelihood}
+
+```
+
+3. Use G
+```{julia GLS to estimate beta again}
+# Check if V is positive definite and symmetric
 ```
 
 
+4. Iterate until convergence
+```{julia two-step iteration until convergence}
 
+```
 
 
 
