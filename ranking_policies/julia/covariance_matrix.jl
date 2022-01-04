@@ -9,6 +9,8 @@ using GLM  # OLS (lm) and GLS (glm)
 using Optim  # optimize (minimizing)
 
 
+
+
 #######################################################################
 #           Functions
 #######################################################################
@@ -31,6 +33,10 @@ end
 
 # Negative Log Likelihood (want to minimize)
 nLL(ρ, σₐ, σᵤ, v) = (1/2)*( v' * inv(∑(ρ, σₐ, σᵤ)) * v + log(det(∑(ρ, σₐ, σᵤ))) );
+
+
+
+
 
 
 
@@ -58,10 +64,14 @@ function mymle(ρstart, σₐstart, σᵤstart, v;
     # optimum = optimize(nLL, params0, LBFGS(); autodiff = :forward)
 
     # Return the values
-    MLE = -optimum.minimum
+    LL = -optimum.minimum
     ρ, σₐ, σᵤ = optimum.minimizer
-    return(ρ, σₐ, σᵤ, MLE)
+    return(ρ, σₐ, σᵤ, LL)
 end
+
+
+
+
 
 
 """
@@ -75,9 +85,9 @@ Return simulated data from the data generating process given paramters.
 @param σ₀: float >0, SD of region-specific fixed effect distribution
 @param β: 2-vector, linear and quadratic time trend parameters
 """;
-function dgp(ρ, σₐ, σᵤ, β, N, T)
+function dgp(ρ, σₐ, σᵤ, β, N, T; random_seed::Integer=1234)
     # Initial conditions
-    Random.seed!(1234)
+    Random.seed!(random_seed)
     b = 1  # unidentified scale parameter
     v₀ = 0.0  # initial emissions shock
     μ₀ = 0  # mean of region-specific fixed effect distribution (b₀ᵢ)
@@ -117,6 +127,9 @@ function dgp(ρ, σₐ, σᵤ, β, N, T)
     
     return(data)
 end;
+
+
+
 
 
 """
@@ -169,48 +182,54 @@ end
 
 
 
+
+
 #######################################################################
 #           Iterate to convergence!
 #######################################################################
-
-Random.seed!(1234)
-iteration_max = 10
-# Starting parameter values
-ρ=0.85; σₐ=1; σᵤ=1; β=[1, 0.1]; LL = -Inf
-ρtrue, σₐtrue, σᵤtrue, βtrue = ρ, σₐ, σᵤ, β
-# Parameter bounds
-lower = [1e-4, 1e-2, 1e-2]
-upper = [1-1e-4, Inf, Inf]
-# Simuated data
+# Generate different data to see how convergence behaves
 N = 2  # Number of regions
 T = 3  # Number of time periods
-v₀ = 0.0  # initial emissions shock
-μ₀ = 0  # mean of region-specific fixed effect distribution
-σ₀ = 10 # SD of region-specific fixed effect distribution
-data = dgp(ρ, σₐ, σᵤ, β, N, T);
-vtrue = vec(data.vᵢₜ)
-# Initialize the variance matrix (identity matrix = OLS in first iteration)
-V = Diagonal(ones(length(data.eᵢₜ)));
-V_true = ∑(ρ, σₐ, σᵤ)
-# Linear GLS formula
-linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2);
+for seed in 1:10
+    println("\nseed: ", seed)
+    Random.seed!(seed)
+    iteration_max = 10
+    # Starting parameter values
+    ρ=0.85; σₐ=1; σᵤ=1; β=[1, 0.1]; LL = -Inf
+    ρtrue, σₐtrue, σᵤtrue, βtrue = ρ, σₐ, σᵤ, β
+    # Parameter bounds
+    lower = [1e-4, 1e-2, 1e-2]
+    upper = [1-1e-4, Inf, Inf]
+    # Simuated data
+    v₀ = 0.0  # initial emissions shock
+    μ₀ = 0  # mean of region-specific fixed effect distribution
+    σ₀ = 10 # SD of region-specific fixed effect distribution
+    data = dgp(ρ, σₐ, σᵤ, β, N, T; random_seed=seed);
+    vtrue = vec(data.vᵢₜ)
+    σₐobserved = sum((data.αₜ .- mean(data.αₜ)).^2) / 2 / (T - 1)
+    σᵤobserved = sum((data.μᵢₜ .- mean(data.μᵢₜ)).^2) / (N*T - 1)
+    # Initialize the variance matrix (identity matrix = OLS in first iteration)
+    V = Diagonal(ones(length(data.eᵢₜ)));
+    V_true = ∑(ρ, σₐ, σᵤ)
+    # Linear GLS formula
+    linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2);
 
+    println("OBSERVED:  ", "ρ: ", ρ, " σₐ: ", σₐobserved, " σᵤ: ", σᵤobserved)
+    for k in 1:iteration_max
+        # GLS to get residuals v
+        gls = mygls(linear_formula, data, V, N)
+        v = vec(gls[:resid]);
+        # v = vtrue
+        # ML to get parameter estimates ρ, σₐ, σᵤ
+        ρ, σₐ, σᵤ, LL = mymle(ρ, σₐ, σᵤ, v)
+        Vold = V
+        V = ∑(ρ, σₐ, σᵤ)
+        Vnorm = norm(Vold - V)
+    end
+    println("ESTIMATED: ", "ρ: ", ρ, " σₐ: ", σₐ, " σᵤ: ", σᵤ)
+    println(" LL: ", LL)
+    println("Vold vs Vtrue Norm: ", norm(V_true - V))
 
-for k in 1:iteration_max
-    println("\niteration ", k, " LL: ", LL)
-    println("Voldvs Vtrue: ", norm(V_true - V))
-    println("ρ: ", ρ, " σₐ: ", σₐ, " σᵤ: ", σᵤ)
-    # GLS to get residuals v
-    gls = mygls(linear_formula, data, V, N)
-    println("β: ", gls[:β])
-    v = vec(gls[:resid]);
-    # v = vtrue
-    # ML to get parameter estimates ρ, σₐ, σᵤ
-    global ρ, σₐ, σᵤ, LL = mymle(ρ, σₐ, σᵤ, v)
-    Vold = V
-    global V = ∑(ρ, σₐ, σᵤ)
-    Vnorm = norm(Vold - V)
-    println("Vold vs Vnew: ", Vnorm)
 end
 
 
@@ -233,5 +252,20 @@ objective(ρ, σₐ, σᵤ, v) = norm(maximand(ρ, σₐ, σᵤ, v));
 for k in 1:iteration_max
     grad = gradient(objective(ρ, σₐ, σᵤ, v))
 # Could also reverse-mode auto-differentiate to get complete analytical gradient
+
+
+
+
+Change v0 to 20 or 100? Probably doesn't matter since we're demeaning and detrending anyway
+
+Save actual sample variance of a_t and u_it and compare to estimated quantities
+
+Gls: could decompose using Cholskey and augment the data than feed it into glm linear model and use CovarianceMatrices from https://gragusa.org/code/ to get HAC SEs
+
+Iterate many times creating new data and save the vnorm from trueV, see the dist of vnorm and distance from true parameter values. Is it just the randomness of small sampling?
+
+Also create general V function building function from N, T that returns a function to generate V given params (general function should be used once only for given def of N,T)
+
+Want to compare N=2, small T to N=4, large T. Large T should have better convergence? Since we can get more info about variance from more obs
 """
 
