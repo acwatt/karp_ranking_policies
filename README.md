@@ -4,6 +4,7 @@ A project for estimating the parameters of an emissions model from Dr. Larry Kar
 
 ## Helpful locations
 - `docs/larry`: notes from Dr. Karp about the most version of the estimation project
+  - `docs/larry/meeting_notes.md`: Latest meeting notes on the project (probably most updated status)
 - `docs/sunny`: previous estimation and notes done by ARE grad student Sunny (Sayantan Mitra)
 - `docs/andy`: previous estimation and notes done by ARE grad student Andy (Andy Hultgren)
 - `data/`: cleaned data files ready for estimation
