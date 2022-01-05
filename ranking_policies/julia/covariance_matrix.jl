@@ -7,10 +7,12 @@ using LinearAlgebra  # Diagonal
 using StatsModels  # formulas and modelmatrix
 using GLM  # OLS (lm) and GLS (glm)
 using Optim  # optimize (minimizing)
+using Symbolics  # symbolic functions
+import Dates
+using Latexify
 
 
-
-
+println("\n"^3, Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"))
 #######################################################################
 #           Functions
 #######################################################################
@@ -30,6 +32,101 @@ function ∑(ρ, σₐ, σᵤ)
    E(ρ, σₐ, σᵤ) E(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) A(ρ, σₐ, σᵤ) B(ρ, σₐ, σᵤ)
    E(ρ, σₐ, σᵤ) E(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) C(ρ, σₐ, σᵤ) B(ρ, σₐ, σᵤ) A(ρ, σₐ, σᵤ)]
 end
+
+
+
+
+# Indicator functions
+ι(i,j) = (i==j ? 1 : 0)
+κ(s) = (s==0 ? 0 : 1)
+χ(ρ,i,j,s,N) = (1-κ(s))*ι(i,j) + κ(s)*ρ^s/N + ρ^(2+s)/(N*(1-ρ))
+# Symbolic function
+χ(i,j,s,N) = (1-κ(s))*ι(i,j) + κ(s)*ρ^s/N + ρ^(2+s)/(N*(1-ρ))
+
+# Element of the covariance matrix: E[vᵢₜvⱼₜ₊ₛ]
+Evᵢₜvⱼₜ₊ₛ(ρ,σₐ,σᵤ,i,j,s,N; b=1) =  1/b^2*(σₐ^2*ρ^s / (1-ρ^2) + χ(ρ,i,j,s,N)*σᵤ^2 )
+# Symbolic function
+Evᵢₜvⱼₜ₊ₛ(i,j,s,N; b=1) =  1/b^2*(σₐ^2*ρ^s / (1-ρ^2) + χ(i,j,s,N)*σᵤ^2 )
+
+
+"""
+    ∑(ρ, σₐ, σᵤ, N, T)
+
+Return the residuals' analytical N*TxN*T covariance matrix given values of parameters
+@param ρ: float in [0,1], decay rate of AR1 emissions process
+@param σₐ: float >0, SD of year-specific emissions shock 
+@param σᵤ: float >0, SD of region-year-specific emissions shock
+@param N: int>1, number of units/regions
+@param T: int>1, number of time periods
+"""
+function ∑(ρ, σₐ, σᵤ, N, T)
+    # Initalize matrix of 0s
+    V = zeros(N*T, N*T)
+
+    # Fill in upper triangle
+    idx = [(i,j) for i∈1:N*T for j∈i:N*T]
+    for (row, col) in idx
+        t = Integer(ceil(row/N))
+        i = row - (t-1)*N
+
+        τ = Integer(ceil(col/N))
+        s = τ - t
+        j = col - (τ-1)*N
+
+        V[row, col] = Evᵢₜvⱼₜ₊ₛ(ρ, σₐ, σᵤ, i, j, s, N)
+        a = [i,t,j,τ,row,col]
+    end
+
+    # Fill in lower triangle by symmetry
+    V = Symmetric(V)
+    println("\nFull Covariance Matirx:")
+    for r in 1:size(V)[1]
+        println(round.(V[r,:]; sigdigits=4))
+    end
+
+    return(V)
+end
+
+"""
+Symbolic function
+"""
+function ∑(N, T; verbose=false)
+    # Initalize matrix of 0s
+    V = Array{Num}(undef, N*T,  N*T)
+    verbose ? println("\nELEMENTS OF THE COVARIANCE MATRIX:") : nothing
+
+    # Fill in upper triangle
+    idx = [(i,j) for i∈1:N*T for j∈i:N*T]
+    for (row, col) in idx
+        t = Integer(ceil(row/N))
+        i = row - (t-1)*N
+
+        τ = Integer(ceil(col/N))
+        s = τ - t
+        j = col - (τ-1)*N
+        
+        V[row, col] = Evᵢₜvⱼₜ₊ₛ(i, j, s, N)
+        verbose ? println([row,col], " ", Evᵢₜvⱼₜ₊ₛ(i, j, s, N)) : nothing
+    end
+
+    # Fill in lower triangle by symmetry
+    V = Symmetric(V)
+    if verbose
+        half = Integer(floor(N*T/2))
+        println("\nLEFT HALF OF COVARIANCE MATRIX")
+        println(latexify(V[:, 1:half]))
+        println("\nRIGHT HALF OF COVARIANCE MATRIX")
+        println(latexify(V[:, (half+1):N*T]))
+    end
+    verbose ? println(latexify(V)) : nothing
+    return(V)
+end
+
+# ∑(0.85, 1, 2, 2, 6)
+
+
+@variables ρ σₐ σᵤ
+∑(2, 3; verbose=true)
 
 # Negative Log Likelihood (want to minimize)
 nLL(ρ, σₐ, σᵤ, v) = (1/2)*( v' * inv(∑(ρ, σₐ, σᵤ)) * v + log(det(∑(ρ, σₐ, σᵤ))) );
@@ -75,26 +172,29 @@ end
 
 
 """
-    dgp(ρ, σₐ, σᵤ, μ₀, σ₀, β, N, T)
+    dgp(ρ, σₐ, σᵤ, β, N, T; v₀, μ₀, σ₀)
 
 Return simulated data from the data generating process given paramters.
 @param ρ: float in [0,1], decay rate of AR1 emissions process
 @param σₐ: float >0, SD of year-specific emissions shock 
 @param σᵤ: float >0, SD of region-year-specific emissions shock
-@param μ₀: float, mean of region-specific fixed effect distribution
-@param σ₀: float >0, SD of region-specific fixed effect distribution
 @param β: 2-vector, linear and quadratic time trend parameters
+@param v₀: float, initial emissions shock of AR1 process (v_t where t=0)
+@param b₀: Nx1 array of floats, b₀ᵢ for different regions i in {1, ..., N}
+    if not given, then μ₀ and σ₀ are used to pull b₀ᵢ from a random distribution
+@param μ₀: float, mean of region-specific fixed effect distribution (b₀ᵢ)
+@param σ₀: float >0, SD of region-specific fixed effect distribution (b₀ᵢ)
 """;
-function dgp(ρ, σₐ, σᵤ, β, N, T; random_seed::Integer=1234)
+function dgp(ρ, σₐ, σᵤ, β, N, T;
+    v₀=0.0, b₀=nothing, μ₀=0, σ₀=10, random_seed::Integer=1234)
     # Initial conditions
     Random.seed!(random_seed)
     b = 1  # unidentified scale parameter
-    v₀ = 0.0  # initial emissions shock
-    μ₀ = 0  # mean of region-specific fixed effect distribution (b₀ᵢ)
-    σ₀ = 10 # SD of region-specific fixed effect distribution (b₀ᵢ)
     
-    # Get region-specific fixed effects
-    b₀ = rand(Distributions.Normal(μ₀, σ₀), N)
+    # Get region-specific fixed effects if not given
+    if b₀ === nothing
+        b₀ = rand(Distributions.Normal(μ₀, σ₀), N)
+    end
     
     # Random shocks
     αₜ = rand(Distributions.Normal(0, σₐ), T)
@@ -187,52 +287,69 @@ end
 #######################################################################
 #           Iterate to convergence!
 #######################################################################
-# Generate different data to see how convergence behaves
-N = 2  # Number of regions
-T = 3  # Number of time periods
-for seed in 1:10
-    println("\nseed: ", seed)
-    Random.seed!(seed)
-    iteration_max = 10
-    # Starting parameter values
-    ρ=0.85; σₐ=1; σᵤ=1; β=[1, 0.1]; LL = -Inf
-    ρtrue, σₐtrue, σᵤtrue, βtrue = ρ, σₐ, σᵤ, β
-    # Parameter bounds
-    lower = [1e-4, 1e-2, 1e-2]
-    upper = [1-1e-4, Inf, Inf]
-    # Simuated data
-    v₀ = 0.0  # initial emissions shock
-    μ₀ = 0  # mean of region-specific fixed effect distribution
-    σ₀ = 10 # SD of region-specific fixed effect distribution
-    data = dgp(ρ, σₐ, σᵤ, β, N, T; random_seed=seed);
-    vtrue = vec(data.vᵢₜ)
-    σₐobserved = sum((data.αₜ .- mean(data.αₜ)).^2) / 2 / (T - 1)
-    σᵤobserved = sum((data.μᵢₜ .- mean(data.μᵢₜ)).^2) / (N*T - 1)
-    # Initialize the variance matrix (identity matrix = OLS in first iteration)
-    V = Diagonal(ones(length(data.eᵢₜ)));
-    V_true = ∑(ρ, σₐ, σᵤ)
-    # Linear GLS formula
-    linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2);
+function estimate_sigmas(N, T, starting_params;
+    n_seeds=10, iteration_max=10)
+    # Generate different data to see how convergence behaves
+    N = 2  # Number of regions
+    T = 3  # Number of time periods
+    for seed in 1:n_seeds
+        println("\nseed: ", seed)
+        Random.seed!(seed)
+        iteration_max = 10
+        # Starting parameter values
+        ρ = ρtrue = starting_params[:ρ]
+        β = βtrue = [1, 0.1]
+        σₐ = σₐtrue = starting_params[:σₐ]
+        σᵤ = σᵤtrue = starting_params[:σᵤ]
+        LL = -Inf
+        # Parameter bounds on ρ, σₐ, σᵤ
+        lower = [1e-4, 1e-2, 1e-2]
+        upper = [1-1e-4, Inf, Inf]
+        # Simuated data
+        v₀ = 0.0        # initial emissions shock
+        μ₀, σ₀ = 0, 10  # mean, SD of region-specific fixed effect distribution
+        data = dgp(ρ, σₐ, σᵤ, β, N, T; random_seed=seed)
+        # True aggregate shock and observed sample variance from DGP
+        vtrue = vec(data.vᵢₜ)
+        σₐobserved = sum((data.αₜ .- mean(data.αₜ)).^2) / 2 / (T - 1)
+        σᵤobserved = sum((data.μᵢₜ .- mean(data.μᵢₜ)).^2) / (N*T - 1)
+        # Initialize the variance matrix (identity matrix = OLS in first iteration)
+        V = Diagonal(ones(length(data.eᵢₜ)));
+        V_true = ∑(ρtrue, σₐtrue, σᵤtrue)
+        # Linear GLS formula
+        linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2);
 
-    println("OBSERVED:  ", "ρ: ", ρ, " σₐ: ", σₐobserved, " σᵤ: ", σᵤobserved)
-    for k in 1:iteration_max
-        # GLS to get residuals v
-        gls = mygls(linear_formula, data, V, N)
-        v = vec(gls[:resid]);
-        # v = vtrue
-        # ML to get parameter estimates ρ, σₐ, σᵤ
-        ρ, σₐ, σᵤ, LL = mymle(ρ, σₐ, σᵤ, v)
-        Vold = V
-        V = ∑(ρ, σₐ, σᵤ)
-        Vnorm = norm(Vold - V)
+        println("OBSERVED:  ", "ρ: ", ρ, " σₐ: ", σₐobserved, " σᵤ: ", σᵤobserved)
+        for k in 1:iteration_max
+            # println("\niteration ", k, " LL: ", LL)
+            # println("Voldvs Vtrue: ", norm(V_true - V))
+            # println("ρ: ", ρ, " σₐ: ", σₐ, " σᵤ: ", σᵤ)
+            # GLS to get residuals v
+            gls = mygls(linear_formula, data, V, N)
+            # println("β: ", gls[:β])
+            v = vec(gls[:resid]);
+            # v = vtrue
+            # ML to get parameter estimates ρ, σₐ, σᵤ
+            ρ, σₐ, σᵤ, LL = mymle(ρ, σₐ, σᵤ, v)
+            Vold = V
+            V = ∑(ρ, σₐ, σᵤ)
+            Vnorm = norm(Vold - V)
+            # println("Vold vs Vnew: ", Vnorm)
+        end
+        println("ESTIMATED: ", "ρ: ", ρ, " σₐ: ", σₐ, " σᵤ: ", σᵤ)
+        println(" LL: ", LL)
+        println("Vold vs Vtrue Norm: ", norm(V_true - V))
+
+        # println(data)
     end
-    println("ESTIMATED: ", "ρ: ", ρ, " σₐ: ", σₐ, " σᵤ: ", σᵤ)
-    println(" LL: ", LL)
-    println("Vold vs Vtrue Norm: ", norm(V_true - V))
-
 end
 
 
+starting_params = Dict(:ρ => 0.85,
+                       :σₐ => 1,
+                       :σᵤ => 1,
+                       :β => [1, 0.1])
+# estimate_sigmas(N, T, starting_params)
 
 
 """
@@ -267,5 +384,18 @@ Iterate many times creating new data and save the vnorm from trueV, see the dist
 Also create general V function building function from N, T that returns a function to generate V given params (general function should be used once only for given def of N,T)
 
 Want to compare N=2, small T to N=4, large T. Large T should have better convergence? Since we can get more info about variance from more obs
+
+
+
+REFERENCES:
+If you use Symbolics.jl, please cite this paper
+@article{gowda2021high,
+  title={High-performance symbolic-numerics via multiple dispatch},
+  author={Gowda, Shashi and Ma, Yingbo and Cheli, Alessandro and Gwozdz, Maja and Shah, Viral B and Edelman, Alan and Rackauckas, Christopher},
+  journal={arXiv preprint arXiv:2105.03949},
+  year={2021}
+}
+
+
 """
 
