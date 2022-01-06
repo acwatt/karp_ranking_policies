@@ -1,0 +1,1518 @@
+┌ Info: 2022-01-05 15:25:21
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:323
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: 2022-01-05 15:26:02
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:323
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+│   Float16.(V_true) = Float16[
+7.01 6.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889 2.455 2.455 2.088 2.088 1.774 1.774 1.508 1.508; 
+6.01 7.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889 2.455 2.455 2.088 2.088 1.774 1.774 1.508 1.508; 
+5.535 5.535 7.01 6.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889 2.455 2.455 2.088 2.088 1.774 1.774; 
+5.535 5.535 6.01 7.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889 2.455 2.455 2.088 2.088 1.774 1.774; 
+4.703 4.703 5.535 5.535 7.01 6.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889 2.455 2.455 2.088 2.088; 
+4.703 4.703 5.535 5.535 6.01 7.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889 2.455 2.455 2.088 2.088; 
+4.0 4.0 4.703 4.703 5.535 5.535 7.01 6.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889 2.455 2.455; 
+4.0 4.0 4.703 4.703 5.535 5.535 6.01 7.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889 2.455 2.455; 
+3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 7.01 6.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889; 
+3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 6.01 7.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398 2.889 2.889; 
+2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 7.01 6.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398; 
+2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 6.01 7.01 5.535 5.535 4.703 4.703 4.0 4.0 3.398 3.398; 
+2.455 2.455 2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 7.01 6.01 5.535 5.535 4.703 4.703 4.0 4.0; 
+2.455 2.455 2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 6.01 7.01 5.535 5.535 4.703 4.703 4.0 4.0; 
+2.088 2.088 2.455 2.455 2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 7.01 6.01 5.535 5.535 4.703 4.703; 
+2.088 2.088 2.455 2.455 2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 6.01 7.01 5.535 5.535 4.703 4.703; 
+1.774 1.774 2.088 2.088 2.455 2.455 2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 7.01 6.01 5.535 5.535; 
+1.774 1.774 2.088 2.088 2.455 2.455 2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 6.01 7.01 5.535 5.535; 
+1.508 1.508 1.774 1.774 2.088 2.088 2.455 2.455 2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 7.01 6.01; 
+1.508 1.508 1.774 1.774 2.088 2.088 2.455 2.455 2.889 2.889 3.398 3.398 4.0 4.0 4.703 4.703 5.535 5.535 6.01 7.01]
+│   Float16.(V) = Float16[
+1.325   0.587   0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 
+0.587   1.325   0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 
+0.00956 0.00956 1.325   0.587   0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 
+0.00956 0.00956 0.587   1.325   0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 
+9.56e-5 9.56e-5 0.00956 0.00956 1.325   0.587 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 
+9.56e-5 9.56e-5 0.00956 0.00956 0.587   1.325 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0; 
+9.5e-7  9.5e-7  9.56e-5 9.56e-5 0.00956 0.00956 1.325 0.587 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0 0.0 0.0; 
+9.5e-7  9.5e-7  9.56e-5 9.56e-5 0.00956 0.00956 0.587 1.325 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0 0.0 0.0; 
+0.0 0.0 9.5e-7  9.5e-7  9.56e-5 9.56e-5 0.00956 0.00956 1.325 0.587 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0; 
+0.0 0.0 9.5e-7  9.5e-7  9.56e-5 9.56e-5 0.00956 0.00956 0.587 1.325 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0 0.0 0.0; 
+0.0 0.0 0.0 0.0 9.5e-7  9.5e-7  9.56e-5 9.56e-5 0.00956 0.00956 1.325 0.587 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0; 
+0.0 0.0 0.0 0.0 9.5e-7  9.5e-7  9.56e-5 9.56e-5 0.00956 0.00956 0.587 1.325 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7 0.0 0.0; 
+0.0 0.0 0.0 0.0 0.0 0.0 9.5e-7  9.5e-7 9.56e-5 9.56e-5 0.00956 0.00956 1.325 0.587 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7; 
+0.0 0.0 0.0 0.0 0.0 0.0 9.5e-7  9.5e-7 9.56e-5 9.56e-5 0.00956 0.00956 0.587 1.325 0.00956 0.00956 9.56e-5 9.56e-5 9.5e-7 9.5e-7; 
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 9.5e-7 9.5e-7 9.56e-5 9.56e-5 0.00956 0.00956 1.325 0.587 0.00956 0.00956 9.56e-5 9.56e-5; 
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 9.5e-7 9.5e-7 9.56e-5 9.56e-5 0.00956 0.00956 0.587 1.325 0.00956 0.00956 9.56e-5 9.56e-5; 
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 9.5e-7 9.5e-7 9.56e-5 9.56e-5 0.00956 0.00956 1.325 0.587 0.00956 0.00956;
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 9.5e-7 9.5e-7 9.56e-5 9.56e-5 0.00956 0.00956 0.587 1.325 0.00956 0.00956; 
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 9.5e-7 9.5e-7 9.56e-5 9.56e-5 0.00956 0.00956 1.325 0.587; 
+0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 9.5e-7 9.5e-7 9.56e-5 9.56e-5 0.00956 0.00956 0.587 1.325]
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: 2022-01-05 15:40:05
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:323
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+│   display(Float16.(V_true)) = nothing
+│   display(Float16.(V)) = nothing
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: 2022-01-05 15:52:59
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:323
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: 2022-01-05 15:53:56
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:323
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: 2022-01-05 15:56:04
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:323
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: 2022-01-05 15:57:40
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:323
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: seed: 
+│   seed = 2
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 0.8392579265124912, 1.1316002237816167)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.21779469092257486
+│   σₐtrue = 1
+│   σₐobserved = 0.8392579265124912
+│   σₐestimated = 0.688432731446913
+│   σᵤtrue = 1
+│   σᵤobserved = 1.1316002237816167
+│   σᵤestimated = 0.8989443780723677
+│   LL = -11.797808512114498
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 82.65705331441659
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: seed: 
+│   seed = 3
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.1697311952791727, 0.8026853471141873)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.1697311952791727
+│   σₐestimated = 0.010000000000000002
+│   σᵤtrue = 1
+│   σᵤobserved = 0.8026853471141873
+│   σᵤestimated = 0.7626441483454224
+│   LL = -4.5817956562998186
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 85.55963048249647
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: 2022-01-05 15:59:05
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:323
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:328
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:360
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:380
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+│   display(Float16.(V)) = nothing
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:383
+┌ Info: 2022-01-05 16:00:57
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:325
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:329
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:359
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:361
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:381
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+│   display(Float16.(V)) = nothing
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:384
+┌ Info: 2022-01-05 16:02:04
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:324
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:325
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:329
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:359
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:361
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:381
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+│   display(Float16.(V)) = nothing
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:384
+┌ Info: 2022-01-05 16:27:21
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:332
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:336
+┌ Info: 2022-01-05 16:28:06
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:332
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:336
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:367
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:369
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:390
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+│   display(Float16.(V)) = nothing
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:393
+┌ Info: 2022-01-05 16:30:13
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:332
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:336
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:367
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:369
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:390
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:393
+┌ Info: 2022-01-05 16:38:14
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:333
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:334
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:338
+┌ Error: Error adding value to column :iterations.
+└ @ DataFrames /home/a/.julia/packages/DataFrames/BM4OQ/src/dataframe/dataframe.jl:1562
+┌ Info: 2022-01-05 16:39:03
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:333
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:334
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:338
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:369
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:371
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:392
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:395
+┌ Info: 2022-01-05 16:44:09
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:333
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:334
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:338
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:369
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:371
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:392
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:395
+┌ Info: 2022-01-05 16:45:22
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:25
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:333
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:334
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:338
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:369
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:371
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:392
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:395
+┌ Info: 2022-01-05 16:46:41
+│   s = 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+============================================================
+COVARIANCE MATRIX ESTIMATION BEGIN
+============================================================
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:26
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:330
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:335
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:366
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:368
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:389
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:392
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 16:47:39
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:26
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:330
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:335
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:366
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:368
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:389
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:392
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 16:49:42
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:26
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:330
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:335
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ) = (0.85, 1, 1)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:366
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:368
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:389
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:392
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 16:58:00
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:26
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:330
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:335
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:367
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:369
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140223317
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224450935
+│   LL = -11.724993260922528
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:390
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997369684
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:393
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:04:13
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:26
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:330
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:335
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:367
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:369
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.76602491408355
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374222307483
+│   b₀ᵢ = [-1.3087965006701012, 4.734587007881386]
+│   β = [2.566976564103167, 0.8544584948132997]
+│   LL = -11.724993260922515
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:390
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997395286
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:393
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:05:18
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:26
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:330
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:331
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:335
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:367
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:369
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.76602491408355
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374222307483
+│   b₀ᵢ = [-1.3087965006701012, 4.734587007881386]
+│   β = [2.566976564103167, 0.8544584948132997]
+│   LL = -11.724993260922515
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:390
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997395286
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:393
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:22:21
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:347
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:348
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:352
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:25:48
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:347
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:348
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:352
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:386
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:388
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.76602491408355
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374222307483
+│   b₀ᵢ = [-1.3087965006701012, 4.734587007881386]
+│   β = [2.566976564103167, 0.8544584948132997]
+│   LL = -11.724993260922515
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:409
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997395286
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:412
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:27:30
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:347
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:348
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:352
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:386
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:388
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.76602491408355
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374222307483
+│   b₀ᵢ = [-1.3087965006701012, 4.734587007881386]
+│   β = [2.566976564103167, 0.8544584948132997]
+│   LL = -11.724993260922515
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:409
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997395286
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:412
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:42:00
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:352
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:353
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:357
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:45:02
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:352
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:353
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:357
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:50:59
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:353
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:354
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:392
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:394
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.76602491408355
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374222307483
+│   b₀ᵢ = [-1.3087965006701012, 4.734587007881386]
+│   β = [2.566976564103167, 0.8544584948132997]
+│   LL = -11.724993260922515
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:415
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997395286
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:418
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 17:53:03
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:353
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:354
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:358
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:392
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:394
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.76602491408355
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374222307483
+│   b₀ᵢ = [-1.3087965006701012, 4.734587007881386]
+│   β = [2.566976564103167, 0.8544584948132997]
+│   LL = -11.724993260922515
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:415
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997395286
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:418
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 18:17:31
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:342
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:343
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:347
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:379
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:381
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 18:20:00
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:342
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:343
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:347
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:379
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:381
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 18:21:26
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:342
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:343
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:347
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:379
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:381
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 18:22:30
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:342
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:343
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:347
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:379
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:381
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.76602491408355
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374222307483
+│   b₀ᵢ = [-1.3087965006701012, 4.734587007881386]
+│   β = [2.566976564103167, 0.8544584948132997]
+│   LL = -11.724993260922515
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:402
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997395286
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:405
+┌ Info: 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ 
+│ ============================================================
+│ COVARIANCE MATRIX ESTIMATION BEGIN
+│ ============================================================
+│   Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS") = 2022-01-05 18:26:26
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:27
+┌ Info: Starting estimation with N,T:
+│   N = 2
+│   T = 10
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:342
+┌ Info: Starting parameters:
+│   starting_params = Dict{Symbol, Any}(:ρ => 0.85, :σₐ => 1, :σᵤ => 1, :β => [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:343
+┌ Info: seed: 
+│   seed = 1
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:347
+┌ Info: TRUE:
+│   (ρ, σₐ, σᵤ, b₀ᵢ, β) = (0.85, 1, 1, [-0.7058313895389791, 5.314767537831963], [1.0, 0.1])
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:379
+┌ Info: SAMPLE:
+│   (ρ, σₐobserved, σᵤobserved) = (0.85, 1.5083213083626135, 0.9645017595922601)
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:381
+┌ Info: PARAMETERS:
+│   ρtrue = 0.85
+│   ρestimated = 0.010000000000000002
+│   σₐtrue = 1
+│   σₐobserved = 1.5083213083626135
+│   σₐestimated = 0.7660249140342114
+│   σᵤtrue = 1
+│   σᵤobserved = 0.9645017595922601
+│   σᵤestimated = 0.8593374224159945
+│   b₀ᵢ = [-1.3087965006686912, 4.73458700788279]
+│   β = [2.5669765641028683, 0.854458494813317]
+│   LL = -11.724993260922549
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:402
+┌ Info: Frobenius Norm (Vest - Vtrue)
+│   Vnorm_true = 83.67018997371683
+└ @ Main /media/a/E/Programming/github/karp_ranking_policies/ranking_policies/julia/covariance_matrix.jl:405
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
