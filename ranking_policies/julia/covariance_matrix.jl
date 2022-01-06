@@ -331,7 +331,7 @@ end
 
 function get_covar_names(data)
     ilevels = unique(data.i); len = length(ilevels);
-    inames = repeat(["i"], len) .* string.(ilevels[2:len])
+    inames = repeat(["i"], len-1) .* string.(ilevels[2:len])
     varnames = vcat(["intercept"], inames, ["t", "t^2"])
     return(varnames)
 end
@@ -416,13 +416,13 @@ starting_params = Dict(:ρ => 0.85,
     :β => [1, 0.1]
 )
 
-println("\nTesting T")
-for T ∈ [5,10,25,50,100]
-    estimate_sigmas(2, T, starting_params; n_seeds=10)
-end
+# println("\nTesting T")
+# for T ∈ [5,10,25,50,100]
+#     estimate_sigmas(2, T, starting_params; n_seeds=10)
+# end
 
 println("\nTesting N")
-for N ∈ [2,3,4]
+for N ∈ [3,4]
     estimate_sigmas(N, 50, starting_params; n_seeds=10)
 end
 
