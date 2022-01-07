@@ -242,7 +242,7 @@ function dgp(ρ, σₐ, σᵤ, β, N, T;
         vₜ = repeat(vₜ[2:(T+1)], inner = N))
 
     # Generate the resulting emissions
-    data.eᵢₜ = (1 / b) * (data.b₀ᵢ + β[1] * data.t + β[1] * data.t .^ 2 + data.vᵢₜ)
+    data.eᵢₜ = (1 / b) * (data.b₀ᵢ + β[1] * data.t + β[2] * data.t .^ 2 + data.vᵢₜ)
 
     return (data)
 end;
@@ -416,10 +416,10 @@ starting_params = Dict(:ρ => 0.85,
     :β => [1, 0.1]
 )
 
-# println("\nTesting T")
-# for T ∈ [5,10,25,50,100]
-#     estimate_sigmas(2, T, starting_params; n_seeds=10)
-# end
+println("\nTesting T")
+for T ∈ [5,10,25,50,100]
+    estimate_sigmas(2, T, starting_params; n_seeds=10)
+end
 
 println("\nTesting N")
 for N ∈ [3,4]
