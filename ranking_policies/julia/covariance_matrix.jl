@@ -166,7 +166,7 @@ Given vector of residuals, minimize the
 @param upper: float 3-vector, upper bounds for parameters ρ, σₐ, σᵤ
 """
 function mymle(ρstart, σₐstart, σᵤstart, v, N, T;
-    lower = [1e-2, 1e-2, 1e-2], upper = [1 - 1e-4, Inf, Inf])
+    lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf])
 
     # Starting paramerter values
     params0 = [ρstart, σₐstart, σᵤstart]
