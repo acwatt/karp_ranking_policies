@@ -1,0 +1,14 @@
+seed,random seed ( 1 through 10) to generate the data in a pseudo-random reproducible way.
+type,"True = parameter values used to generate the data, Sample = sample variance of data, Estimated = estimated values from GLS/ML"
+N,Number of regions
+T,Number of time periods
+b₀ᵢ,N-vector of region-specific fixed effects
+β,"2-vector of time trend parameters (linear, quadratic)"
+ρ,AR(1) process parameter
+σₐ,sigma_alpha
+σᵤ,sigma_mu
+iterations,"number of iterations used in convergence to 10^-16 Frobenius norm of the covariance matrix. Maximum used was 10, which still result in <10^-11."
+LL,Log Likelihood (initial and final)
+V_norm_finalstep,Frobenius norm of the difference between the last two iterations of the covariance matrix.
+V_norm_true,Frobenius norm of the difference between the last iteration of the covariance matrix and the “true” covariance matrix.
+V,Place to save the “true” approximate numerical covariance matrix. Currently turned off because they are large.
