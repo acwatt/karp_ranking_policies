@@ -7,7 +7,7 @@ using LinearAlgebra  # Diagonal
 using StatsModels  # formulas and modelmatrix
 using GLM  # OLS (lm) and GLS (glm)
 using Optim  # optimize (minimizing)
-# using Symbolics  # symbolic functions
+using Symbolics  # symbolic functions
 import Dates
 using Latexify  # output symbolic expressions as latex code
 # using ModelingToolkit  # more symbolic matrix functions
@@ -33,7 +33,7 @@ s = "\n"^20 * "="^60 * "\nCOVARIANCE MATRIX ESTIMATION BEGIN\n" * "="^60
 #           Functions
 #######################################################################
 
-# Building the covariance matrix
+# Building the covariance matrix for the N=2, T=3 case
 N = 2;
 T = 3;
 A(ρ, σₐ, σᵤ) = 1 / (1 - ρ^2) * σₐ^2 + (1 + ρ^2 / (N * (1 - ρ^2))) * σᵤ^2;
@@ -52,18 +52,34 @@ end
 
 
 
-
+# Building the covariance matrix for general N, T
 # Indicator functions
 ι(i, j) = (i == j ? 1 : 0)
 κ(s) = (s == 0 ? 0 : 1)
 χ(ρ, i, j, s, N) = (1 - κ(s)) * ι(i, j) + κ(s) * ρ^s / N + ρ^(2 + s) / (N * (1 - ρ))
-# Symbolic function
-χ(i, j, s, N) = (1 - κ(s)) * ι(i, j) + κ(s) * ρ^s / N + ρ^(2 + s) / (N * (1 - ρ))
+# Symbolic Functions
+χ = (1 - κ) * ι + κ * ρ^s / N + ρ^(2 + s) / (N * (1 - ρ))
 
-# Element of the covariance matrix: E[vᵢₜvⱼₜ₊ₛ]
+# Element of the covariance matrix: Σ = E[vᵢₜvⱼₜ₊ₛ]
 Evᵢₜvⱼₜ₊ₛ(ρ, σₐ, σᵤ, i, j, s, N; b = 1) = 1 / b^2 * (σₐ^2 * ρ^s / (1 - ρ^2) + χ(ρ, i, j, s, N) * σᵤ^2)
 # Symbolic function
-Evᵢₜvⱼₜ₊ₛ(i, j, s, N; b = 1) = 1 / b^2 * (σₐ^2 * ρ^s / (1 - ρ^2) + χ(i, j, s, N) * σᵤ^2)
+Evᵢₜvⱼₜ₊ₛ = σₐ^2 * ρ^s / (1 - ρ^2) + χ * σᵤ^2
+
+# Element of ∂Σ/∂y for y ∈ {ρ, σₐ, σᵤ}
+∂Σ∂ρ(ρ, σₐ, σᵤ, s, N) = ρ^(s-1) / N / (ρ^2 - 1)^2 * (
+    (s*κ(s) + (2 + s - 2*s*κ(s))*ρ^2 + (s*κ(s) - s)*ρ^4)*σᵤ^2 +
+    (N*(2-s)*ρ^2 + N*s)*σₐ^2
+)
+
+∂Σ∂σₐ(ρ, s) = ρ^s / (1 - ρ^2)
+
+∂Σ∂σᵤ(ρ, σₐ, σᵤ, i, j, s, N; b = 1) = ρ^s / N * (
+    (s*κ(s) + (2 + s - 2*s*κ(s))*ρ^2 + (s*κ(s) - s)*ρ^4)*σᵤ^2 +
+    (N*(2-s)*ρ^2 + N*s)*σₐ^2
+)
+
+# Symbolic Derivatives
+∂Evᵢₜvⱼₜ₊ₛ∂ρ = Symbolics.derivative(Evᵢₜvⱼₜ₊ₛ, ρ)
 
 
 """
