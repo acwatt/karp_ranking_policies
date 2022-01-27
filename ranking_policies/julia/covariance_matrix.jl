@@ -444,10 +444,10 @@ create_dataframe() = DataFrame(
 function add_row(df, seed, type, N, T;
     b₀ᵢ=missing, β=missing, ρ=missing, σₐ²=missing, σᵤ²=missing, iterations=missing,
     LL=missing, V_norm_finalstep=missing, V_norm_true=missing, V=missing,
-    runtime=missing, notes=missing)
+    runtime=missing, notes=missing, digits=3)
     push!(df, Dict(
     :seed=>seed, :type=>type, :N=>N, :T=>T,
-    :b₀ᵢ=>b₀ᵢ, :β=>β, :ρ=>ρ, :σₐ²=>σₐ², :σᵤ²=>σᵤ², :LL=>LL, :iterations=>iterations,
+    :b₀ᵢ=>round.(b₀ᵢ, digits=digits), :β=>round.(β, digits=digits), :ρ=>ρ, :σₐ²=>σₐ², :σᵤ²=>σᵤ², :LL=>LL, :iterations=>iterations,
     :V_norm_finalstep=>V_norm_finalstep, :V_norm_true=>V_norm_true, :V=>V,
     :runtime=>runtime, :notes=>notes
     ))
@@ -471,7 +471,7 @@ function write_estimation_df(df; N=2)
         end
     end
     # Save dataframe
-    filepath = "../../data/temp/realdata_estimation_results_log(N=$N).csv"
+    filepath = "../../data/temp/realdata_estimation_results_log.csv"
     if isfile(filepath)
         CSV.write(filepath, df, append=true)
     else
@@ -526,10 +526,17 @@ function save_reformatted_data()
     CSV.write(filepath, data)
 end
 
-function save_ols(df::DataFrame, gls::Dict)
-    β = gls[:β][3:4]
-    b₀ᵢ = gls[:β][1:2]
-    b₀ᵢ[2] = sum(gls[:β][1:2])
+function translate_gls(gls, N)
+    β = gls[:β][N+1:N+2]
+    b₀ᵢ = gls[:β][1:N]
+    for i ∈ 2:N
+        b₀ᵢ[i] = gls[:β][1] + gls[:β][i]
+    end
+    return([β, b₀ᵢ])
+end
+
+function save_ols(df::DataFrame, gls::Dict, N, T)
+    β, b₀ᵢ = translate_gls(gls, N)
     note = "This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix)."
     add_row(df, "real data", "First-pass OLS Estimate", N, T;
         b₀ᵢ=b₀ᵢ, β=β, iterations=0,
@@ -620,6 +627,7 @@ function estimate_dgp_params(N, T, starting_params;
         params_upper_bound = [1 - 1e-4, Inf, Inf],
         data = missing)
     println("Estimating parameters of real data using iteration method.")
+    println(N, " ", T, " ", starting_params)
     # dataframe to save to CSV
     df = create_dataframe()
     # Load data, or use provided simulated data
@@ -641,8 +649,7 @@ function estimate_dgp_params(N, T, starting_params;
         global gls = mygls(linear_formula, data, V, N)
         v = vec(gls[:resid])
         if i == 1
-            save_ols(df, gls)
-            println(gls)
+            save_ols(df, gls, N, T)
         end
 
         # ML to get parameter estimates ρ, σₐ², σᵤ²
@@ -655,7 +662,7 @@ function estimate_dgp_params(N, T, starting_params;
         i += 1
     end
     
-    β = gls[:β][3:4];   b₀ᵢ = [gls[:β][1], sum(gls[:β][1:2])];
+    β, b₀ᵢ = translate_gls(gls, N)
     note = join(["Estimated parameters after convergence of the iterative method using the following values: ",
                  "lower param bounds ", join(params_lower_bound, ", "), " :: ",
                  "upper param bounds ", join(params_upper_bound, ", "), " :: ",
@@ -751,7 +758,7 @@ end
 function test_starting_real_estimation()
     println("Starting series of estimations using real data.")
     # Starting parameters for the search ρ, σₐ², σᵤ²
-    plist1 = [0.85, 1, 1]
+    plist1 = [0.8785, 1, 1]
     plist2 = [0.1, 0.1, 0.1]
     plist3 = [0.1, 10, 10]
     plist4 = [0.1, 100, 100]
@@ -766,6 +773,10 @@ function test_starting_real_estimation()
     N = 2;
     T = 60;
     @time estimate_dgp_params(N, T, param(plist1);
+        params_lower_bound=lower_bounds1,
+        params_upper_bound=upper_bounds1)
+
+    @time estimate_dgp_params(4, T, param(plist1);
         params_lower_bound=lower_bounds1,
         params_upper_bound=upper_bounds1)
 
