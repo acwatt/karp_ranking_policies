@@ -1,4 +1,4 @@
-seed,type,N,T,"B₀ᵢ [""USA"",""EU"",""BRIC"",""Other""]","β [linear, quadratic]",ρ,σₐ²,σᵤ²,iterations,LL,V_norm_finalstep,V_norm_true,V,runtime,notes
+seed,type,N,T,"b₀ᵢ [""USA"",""EU"",""BRIC"",""Other""]","β [linear, quadratic]",ρ,σₐ²,σᵤ²,iterations,LL,V_norm_finalstep,V_norm_true,V,runtime,notes
 real data,First-pass OLS Estimate,2,60,"[179292.86, 539328.194]","[24306.343, -139.466]",,,,0,,,,,2022-01-27 02:28:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
 real data,Estimated,2,60,"[210418.106, 570453.439]","[21936.931, -104.284]",0.8785,30.7067,264.8113,2,-309898436,5.45336125126432E-13,,,2022-01-27 02:29:03,"Estimated parameters after convergence of the iterative method using the following values: lower param bounds 0.878, 0.0001, 0.0001 :: upper param bounds 0.879, Inf, Inf :: starting params ρ, σᵤ², σₐ²: 0.8785, 1.0, 1.0"
 real data,First-pass OLS Estimate,4,60,"[312489.7, -110919.366, 282327.75, 249115.967]","[32574.75, -108.555]",,,,0,,,,,2022-01-27 02:29:04,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
