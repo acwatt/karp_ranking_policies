@@ -266,6 +266,7 @@ end
 """
 Same MLE estimation as above, but assuming value for rho as given
 Only estimates two sigma values
+Have not yet editied -- would require editing nLL and gradients
 """
 function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
     lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true)
@@ -585,7 +586,7 @@ function estimate_sigmas(N, T, starting_params;
             # v = vec(data.vᵢₜ)
 
             # ML to get parameter estimates ρ, σₐ², σᵤ²
-            ρ, σₐ², σᵤ², LL = mymle(ρ, σₐ², σᵤ², v, N, T; analytical)
+            ρ, σₐ², σᵤ², LL = mymle_3(ρ, σₐ², σᵤ², v, N, T; analytical)
             Vold = V
             V = Σ(ρ, σₐ², σᵤ², N, T)
             Vnorm = norm(Vold - V)
@@ -645,7 +646,7 @@ function estimate_dgp_params(N, T, starting_params;
         end
 
         # ML to get parameter estimates ρ, σₐ², σᵤ²
-        ρ, σₐ², σᵤ², LL = mymle(ρ, σₐ², σᵤ², v, N, T;
+        ρ, σₐ², σᵤ², LL = mymle_3(ρ, σₐ², σᵤ², v, N, T;
                                 lower=params_lower_bound, upper=params_upper_bound)
         Vold = V
         V = Σ(ρ, σₐ², σᵤ², N, T)
@@ -692,7 +693,7 @@ param(plist) = Dict(
 )
 
 
-save_reformatted_data()
+# save_reformatted_data()
 
 function test_dgp_params_from_real()
     N = 2; T = 60  # 1945-2005
@@ -748,6 +749,7 @@ end
 
 
 function test_starting_real_estimation()
+    println("Starting series of estimations using real data.")
     # Starting parameters for the search ρ, σₐ², σᵤ²
     plist1 = [0.85, 1, 1]
     plist2 = [0.1, 0.1, 0.1]
