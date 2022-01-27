@@ -227,9 +227,49 @@ Given vector of residuals, minimize the
 @param lower: float 3-vector, lower bounds for parameters ρ, σₐ², σᵤ²
 @param upper: float 3-vector, upper bounds for parameters ρ, σₐ², σᵤ²
 """
-function mymle(ρstart, σₐ²start, σᵤ²start, v, N, T;
+function mymle_3(ρstart, σₐ²start, σᵤ²start, v, N, T;
     lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true)
+    println("Starting MLE")
+    # Starting paramerter values
+    params0 = [ρstart, σₐ²start, σᵤ²start]
 
+    # Function of only parameters (given residuals v)
+    objective(ρσₐ²σᵤ²) = nLL(ρσₐ²σᵤ²[1], ρσₐ²σᵤ²[2], ρσₐ²σᵤ²[3], v, N, T)
+
+    # Minimize over parameters
+    grad!(storage, x) = nLL_grad(storage, x, v, N, T)
+
+    # Calculates gradient with no parameter bounds
+    # optimum = optimize(objective, params0, LBFGS())
+    # Results in a domain error in the log function because the gradient pushes
+    #   it to a negative value inside the log
+
+    # Analytical gradient with no parameter bounds
+    # optimum = optimize(objective, grad!, params0, LBFGS())
+    # Results in a domain error in the log function because the gradient pushes
+    #   it to a negative value inside the log
+
+    if analytical
+        # Analytical gradient with parameter bounds
+        optimum = optimize(objective, grad!, lower, upper, params0, Fminbox(GradientDescent()))
+    else
+        # Calculates gradient with parameter bounds
+        optimum = optimize(objective, lower, upper, params0, Fminbox(GradientDescent()))
+    end
+
+    # Return the values
+    LL = -optimum.minimum
+    ρ, σₐ², σᵤ² = optimum.minimizer
+    return (ρ, σₐ², σᵤ², LL)
+end
+
+"""
+Same MLE estimation as above, but assuming value for rho as given
+Only estimates two sigma values
+"""
+function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
+    lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true)
+    println("Starting MLE")
     # Starting paramerter values
     params0 = [ρstart, σₐ²start, σᵤ²start]
 
@@ -345,6 +385,7 @@ end;
 - rsusmel lecture notes: bauer.uh.edu/rsusmel/phd/ec1-11.pdf
 """
 function mygls(formula, df, W, N)
+    println("Starting GLS")
     X = StatsModels.modelmatrix(formula.rhs, df)
     y = StatsModels.modelmatrix(formula.lhs, df)
     XX = inv(X'X)
@@ -422,6 +463,12 @@ function write_simulation_df(df; N=2)
 end
 
 function write_estimation_df(df; N=2)
+    # Round dataframe columns
+    for n in names(df)
+        if eltype(df[!,n]) == Float64 || eltype(df[!,n]) == Float32
+            df[!,n] = round.(df[!,n], digits=3)
+        end
+    end
     # Save dataframe
     filepath = "../../data/temp/realdata_estimation_results_log(N=$N).csv"
     if isfile(filepath)
@@ -476,6 +523,18 @@ function save_reformatted_data()
     data = read_data(N, T)
     filepath = "../../data/temp/realdata_reformated(N=$N).csv"
     CSV.write(filepath, data)
+end
+
+function save_ols(df::DataFrame, gls::Dict)
+    β = gls[:β][3:4]
+    b₀ᵢ = gls[:β][1:2]
+    b₀ᵢ[2] = sum(gls[:β][1:2])
+    note = "This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix)."
+    add_row(df, "real data", "First-pass OLS Estimate", N, T;
+        b₀ᵢ=b₀ᵢ, β=β, iterations=0,
+        runtime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"),
+        notes=note
+    )
 end
 
 
@@ -571,13 +630,19 @@ function estimate_dgp_params(N, T, starting_params;
     # Linear GLS formula
     linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2)
 
+
     # Starting parameter values
     ρ = starting_params[:ρ]; σₐ² = starting_params[:σₐ²];  σᵤ² = starting_params[:σᵤ²]
     Vnorm = Inf; i = 1; LL = -Inf
     while Vnorm > convergence_threshold && i <= iteration_max
+        println("Starting iteration ", i)
         # GLS to estimate b₀ᵢ and β; get residuals v
         global gls = mygls(linear_formula, data, V, N)
         v = vec(gls[:resid])
+        if i == 1
+            save_ols(df, gls)
+            println(gls)
+        end
 
         # ML to get parameter estimates ρ, σₐ², σᵤ²
         ρ, σₐ², σᵤ², LL = mymle(ρ, σₐ², σᵤ², v, N, T;
@@ -590,7 +655,8 @@ function estimate_dgp_params(N, T, starting_params;
     end
     
     β = gls[:β][3:4];   b₀ᵢ = [gls[:β][1], sum(gls[:β][1:2])];
-    note = join(["lower param bounds ", join(params_lower_bound, ", "), " :: ",
+    note = join(["Estimated parameters after convergence of the iterative method using the following values: ",
+                 "lower param bounds ", join(params_lower_bound, ", "), " :: ",
                  "upper param bounds ", join(params_upper_bound, ", "), " :: ",
                  "starting params ", join(collect(keys(starting_params)), ", "), ": ",
                  join(collect(values(starting_params)), ", ")])
@@ -653,8 +719,8 @@ function test_dgp_params_from_real()
     plist3 = [0.8785, 10, 10]
     plist4 = [0.8785, 100, 100]
     plist5 = [0.8785, 1000, 1000]
-    lower_bounds1 = [0, 1e-4, 1e-4]
-    upper_bounds1 = [1, Inf, Inf]
+    lower_bounds1 = [0.878, 1e-4, 1e-4]
+    upper_bounds1 = [0.879, Inf, Inf]
  
     # @time estimate_dgp_params(N, T, param(plist1); data=simulated_data,
     #     params_lower_bound=lower_bounds1,
@@ -668,16 +734,16 @@ function test_dgp_params_from_real()
         params_lower_bound=lower_bounds1,
         params_upper_bound=upper_bounds1)
 
-    @time estimate_dgp_params(N, T, param(plist4); data=simulated_data,
-        params_lower_bound=lower_bounds1,
-        params_upper_bound=upper_bounds1)
+    # @time estimate_dgp_params(N, T, param(plist4); data=simulated_data,
+    #     params_lower_bound=lower_bounds1,
+    #     params_upper_bound=upper_bounds1)
 
     # @time estimate_dgp_params(N, T, param(plist5); data=simulated_data,
     #     params_lower_bound=lower_bounds1,
     #     params_upper_bound=upper_bounds1)
 
 end
-# test_dgp_params_from_real()
+# test_dgp_params_from_real() 
 # Takes about 1.5 hours to run and drives sigma_a to 0
 
 
@@ -692,27 +758,32 @@ function test_starting_real_estimation()
     plist7 = [0.99, 10, 10]
     plist8 = [0.99, 100, 100]
     plist9 = [0.99, 1000, 1000]
+
+    lower_bounds1 = [0.878, 1e-4, 1e-4]
+    upper_bounds1 = [0.879, Inf, Inf]
     N = 2;
     T = 60;
-    @time estimate_dgp_params(N, T, param(plist1))
+    @time estimate_dgp_params(N, T, param(plist1);
+        params_lower_bound=lower_bounds1,
+        params_upper_bound=upper_bounds1)
 
-    @time estimate_dgp_params(N, T, param(plist2))
+    # @time estimate_dgp_params(N, T, param(plist2))
 
-    @time estimate_dgp_params(N, T, param(plist3))
+    # @time estimate_dgp_params(N, T, param(plist3))
 
-    @time estimate_dgp_params(N, T, param(plist4))
+    # @time estimate_dgp_params(N, T, param(plist4))
 
-    @time estimate_dgp_params(N, T, param(plist5))
+    # @time estimate_dgp_params(N, T, param(plist5))
 
-    @time estimate_dgp_params(N, T, param(plist6))
+    # @time estimate_dgp_params(N, T, param(plist6))
 
-    @time estimate_dgp_params(N, T, param(plist7))
+    # @time estimate_dgp_params(N, T, param(plist7))
 
-    @time estimate_dgp_params(N, T, param(plist8))
+    # @time estimate_dgp_params(N, T, param(plist8))
 
-    @time estimate_dgp_params(N, T, param(plist9))
+    # @time estimate_dgp_params(N, T, param(plist9))
 end
-# test_starting_real_estimation()
+test_starting_real_estimation()
 # about 2 minutes to finish
 
 
