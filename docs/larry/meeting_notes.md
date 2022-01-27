@@ -32,7 +32,7 @@ I've proceeded assuming these two items, but correct me if I'm mistaken. It woul
 In any case, it's exciting that the basic estimation results are not zero! But none of these estimates have standard errors yet and I'm still hoping to show (at least numerically) that this can be a consistent estimator.
 
 ## Next
-- save first-past ols GLS estimates, and final GLS estimates
+- save first-past ols GLS estimates, and final GLS estimates (DONE)
 - Use N=4, real data, hold rho constant at 0.8785, estimate other params
     - with and without gradient
     - different starting search values
