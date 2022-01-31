@@ -1,5 +1,487 @@
-seed,type,N,T,"b₀ᵢ [""USA"",""EU"",""BRIC"",""Other""]","β [linear, quadratic]",ρ,σₐ²,σᵤ²,iterations,LL,V_norm_finalstep,V_norm_true,V,runtime,notes
-real data,First-pass OLS Estimate,2,60,"[179292.86, 539328.194]","[24306.343, -139.466]",,,,0,,,,,2022-01-27 02:28:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
-real data,Estimated,2,60,"[210418.106, 570453.439]","[21936.931, -104.284]",0.8785,30.7067,264.8113,2,-309898436,5.45336125126432E-13,,,2022-01-27 02:29:03,"Estimated parameters after convergence of the iterative method using the following values: lower param bounds 0.878, 0.0001, 0.0001 :: upper param bounds 0.879, Inf, Inf :: starting params ρ, σᵤ², σₐ²: 0.8785, 1.0, 1.0"
-real data,First-pass OLS Estimate,4,60,"[312489.7, -110919.366, 282327.75, 249115.967]","[32574.75, -108.555]",,,,0,,,,,2022-01-27 02:29:04,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
-real data,Estimated,4,60,"[378017.714, -45391.353, 347855.764, 314643.98]","[26517.938, -6.618]",0.8785,1.0348,16.224,2,-268042170896,0,,,2022-01-27 02:31:29,"Estimated parameters after convergence of the iterative method using the following values: lower param bounds 0.878, 0.0001, 0.0001 :: upper param bounds 0.879, Inf, Inf :: starting params ρ, σᵤ², σₐ²: 0.8785, 1.0, 1.0"
+seed,type,N,T,ρ_estimate,ρ_start,ρ_lower,ρ_upper,σₐ²_estimate,σₐ²_start,σₐ²_lower,σₐ²_upper,σᵤ²_estimate,σᵤ²_start,σᵤ²_lower,σᵤ²_upper,iterations,LL,V_norm_finalstep,V_norm_true,V,b₀₁,b₀₂,b₀₃,b₀₄,β₁,β₂,runtime,notes
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:39:56,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.138,0.1,0.0001,Inf,16.727,0.1,0.0001,Inf,2,-2.60287498977e11,0.0,,,378017.72,-45391.346,347855.77,314643.987,26517.938,-6.618,2022-01-30 13:40:17,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:40:17,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.103,0.1,0.0001,Inf,16.747,1.0,0.0001,Inf,2,-2.59977413233e11,0.0,,,378017.714,-45391.352,347855.764,314643.981,26517.938,-6.618,2022-01-30 13:40:40,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:40:40,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.101,0.1,0.0001,Inf,16.749,2.0,0.0001,Inf,2,-2.59960720806e11,0.0,,,378017.714,-45391.353,347855.764,314643.98,26517.938,-6.618,2022-01-30 13:41:00,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:41:00,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,Inf,16.749,5.0,0.0001,Inf,2,-2.59955000948e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:41:22,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:41:22,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,Inf,16.749,10.0,0.0001,Inf,2,-2.59954175581e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:41:43,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:41:43,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:41:43,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:41:43,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:41:44,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:41:44,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:41:44,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:41:44,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:41:45,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:41:45,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.069,1.0,0.0001,Inf,16.206,0.1,0.0001,Inf,2,-2.6833238481e11,0.0,,,378017.714,-45391.353,347855.764,314643.981,26517.938,-6.618,2022-01-30 13:42:06,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:42:06,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.035,1.0,0.0001,Inf,16.224,1.0,0.0001,Inf,2,-2.68042170896e11,0.0,,,378017.714,-45391.353,347855.764,314643.98,26517.938,-6.618,2022-01-30 13:42:28,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:42:28,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.019,1.0,0.0001,Inf,16.232,2.0,0.0001,Inf,2,-2.67910664001e11,0.0,,,378017.713,-45391.353,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:42:52,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:42:52,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.005,1.0,0.0001,Inf,16.24,5.0,0.0001,Inf,2,-2.6779157949e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:43:12,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:43:12,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.001,1.0,0.0001,Inf,16.242,10.0,0.0001,Inf,2,-2.67754872289e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:43:36,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:43:36,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.0,1.0,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:43:36,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:43:36,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.0,1.0,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:43:37,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:43:37,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.0,1.0,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:43:37,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:43:37,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.0,1.0,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:43:37,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:43:38,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.07,2.0,0.0001,Inf,15.698,0.1,0.0001,Inf,2,-2.76714653158e11,0.0,,,378017.713,-45391.353,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:44:00,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:44:00,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.046,2.0,0.0001,Inf,15.71,1.0,0.0001,Inf,2,-2.76520782761e11,0.0,,,378017.713,-45391.353,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:44:25,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:44:25,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.031,2.0,0.0001,Inf,15.717,2.0,0.0001,Inf,2,-2.76397469742e11,0.0,,,378017.713,-45391.353,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:44:49,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:44:49,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.012,2.0,0.0001,Inf,15.726,5.0,0.0001,Inf,2,-2.76235993215e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:45:12,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:45:12,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.003,2.0,0.0001,Inf,15.731,10.0,0.0001,Inf,2,-2.76161905985e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:45:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:45:35,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.0,2.0,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:45:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:45:35,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.0,2.0,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:45:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:45:35,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.0,2.0,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:45:36,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:45:36,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.0,2.0,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:45:36,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:45:36,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.067,5.0,0.0001,Inf,14.439,0.1,0.0001,Inf,2,-3.00186248439e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:45:59,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:45:59,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.053,5.0,0.0001,Inf,14.444,1.0,0.0001,Inf,2,-3.00081020665e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:46:22,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:46:22,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.042,5.0,0.0001,Inf,14.448,2.0,0.0001,Inf,2,-3.00001421474e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:46:50,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:46:50,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.022,5.0,0.0001,Inf,14.455,5.0,0.0001,Inf,2,-2.99849166287e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:47:13,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:47:13,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.006,5.0,0.0001,Inf,14.461,10.0,0.0001,Inf,2,-2.99733718323e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:47:33,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:47:33,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.0,5.0,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:47:34,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:47:34,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.0,5.0,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:47:34,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:47:34,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.0,5.0,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:47:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:47:35,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.0,5.0,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:47:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:47:35,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.062,10.0,0.0001,Inf,12.931,0.1,0.0001,Inf,2,-3.34517974192e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:48:00,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:48:00,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.051,10.0,0.0001,Inf,12.934,1.0,0.0001,Inf,2,-3.34446401585e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:48:24,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:48:24,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.043,10.0,0.0001,Inf,12.936,2.0,0.0001,Inf,2,-3.34396853974e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:48:46,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:48:46,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.025,10.0,0.0001,Inf,12.94,5.0,0.0001,Inf,2,-3.34282899027e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:49:07,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:49:07,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.007,10.0,0.0001,Inf,12.945,10.0,0.0001,Inf,2,-3.34167047951e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:49:29,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:49:29,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.0,10.0,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:49:30,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:49:30,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.0,10.0,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:49:30,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:49:30,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.0,10.0,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:49:31,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:49:31,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.0,10.0,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:49:31,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:49:31,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.056,20.0,0.0001,Inf,11.068,0.1,0.0001,Inf,2,-3.90180858529e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:49:53,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:49:53,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.045,20.0,0.0001,Inf,11.069,1.0,0.0001,Inf,2,-3.90125049428e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:50:17,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:50:17,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.038,20.0,0.0001,Inf,11.07,2.0,0.0001,Inf,2,-3.90095075579e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:50:45,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:50:45,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.023,20.0,0.0001,Inf,11.072,5.0,0.0001,Inf,2,-3.90017750586e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:51:07,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:51:08,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.003,20.0,0.0001,Inf,11.075,10.0,0.0001,Inf,2,-3.8992220621e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:51:31,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:51:31,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.0,20.0,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:51:32,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:51:32,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.0,20.0,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:51:32,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:51:32,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.0,20.0,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:51:33,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:51:33,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.0,20.0,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:51:33,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:51:33,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.049,50.0,0.0001,Inf,8.547,0.1,0.0001,Inf,2,-5.04636966439e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:51:54,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:51:54,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.034,50.0,0.0001,Inf,8.547,1.0,0.0001,Inf,2,-5.0459028107e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:52:14,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:52:14,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.029,50.0,0.0001,Inf,8.548,2.0,0.0001,Inf,2,-5.04574123334e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:52:38,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:52:38,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.014,50.0,0.0001,Inf,8.548,5.0,0.0001,Inf,2,-5.04529195586e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:53:00,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:53:00,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,Inf,10.0,10.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:53:00,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:53:00,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:53:01,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:53:01,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:53:01,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:53:01,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:53:02,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:53:02,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:53:02,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:53:02,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.048,100.0,0.0001,Inf,6.877,0.1,0.0001,Inf,2,-6.26865353378e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:53:23,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:53:23,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.027,100.0,0.0001,Inf,6.878,1.0,0.0001,Inf,2,-6.26822300754e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:53:44,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:53:44,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.021,100.0,0.0001,Inf,6.878,2.0,0.0001,Inf,2,-6.2681142509e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:54:06,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:54:06,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.007,100.0,0.0001,Inf,6.878,5.0,0.0001,Inf,2,-6.26782113905e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:54:26,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:54:26,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,Inf,10.0,10.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:54:27,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:54:27,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:54:27,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:54:27,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:54:28,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:54:28,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:54:28,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:54:28,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:54:29,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:54:29,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.052,200.0,0.0001,Inf,5.49,0.1,0.0001,Inf,2,-7.85148891498e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:55:02,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:55:02,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.02,200.0,0.0001,Inf,5.49,1.0,0.0001,Inf,2,-7.8510806202e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:55:28,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:55:28,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.014,200.0,0.0001,Inf,5.49,2.0,0.0001,Inf,2,-7.85100133403e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:55:49,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:55:49,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.001,200.0,0.0001,Inf,5.49,5.0,0.0001,Inf,2,-7.85083689477e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:56:10,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:56:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,Inf,10.0,10.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:56:11,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:56:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,Inf,20.0,20.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:56:11,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:56:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,Inf,50.0,50.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:56:12,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:56:12,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,Inf,100.0,100.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:56:13,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 13:56:13,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,Inf,200.0,200.0,0.0001,Inf,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 13:56:14,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:19:40,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.138,0.1,0.0001,1000.0,16.727,0.1,0.0001,1000.0,2,-2.6028749894e11,0.0,,,378017.72,-45391.346,347855.77,314643.987,26517.938,-6.618,2022-01-30 15:20:03,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:20:03,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.103,0.1,0.0001,1000.0,16.747,1.0,0.0001,1000.0,2,-2.59977413256e11,0.0,,,378017.714,-45391.352,347855.764,314643.981,26517.938,-6.618,2022-01-30 15:20:25,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:20:25,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.101,0.1,0.0001,1000.0,16.749,2.0,0.0001,1000.0,2,-2.59960720833e11,0.0,,,378017.714,-45391.353,347855.764,314643.98,26517.938,-6.618,2022-01-30 15:20:44,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:20:44,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,1000.0,16.749,5.0,0.0001,1000.0,2,-2.59955000972e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:21:07,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:21:07,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,1000.0,16.749,10.0,0.0001,1000.0,2,-2.59954175596e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:21:26,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:21:26,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:21:27,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:21:27,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:21:27,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:21:27,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:21:28,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:21:28,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,0.1,0.1,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:21:29,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:21:29,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.069,1.0,0.0001,1000.0,16.206,0.1,0.0001,1000.0,2,-2.68332380808e11,0.0,,,378017.714,-45391.353,347855.764,314643.981,26517.938,-6.618,2022-01-30 15:21:49,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:21:49,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.035,1.0,0.0001,1000.0,16.224,1.0,0.0001,1000.0,2,-2.68042170864e11,0.0,,,378017.714,-45391.353,347855.764,314643.98,26517.938,-6.618,2022-01-30 15:22:10,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:22:10,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.019,1.0,0.0001,1000.0,16.232,2.0,0.0001,1000.0,2,-2.6791066449e11,0.0,,,378017.713,-45391.353,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:22:37,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:22:37,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.005,1.0,0.0001,1000.0,16.24,5.0,0.0001,1000.0,2,-2.67791580599e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:23:03,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:23:03,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.001,1.0,0.0001,1000.0,16.242,10.0,0.0001,1000.0,2,-2.677548732e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:23:26,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:23:26,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.0,1.0,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:23:26,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:23:26,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.0,1.0,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:23:27,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:23:27,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.0,1.0,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:23:27,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:23:27,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,1.0,1.0,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:23:28,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:23:28,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.07,2.0,0.0001,1000.0,15.698,0.1,0.0001,1000.0,2,-2.76714638023e11,0.0,,,378017.713,-45391.353,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:23:49,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:23:49,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.046,2.0,0.0001,1000.0,15.71,1.0,0.0001,1000.0,2,-2.76520781492e11,0.0,,,378017.713,-45391.353,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:24:09,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:24:09,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.031,2.0,0.0001,1000.0,15.717,2.0,0.0001,1000.0,2,-2.76397469714e11,0.0,,,378017.713,-45391.353,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:24:33,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:24:33,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.012,2.0,0.0001,1000.0,15.726,5.0,0.0001,1000.0,2,-2.76235995265e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:24:54,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:24:54,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.003,2.0,0.0001,1000.0,15.731,10.0,0.0001,1000.0,2,-2.76161908196e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:25:21,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:25:21,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.0,2.0,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:25:23,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:25:23,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.0,2.0,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:25:24,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:25:24,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.0,2.0,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:25:25,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:25:25,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,2.0,2.0,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:25:25,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:25:25,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.067,5.0,0.0001,1000.0,14.439,0.1,0.0001,1000.0,2,-3.0018616902e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:25:48,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:25:48,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.053,5.0,0.0001,1000.0,14.444,1.0,0.0001,1000.0,2,-3.00081010535e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:26:08,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:26:08,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.042,5.0,0.0001,1000.0,14.448,2.0,0.0001,1000.0,2,-3.00001414692e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:26:30,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:26:30,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.022,5.0,0.0001,1000.0,14.455,5.0,0.0001,1000.0,2,-2.9984916627e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:26:51,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:26:51,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.006,5.0,0.0001,1000.0,14.461,10.0,0.0001,1000.0,2,-2.99733721773e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:27:10,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:27:10,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.0,5.0,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:27:10,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:27:10,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.0,5.0,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:27:10,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:27:10,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.0,5.0,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:27:11,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:27:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,5.0,5.0,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:27:11,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:27:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.062,10.0,0.0001,1000.0,12.931,0.1,0.0001,1000.0,2,-3.34517728602e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:27:31,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:27:31,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.051,10.0,0.0001,1000.0,12.934,1.0,0.0001,1000.0,2,-3.34446367192e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:27:51,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:27:51,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.043,10.0,0.0001,1000.0,12.936,2.0,0.0001,1000.0,2,-3.34396826874e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:28:11,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:28:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.025,10.0,0.0001,1000.0,12.94,5.0,0.0001,1000.0,2,-3.34282886846e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:28:31,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:28:31,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.007,10.0,0.0001,1000.0,12.945,10.0,0.0001,1000.0,2,-3.34167047946e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:28:50,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:28:50,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.0,10.0,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:28:50,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:28:51,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.0,10.0,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:28:51,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:28:51,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.0,10.0,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:28:51,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:28:51,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,10.0,10.0,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:28:52,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:28:52,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.056,20.0,0.0001,1000.0,11.068,0.1,0.0001,1000.0,2,-3.90180194895e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:29:10,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:29:10,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.044,20.0,0.0001,1000.0,11.069,1.0,0.0001,1000.0,2,-3.90124953545e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:29:32,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:29:32,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.038,20.0,0.0001,1000.0,11.07,2.0,0.0001,1000.0,2,-3.90094996686e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:29:52,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:29:52,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.023,20.0,0.0001,1000.0,11.072,5.0,0.0001,1000.0,2,-3.90017707223e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:30:11,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:30:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.003,20.0,0.0001,1000.0,11.075,10.0,0.0001,1000.0,2,-3.89922201339e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:30:34,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:30:34,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.0,20.0,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:30:34,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:30:34,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.0,20.0,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:30:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:30:35,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.0,20.0,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:30:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:30:35,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,20.0,20.0,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:30:36,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:30:36,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.049,50.0,0.0001,1000.0,8.547,0.1,0.0001,1000.0,2,-5.04634854611e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:30:54,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:30:54,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.034,50.0,0.0001,1000.0,8.547,1.0,0.0001,1000.0,2,-5.04589977751e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:31:12,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:31:12,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.029,50.0,0.0001,1000.0,8.548,2.0,0.0001,1000.0,2,-5.04573878302e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:31:32,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:31:32,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.014,50.0,0.0001,1000.0,8.548,5.0,0.0001,1000.0,2,-5.04529082661e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:31:50,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:31:50,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,1000.0,10.0,10.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:31:51,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:31:51,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:31:51,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:31:51,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:31:51,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:31:51,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:31:52,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:31:52,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,50.0,50.0,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:31:52,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:31:52,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.046,100.0,0.0001,1000.0,6.877,0.1,0.0001,1000.0,2,-6.26860440481e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:32:11,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:32:11,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.026,100.0,0.0001,1000.0,6.878,1.0,0.0001,1000.0,2,-6.26821619521e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:32:33,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:32:33,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.021,100.0,0.0001,1000.0,6.878,2.0,0.0001,1000.0,2,-6.26810914721e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:32:52,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:32:52,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.007,100.0,0.0001,1000.0,6.878,5.0,0.0001,1000.0,2,-6.26781979533e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:33:12,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:33:12,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,1000.0,10.0,10.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:33:12,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:33:12,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:33:13,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:33:13,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:33:13,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:33:13,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:33:14,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:33:14,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,100.0,100.0,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:33:14,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:33:14,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.042,200.0,0.0001,1000.0,5.49,0.1,0.0001,1000.0,2,-7.85136811914e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:33:36,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:33:36,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.019,200.0,0.0001,1000.0,5.49,1.0,0.0001,1000.0,2,-7.85106527076e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:33:54,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:33:54,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.013,200.0,0.0001,1000.0,5.49,2.0,0.0001,1000.0,2,-7.85099196916e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:34:12,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:34:12,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.001,200.0,0.0001,1000.0,5.49,5.0,0.0001,1000.0,2,-7.85083642911e11,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:34:33,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:34:33,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,1000.0,10.0,10.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:34:33,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:34:33,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,1000.0,20.0,20.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:34:34,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:34:34,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,1000.0,50.0,50.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:34:34,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:34:34,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,1000.0,100.0,100.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:34:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+real data,First-pass OLS Estimate,4,60,,,,,,,,,,,,,0,,,,,312489.7,-110919.366,282327.75,249115.967,32574.75,-108.555,2022-01-30 15:34:35,This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix).
+real data,Estimated,4,60,0.8785,0.8785,0.878,0.879,200.0,200.0,0.0001,1000.0,200.0,200.0,0.0001,1000.0,2,-Inf,0.0,,,378017.713,-45391.354,347855.763,314643.98,26517.938,-6.618,2022-01-30 15:34:35,Estimated parameters after convergence of the iterative method
+,blank line,4,60,,,,,,,,,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.

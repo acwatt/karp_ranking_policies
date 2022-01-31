@@ -34,9 +34,9 @@ In any case, it's exciting that the basic estimation results are not zero! But n
 ## Next
 - save first-past ols GLS estimates, and final GLS estimates (DONE)
 - Use N=4, real data, hold rho constant at 0.8785, estimate other params
-    - with and without gradient
+    - with and without gradient 
     - different starting search values
-    - round to 3 decimals
+    - round to 3 decimals (DONE)
 - plot log likelihood as a function of sigma_a, sigma_u, holding rho constant
 - Think about delta method vs taylor series expansion (want to know about momemnts of f(sigma_a, sigma_u))
 

@@ -229,7 +229,7 @@ Given vector of residuals, minimize the
 """
 function mymle_3(ρstart, σₐ²start, σᵤ²start, v, N, T;
     lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true)
-    println("Starting MLE")
+    println("Starting MLE with $ρstart, $σₐ²start, $σᵤ²start")
     # Starting paramerter values
     params0 = [ρstart, σₐ²start, σᵤ²start]
 
@@ -435,23 +435,72 @@ end
 #######################################################################
 
 create_dataframe() = DataFrame(
+    # This function determines the order of the columns
     seed = [], type = [], N = [], T = [],
-    b₀ᵢ = [], β = [], ρ = [], σₐ² = [], σᵤ² = [], iterations = [],
-    LL = [], V_norm_finalstep = [], V_norm_true=[], V = [],
+    ρ_estimate = [], ρ_start = [], ρ_lower = [], ρ_upper = [],
+    σₐ²_estimate = [],  σₐ²_start = [], σₐ²_lower = [], σₐ²_upper = [],
+    σᵤ²_estimate = [],  σᵤ²_start = [],  σᵤ²_lower = [], σᵤ²_upper = [], 
+    iterations = [], LL = [],
+    V_norm_finalstep = [], V_norm_true=[], V = [],
+    b₀₁ = [], b₀₂ = [], b₀₃ = [], b₀₄ = [], 
+    β₁ = [], β₂ = [],
     runtime = [], notes=[]
 )
 
+
+function optional_round(var, n, digits)
+    if ismissing(var)
+        if n == 1
+            return missing
+        else
+            return repeat([missing], n)
+        end
+    else
+        var = round.(var, digits=digits)
+        if length(var) < n
+            return vcat(var, repeat([missing], n-length(var)))
+        end
+        return var
+    end
+end
+
+
 function add_row(df, seed, type, N, T;
-    b₀ᵢ=missing, β=missing, ρ=missing, σₐ²=missing, σᵤ²=missing, iterations=missing,
+    b₀ᵢ = missing, β = missing,
+    ρ=missing, σₐ²=missing, σᵤ²=missing, iterations=missing,
     LL=missing, V_norm_finalstep=missing, V_norm_true=missing, V=missing,
+    params_start = missing, params_lower = missing, params_upper = missing,
     runtime=missing, notes=missing, digits=3)
+
+    b₀₁, b₀₂, b₀₃, b₀₄ = optional_round(b₀ᵢ, N, digits)
+    β₁, β₂ = optional_round(β, 2, digits)
+
+    ρ = optional_round(ρ, 1, 4)
+    println(ρ)
+    σₐ² = optional_round(σₐ², 1, digits)
+    σᵤ² = optional_round(σᵤ², 1, digits)
+
+    LL = optional_round(LL, 1, 0)
+    V_norm_finalstep = optional_round(V_norm_finalstep, 1, digits)
+    V_norm_true = optional_round(V_norm_true, 1, digits)
+
+    ρ_start, σₐ²_start, σᵤ²_start = optional_round(params_start, 3, 4)
+    ρ_lower, σₐ²_lower, σᵤ²_lower = optional_round(params_lower, 3, 4)
+    ρ_upper, σₐ²_upper, σᵤ²_upper = optional_round(params_upper, 3, 4)
+
     push!(df, Dict(
     :seed=>seed, :type=>type, :N=>N, :T=>T,
-    :b₀ᵢ=>round.(b₀ᵢ, digits=digits), :β=>round.(β, digits=digits), :ρ=>ρ, :σₐ²=>σₐ², :σᵤ²=>σᵤ², :LL=>LL, :iterations=>iterations,
+    :b₀₁=>b₀₁, :b₀₂=>b₀₂, :b₀₃=>b₀₃, :b₀₄=>b₀₄,
+    :β₁=>β₁, :β₂=>β₂,
+    :ρ_estimate=>ρ, :σₐ²_estimate=>σₐ², :σᵤ²_estimate=>σᵤ², :LL=>LL, :iterations=>iterations,
     :V_norm_finalstep=>V_norm_finalstep, :V_norm_true=>V_norm_true, :V=>V,
+    :ρ_start=>ρ_start, :σₐ²_start=>σₐ²_start, :σᵤ²_start=>σᵤ²_start, 
+    :ρ_lower=>ρ_lower, :σₐ²_lower=>σₐ²_lower, :σᵤ²_lower=>σᵤ²_lower, 
+    :ρ_upper=>ρ_upper, :σₐ²_upper=>σₐ²_upper, :σᵤ²_upper=>σᵤ²_upper, 
     :runtime=>runtime, :notes=>notes
     ))
 end
+
 
 function write_simulation_df(df; N=2)
     # Save dataframe
@@ -462,6 +511,7 @@ function write_simulation_df(df; N=2)
         CSV.write(filepath, df)
     end
 end
+
 
 function write_estimation_df(df; N=2)
     # Round dataframe columns
@@ -479,6 +529,7 @@ function write_estimation_df(df; N=2)
     end
 end
 
+
 function read_data(N, T)
     filepath = "../../data/sunny/clean/grouped_nation.1751_2014.csv"
     df = @chain CSV.read(filepath, DataFrame) begin
@@ -491,6 +542,7 @@ function read_data(N, T)
 
     return(df)
 end
+
 
 function read_global_data(T)
     filepath = "../../data/sunny/clean/ts_allYears_nation.1751_2014.csv"
@@ -505,12 +557,14 @@ function read_global_data(T)
     return(df)
 end
 
+
 function get_covar_names(data)
     ilevels = unique(data.i); len = length(ilevels);
     inames = repeat(["i"], len-1) .* string.(ilevels[2:len])
     varnames = vcat(["intercept"], inames, ["t", "t^2"])
     return(varnames)
 end
+
 
 function get_sample_variances(data)
     σₐ² = sum((data.αₜ .- mean(data.αₜ)) .^ 2) / 2 / (T - 1)
@@ -526,6 +580,7 @@ function save_reformatted_data()
     CSV.write(filepath, data)
 end
 
+
 function translate_gls(gls, N)
     β = gls[:β][N+1:N+2]
     b₀ᵢ = gls[:β][1:N]
@@ -534,6 +589,7 @@ function translate_gls(gls, N)
     end
     return([β, b₀ᵢ])
 end
+
 
 function save_ols(df::DataFrame, gls::Dict, N, T)
     β, b₀ᵢ = translate_gls(gls, N)
@@ -546,12 +602,22 @@ function save_ols(df::DataFrame, gls::Dict, N, T)
 end
 
 
+param(plist) = Dict(
+    :ρ => plist[1],
+    :σₐ² => plist[2],
+    :σᵤ² => plist[3],
+)
+
+
 
 #######################################################################
 #           Iterate to convergence!
 #######################################################################
 """
-Examine convergence behavior of covariance matrix
+Examine convergence behavior of covariance matrix by creating fake data
+using known parameter values. These values may or may not be close to
+any realistic values, but this allows us to examine how relative sizes
+of parameters seem to effect the estimation process.
 """
 function estimate_sigmas(N, T, starting_params;
         n_seeds = 10, iteration_max = 500, convergence_threshold = 1e-16,
@@ -625,7 +691,7 @@ function estimate_dgp_params(N, T, starting_params;
         iteration_max = 500, convergence_threshold = 1e-4,
         params_lower_bound = [1e-4, 1e-4, 1e-4],
         params_upper_bound = [1 - 1e-4, Inf, Inf],
-        data = missing)
+        data = missing, print_results = false)
     println("Estimating parameters of real data using iteration method.")
     println(N, " ", T, " ", starting_params)
     # dataframe to save to CSV
@@ -663,22 +729,26 @@ function estimate_dgp_params(N, T, starting_params;
     end
     
     β, b₀ᵢ = translate_gls(gls, N)
-    note = join(["Estimated parameters after convergence of the iterative method using the following values: ",
-                 "lower param bounds ", join(params_lower_bound, ", "), " :: ",
-                 "upper param bounds ", join(params_upper_bound, ", "), " :: ",
-                 "starting params ", join(collect(keys(starting_params)), ", "), ": ",
-                 join(collect(values(starting_params)), ", ")])
+    note = "Estimated parameters after convergence of the iterative method"
     add_row(df, "real data", "Estimated", N, T;
         b₀ᵢ=b₀ᵢ, β=β, ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ², LL=LL, iterations=i-1,
         V_norm_finalstep=Vnorm,
+        params_start = [starting_params[:ρ], starting_params[:σₐ²], starting_params[:σᵤ²]],
+        params_lower = params_lower_bound, params_upper = params_upper_bound,
         runtime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"),
         notes=note
     )
+    add_row(df, "", "blank line", N, T; notes="Row intentionally left blank for visual reasons.")
 
     # Save dataframe of results
     write_estimation_df(df; N=N)
     println(note)
     println("DONE estimating parameters of real data.")
+
+    # print results
+    if print_results
+
+    end
 end
 
 
@@ -693,11 +763,6 @@ starting_params = Dict(:ρ => 0.85,
     :β => [1, 0.1]
 )
 
-param(plist) = Dict(
-    :ρ => plist[1],
-    :σₐ² => plist[2],
-    :σᵤ² => plist[3],
-)
 
 
 # save_reformatted_data()
