@@ -8,5 +8,5 @@ A project for estimating the parameters of an emissions model from Dr. Larry Kar
 - `docs/sunny`: previous estimation and notes done by ARE grad student Sunny (Sayantan Mitra)
 - `docs/andy`: previous estimation and notes done by ARE grad student Andy (Andy Hultgren)
 - `data/`: cleaned data files ready for estimation
-- `ranking_policies/`: this project's (Aaron's) various code chunks (the code 
+- `ranking_policies/`: this project's (Aaron's) various code chunks
   - `ranking_policies/julia/covariance_matrix.jl`: Aaron's most recent simulation + estimation attempt

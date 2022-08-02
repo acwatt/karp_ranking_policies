@@ -1,3 +1,16 @@
+# 2022-08-01 Zoom Meeting
+present: A. Watt, L. Karp
+
+
+
+## Next:
+- simulated data but not too small of a dataset
+- plot the LL function for n=2, T=5, rho=0.878 along sigmas
+
+Bruce Hanson Econometrics (for time series and MLE)
+
+
+___
 # 2022-01-20 Zoom Meeting
 present: A. Watt, L. Karp
 

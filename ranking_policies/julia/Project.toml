@@ -1,0 +1,6 @@
+[deps]
+Forecast = "6efb3b9f-b065-4dd1-b1a5-fac2350e161b"
+FredData = "6e85b7ee-7d24-5488-b1b7-e4f4198c51ac"
+Measures = "442fdcdd-2543-5da2-b0f3-8c86c306513e"
+MessyTimeSeries = "2a88db5c-15f1-4b3e-a070-d1159e8d76cc"
+StableRNGs = "860ef19b-820b-49d6-a774-d7a799459cd3"
