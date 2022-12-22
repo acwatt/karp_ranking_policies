@@ -1,3 +1,34 @@
+# 2022-12-21
+# 
+
+
+# 2022-10-12
+## Updates before meeting
+- I was able to test several different optimization algorithms and all converged on the same likelihood-maximizing point: sigma_a^2 = 0, sigma_u^2 ~ (180,000 tons CO2)^2
+- I believe the joint error term's variance is identified in this model, which means sigma_a and sigma_u would be set identified.
+- In the past, we've tried estimating sigma_a with aggregate data, and get sigma_a larger than the joint error variance estimated from this model (sigma_a^2 + sigma_u^2/n). This implies that sigma_u is then zero.
+- I think we can combine both of these estimations in either MLE or in GMM. But it appears to me that the GMM implementation is simpler than writing a new log likelihood function for the joint estimation of both the regional estimation and the aggregate estimation.
+- So I am going to suggest in the meeting that we might try a GMM estimation to jointly estimate sigma_a and sigma (the joint error variance).
+
+## Notes during meeting
+
+
+
+
+# 2022-09-13
+Present: A. Watt, L. Karp
+
+## Updates
+- plotted the LL function (plots and more notes in output/estimation_notes/2022-01-30 meeting notes.docx)
+- Very flat narrow valley (valley in the nLL function, ridge in the LL function)
+- Seems that ridge of the LL function slopes slightly up and pushes sigma_a to 0
+
+## Next
+- get optimizer to work using different step sizes in different directions
+- why would MLE push sigma_a to 0 even for the simulated data? Shouldn't the true values of the paramters maximize LL?
+
+
+
 # 2022-08-01 Zoom Meeting
 present: A. Watt, L. Karp
 

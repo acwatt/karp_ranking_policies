@@ -1,9 +1,17 @@
-# simulations.jl
-# author = Aaron Watt
-# email = aaron@acwatt.net
-# description = Estimations on simulated data to test estimation issues for project
+#==============================================================================
+file: simulations.jl
+description: Estimations on simulated data to test estimation issues for Larry
+    Karp's "Ranking Policies" project
+author: Aaron C Watt (UCB Grad Student, Ag & Resource Econ)
+email: aaron@acwatt.net
+created: 
+last update: 
+notes:
+ - Andy Hultgree
+ - 
+==============================================================================#
 # Notes:
-#       - all nu's are the symbol \nu not the letter v
+#       - all ν's are the symbol \nu not the letter v (there are no standalone vee's)
 
 # packages
 using LinearAlgebra, Statistics, Random, Distributions
@@ -11,7 +19,7 @@ using LinearAlgebra, Statistics, Random, Distributions
 # create simulated data
 b = 1
 n = 2
-T = 3
+T = 5
 tvec = [t for t in 1:T]
 b₀ = [1, 1]
 a = [1, 0.5]
@@ -49,3 +57,5 @@ X = xt.(tvec)
 function eit(i, t)..
     1/b*(b₀ + dot(a, tvec))
 end
+
+

@@ -7,7 +7,7 @@ using DataFramesMeta
 using CategoricalArrays
 using LinearAlgebra  # Diagonal
 using StatsModels  # formulas and modelmatrix
-# using StatsPlots
+using StatsPlots
 using GLM  # OLS (lm) and GLS (glm)
 using Optim  # optimize (minimizing)
 using FiniteDifferences  # numerical gradient
@@ -19,6 +19,9 @@ using Latexify  # output symbolic expressions as latex code
 # @force using Reduce.Algebra  # to extend native functions to Sybmol/Expr types
 using Logging
 import CSV
+
+import Revise
+Revise.includet("reg_utils.jl")  # mygls()
 
 
 """
@@ -46,6 +49,8 @@ Time to run: Most of the functions at the end that actually run the
     depending on your system. Julia does multithreading automatically,
     meaning it will take up all available CPU during most compuations
     until the script has complete.
+
+Last update: 2022-12-15
 """
 
 #######################################################################
@@ -56,7 +61,7 @@ logger = SimpleLogger(io)
 # debuglogger = ConsoleLogger(stderr, Logging.Debug)
 global_logger(logger)
 s = "\n"^20 * "="^60 * "\nCOVARIANCE MATRIX ESTIMATION BEGIN\n" * "="^60
-@info s Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS")
+@info s datetime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS")
 num2country = Dict(1=>"USA", 2=>"EU", 3=>"BRIC", 4=>"Other")
 country2num = Dict("USA"=>1, "EU"=>2, "BRIC"=>3, "Other"=>4)
 
@@ -209,7 +214,7 @@ end
 
 
 # Define the gradient of the negative log likelihood
-function nLL_grad(gradient_vec, params, v, N, T)
+function nLL_grad!(gradient_vec, params, v, N, T)
     ρ = params[1]; σₐ² = params[2]; σᵤ² = params[3]
     gradient_vec[1] = ∂nLL∂y("ρ", ρ, σₐ², σᵤ², v, N, T)
     gradient_vec[2] = ∂nLL∂y("σₐ²", ρ, σₐ², σᵤ², v, N, T)
@@ -218,7 +223,7 @@ function nLL_grad(gradient_vec, params, v, N, T)
 end
 function nLL_grad2(gradient_vec, params, ρ, v, N, T)
     σₐ² = params[1]; σᵤ² = params[2]
-    gradient_vec[1] = ∂nLL∂y("σₐ²", ρ, σₐ², σᵤ², v, N, T)
+    gradient_vec[1] = ∂nLL∂y("σₐ²", ρ, σₐ², σᵤ², v, N, T)*N
     gradient_vec[2] = ∂nLL∂y("σᵤ²", ρ, σₐ², σᵤ², v, N, T)
     return gradient_vec
 end
@@ -246,6 +251,12 @@ end
 
 
 
+METHOD_MAP = Dict("gradient decent" => GradientDescent(),
+                  "conjugate gradient" => ConjugateGradient(),
+                  "BFGS" => BFGS(),
+                  "LBFGS" => LBFGS(),
+                  "momentum gradient" => MomentumGradientDescent(),
+                  "accelerated gradient" => AcceleratedGradientDescent())
 
 """
     mymle(ρstart, σₐ²start, σᵤ²start, v)
@@ -262,8 +273,10 @@ Given vector of residuals, minimize the
 @param upper: float 3-vector, upper bounds for parameters ρ, σₐ², σᵤ²
 """
 function mymle_3(ρstart, σₐ²start, σᵤ²start, v, N, T;
-    lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true)
+    lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true, method = "gradient decent",
+    show_trace=false)
     println("Starting MLE with $ρstart, $σₐ²start, $σᵤ²start")
+    @info "mymle_3()" ρstart σₐ²start σᵤ²start N T lower upper analytical method
     # Starting paramerter values
     params0 = [ρstart, σₐ²start, σᵤ²start]
 
@@ -273,8 +286,8 @@ function mymle_3(ρstart, σₐ²start, σᵤ²start, v, N, T;
 
     # Minimize over parameters
     # 
-    # println("Analytical gradient: ", nLL_grad([0.,0.,0.], params0, v, N, T))
-    println("Analytical gradient: ", nLL_grad2([0.,0.], params0[2:3], ρstart, v, N, T))
+    println("Analytical gradient: ", nLL_grad!([0.,0.,0.], params0, v, N, T))  # with estimating ρ
+    # println("Analytical gradient: ", nLL_grad2([0.,0.], params0[2:3], ρstart, v, N, T))  # without estimating ρ
 
     
     # println("Fin. Diff. gradient: ", nLL_grad_fidiff!([0.,0.,0.], params0, v, N, T))
@@ -290,30 +303,36 @@ function mymle_3(ρstart, σₐ²start, σᵤ²start, v, N, T;
     # Results in a domain error in the log function because the gradient pushes
     #   it to a negative value inside the log
 
-    if analytical
+    if analytical   
         # Analytical gradient with parameter bounds
         println("Using analytical gradient.")
-        # grad!(storage, x) = nLL_grad(storage, x, v, N, T)  # estimating ρσₐ²σᵤ²
-        # optimum = optimize(objective, grad!, lower, upper, params0, Fminbox(GradientDescent()))
-        grad2!(storage, x) = nLL_grad2(storage, x, ρstart, v, N, T)  # estimating σₐ²σᵤ²
-        optimum = optimize(objective2, grad2!, lower[2:3], upper[2:3], params0[2:3], Fminbox(GradientDescent()))
+        grad!(storage, x) = nLL_grad!(storage, x, v, N, T)  # estimating ρσₐ²σᵤ²  # with estimating ρ
+        optimum = optimize(objective, grad!, 
+                           lower, upper, params0, 
+                           Fminbox(method_map[method]),
+                           Optim.Options(show_trace = true, 
+                                         show_every=1, 
+                                         g_tol = 1e-8,
+                                         time_limit = 10, 
+                                         extended_trace=true))  # with estimating ρ
+        # grad2!(storage, x) = nLL_grad2(storage, x, ρstart, v, N, T)  # estimating σₐ²σᵤ²  # without estimating ρ
+        # optimum = optimize(objective2, grad2!, lower[2:3], upper[2:3], params0[2:3], Fminbox(method_map[method]),  # without estimating ρ
+        #                    Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1))
     else
         # Calculates gradient with parameter bounds
         println("Using estimated gradient.")
-        # optimum = optimize(objective, lower, upper, params0, Fminbox(GradientDescent()),
-        #         Optim.Options(show_trace = true, show_every=5))
         println("Fin. Diff. gradient: ", nLL_grad_fidiff2!([0.,0.], params0[2:3], ρstart, v, N, T))
+        optimum = optimize(objective, lower, upper, params0, Fminbox(method_map[method]),  # with estimating ρ
+                           Optim.Options(show_trace = show_trace, show_every=5))
         # grad2!(storage, x) = nLL_grad_fidiff2!(storage, x, v, N, T)
-        optimum = optimize(objective2, lower[2:3], upper[2:3], params0[2:3], Fminbox(GradientDescent()),
-                        Optim.Options(show_trace = true, show_every=1))
+        # optimum = optimize(objective2, lower[2:3], upper[2:3], params0[2:3], Fminbox(method_map[method]),  # without estimating ρ
+        #                    Optim.Options(show_trace = show_trace, show_every=1))
     end 
-
-        
     
     # Return the values
     LL = -optimum.minimum
-    # ρ, σₐ², σᵤ² = optimum.minimizer
-    ρ, σₐ², σᵤ² = ρstart, optimum.minimizer...
+    ρ, σₐ², σᵤ² = optimum.minimizer                # with estimating ρ
+    # ρ, σₐ², σᵤ² = ρstart, optimum.minimizer...   # without estimating ρ
     return (ρ, σₐ², σᵤ², LL)
 end
 
@@ -323,16 +342,19 @@ Only estimates two sigma values
 Have not yet editied -- would require editing nLL and gradients
 """
 function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
-    lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true)
-    println("Starting MLE")
+    lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true, method = "gradient decent",
+    show_trace=false)
+    println("Starting MLE with $ρstart, $σₐ²start, $σᵤ²start")
+    @info "mymle_2()" ρstart σₐ²start σᵤ²start lower upper analytical method
     # Starting paramerter values
     params0 = [ρstart, σₐ²start, σᵤ²start]
 
     # Function of only parameters (given residuals v)
-    objective(ρσₐ²σᵤ²) = nLL(ρσₐ²σᵤ²[1], ρσₐ²σᵤ²[2], ρσₐ²σᵤ²[3], v, N, T)
+    objective2(σₐ²σᵤ²) = nLL(ρstart, σₐ²σᵤ²[1], σₐ²σᵤ²[2], v, N, T)
 
     # Minimize over parameters
-    grad!(storage, x) = nLL_grad(storage, x, v, N, T)
+    println("Analytical gradient: ", nLL_grad2([0.,0.], params0[2:3], ρstart, v, N, T))
+    # println("Fin. Diff. gradient: ", nLL_grad_fidiff2!([0.,0.], params0[2:3], ρstart, v, N, T))
 
     # Calculates gradient with no parameter bounds
     # optimum = optimize(objective, params0, LBFGS())
@@ -344,17 +366,21 @@ function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
     # Results in a domain error in the log function because the gradient pushes
     #   it to a negative value inside the log
 
-    if analytical
+    if analytical   
         # Analytical gradient with parameter bounds
-        optimum = optimize(objective, grad!, lower, upper, params0, Fminbox(GradientDescent()))
+        grad2!(storage, x) = nLL_grad2(storage, x, ρstart, v, N, T)  # estimating σₐ²σᵤ²
+        optimum = optimize(objective2, grad2!, lower[2:3], upper[2:3], params0[2:3], Fminbox(METHOD_MAP[method]),
+                           Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1))
     else
         # Calculates gradient with parameter bounds
-        optimum = optimize(objective, lower, upper, params0, Fminbox(GradientDescent()))
-    end
+        optimum = optimize(objective2, lower[2:3], upper[2:3], params0[2:3], Fminbox(METHOD_MAP[method]),
+                           Optim.Options(show_trace = show_trace, show_every=1))
+    end 
 
     # Return the values
     LL = -optimum.minimum
-    ρ, σₐ², σᵤ² = optimum.minimizer
+    # ρ, σₐ², σᵤ² = optimum.minimizer
+    ρ, σₐ², σᵤ² = ρstart, optimum.minimizer...
     return (ρ, σₐ², σᵤ², LL)
 end
 
@@ -379,9 +405,13 @@ Return simulated data from the data generating process given paramters.
 """
 function dgp(ρ, σₐ², σᵤ², β, N, T;
     v₀ = 0.0, b₀ = nothing, μ₀ = 0, σ₀ = 10, random_seed::Integer = 1234)
+    @info "dgp()" ρ σₐ² σᵤ² β N T b₀ μ₀ σ₀ random_seed
     # Initial conditions
     Random.seed!(random_seed)
     b = 1  # unidentified scale parameter
+    # Start the emissions 200 years back when they were very small and take the last T years
+    T_final = T
+    T = T + 200
 
     # Get region-specific fixed effects if not given
     if b₀ === nothing
@@ -408,13 +438,13 @@ function dgp(ρ, σₐ², σᵤ², β, N, T;
         append!(vₜ, s / N)  # Aggregate shock = average of this period's shocks
     end
     
-    data = DataFrame(t = repeat(1:T, inner = N),
-        i = categorical(repeat(1:N, outer = T)),
-        b₀ᵢ = repeat(b₀, outer = T),
-        αₜ = repeat(αₜ, inner = N),
-        μᵢₜ = μᵢₜ,
-        vᵢₜ = vᵢₜ,
-        vₜ = repeat(vₜ[2:(T+1)], inner = N))
+    data = DataFrame(t = repeat(1:T_final, inner = N),
+        i = categorical(repeat(1:N, outer = T_final)),
+        b₀ᵢ = repeat(b₀, outer = T_final),
+        αₜ = repeat(last(αₜ,T_final), inner = N),
+        μᵢₜ = last(μᵢₜ, N * T_final),
+        vᵢₜ = last(vᵢₜ, N * T_final),
+        vₜ = repeat(last(vₜ, T_final), inner = N))
 
     # Generate the resulting emissions
     data.eᵢₜ = (1 / b) * (data.b₀ᵢ + β[1]*data.t + β[2]*data.t .^ 2 + data.vᵢₜ)
@@ -424,61 +454,6 @@ end;
 
 
 
-
-"""
-    mygls(formula, df, W, N)
-
-@param formula: StatsModels formula for the linear regression model
-@param df: dataframe with columns corresponding to the variables in formula
-@param W: nxn weighting matrix, n = length(df)
-@param N: number of units
-@returns :β, :βse, :yhat, :resid, :βvar, :HC0, :sandwich
-
-# References
-- Bruce Hansen Econometrics (2021) section 17.15 Feasible GLS
-- Greene Ed 7
-- rsusmel lecture notes: bauer.uh.edu/rsusmel/phd/ec1-11.pdf
-"""
-function mygls(formula, df, W, N)
-    println("Starting GLS")
-    X = StatsModels.modelmatrix(formula.rhs, df)
-    y = StatsModels.modelmatrix(formula.lhs, df)
-    XX = inv(X'X)
-    XWX = X' * inv(W) * X
-    NT, k = size(X)
-
-    β = inv(XWX) * (X' * inv(W) * y)
-    yhat = X * β
-    resid = y - yhat
-    XeX = X' * Diagonal(vec(resid .^ 2)) * X
-
-    # Variance estimators
-    # Hansen eq 4.16 (sandwich estimator)
-    s = XX * XWX * XX
-    s_root = diag(s) .^ 0.5
-    # White estimator (rsusmel pg 11)
-    HC0 = XX * XeX * XX
-    HC0_root = diag(HC0) .^ 0.5
-    # Greene (9-13)
-    βvar = inv(XWX) / (NT - N - k)
-    βse = diag(βvar) .^ 0.5
-
-    # TODO: Add Newey-West HAC SE estimator.
-    #   pg. 20 of bauer.uh.edu/rsusmel/phd/ec1-11.pdf
-
-    results = Dict(:β => β,
-        :βse => βse,
-        :yhat => yhat,
-        :resid => resid,
-        :βvar => βvar,
-        :HC0 => HC0_root,
-        :sandwich => s_root
-    )
-    # display(results)
-
-    # Go with βse for now
-    return(results)
-end
 
 
 
@@ -500,11 +475,15 @@ create_dataframe() = DataFrame(
     iterations = [], LL = [],
     V_norm_finalstep = [], V_norm_true=[], V = [],
     b₀₁ = [], b₀₂ = [], b₀₃ = [], b₀₄ = [], 
-    β₁ = [], β₂ = [],
+    β₁ = [], β₂ = [], method = [],
     runtime = [], notes=[]
 )
 
 
+"""If missing, return missing n-vector.
+    Otherwise, return rounded var vector with missing appended to end to 
+    fill out to n-vector.
+"""
 function optional_round(var, n, digits)
     if ismissing(var)
         if n == 1
@@ -515,19 +494,19 @@ function optional_round(var, n, digits)
     else
         var = round.(var, digits=digits)
         if length(var) < n
-            return vcat(var, repeat([missing], n-length(var)))
+            return vcat(var, repeat([missing], n - length(var)))
         end
         return var
     end
 end
 
 
-function add_row(df, seed, type, N, T;
+function add_row!(df, seed, type, N, T;
     b₀ᵢ = missing, β = missing,
     ρ=missing, σₐ²=missing, σᵤ²=missing, iterations=missing,
     LL=missing, V_norm_finalstep=missing, V_norm_true=missing, V=missing,
     params_start = missing, params_lower = missing, params_upper = missing,
-    runtime=missing, notes=missing, digits=3)
+    runtime=missing, notes=missing, digits=3, method = missing)
 
     if N == 2; b₀₁, b₀₂ = optional_round(b₀ᵢ, N, digits); b₀₃, b₀₄ = missing, missing;
     elseif N == 3; b₀₁, b₀₂, b₀₃ = optional_round(b₀ᵢ, N, digits); b₀₃ = missing;
@@ -537,10 +516,10 @@ function add_row(df, seed, type, N, T;
 
     ρ = optional_round(ρ, 1, 4)
     println(ρ)
-    σₐ² = optional_round(σₐ², 1, digits)
-    σᵤ² = optional_round(σᵤ², 1, digits)
+    σₐ² = optional_round(σₐ², 1, digits+4)
+    σᵤ² = optional_round(σᵤ², 1, digits+4)
 
-    LL = optional_round(LL, 1, 0)
+    LL = optional_round(LL, 1, 4)
     V_norm_finalstep = optional_round(V_norm_finalstep, 1, digits)
     V_norm_true = optional_round(V_norm_true, 1, digits)
 
@@ -551,13 +530,13 @@ function add_row(df, seed, type, N, T;
     push!(df, Dict(
     :seed=>seed, :type=>type, :N=>N, :T=>T,
     :b₀₁=>b₀₁, :b₀₂=>b₀₂, :b₀₃=>b₀₃, :b₀₄=>b₀₄,
-    :β₁=>β₁, :β₂=>β₂,
-    :ρ_estimate=>ρ, :σₐ²_estimate=>σₐ², :σᵤ²_estimate=>σᵤ², :LL=>LL, :iterations=>iterations,
-    :V_norm_finalstep=>V_norm_finalstep, :V_norm_true=>V_norm_true, :V=>V,
+    :β₁=>β₁,   :β₂=>β₂,
+    :ρ_estimate=>ρ,    :σₐ²_estimate=>σₐ²,    :σᵤ²_estimate=>σᵤ², :LL=>LL, :iterations=>iterations,
+    :V_norm_finalstep=>V_norm_finalstep,      :V_norm_true=>V_norm_true, :V=>V,
     :ρ_start=>ρ_start, :σₐ²_start=>σₐ²_start, :σᵤ²_start=>σᵤ²_start, 
     :ρ_lower=>ρ_lower, :σₐ²_lower=>σₐ²_lower, :σᵤ²_lower=>σᵤ²_lower, 
     :ρ_upper=>ρ_upper, :σₐ²_upper=>σₐ²_upper, :σᵤ²_upper=>σᵤ²_upper, 
-    :runtime=>runtime, :notes=>notes
+    :method=>method,   :runtime=>runtime,     :notes=>notes
     ))
 end
 
@@ -590,8 +569,21 @@ function write_estimation_df(df; N=2)
 end
 
 
+function write_data_df(df, data_type; N=4)
+    @transform!(df, type = data_type)
+    @transform!(df, N = N)
+    # Save dataframe
+    filepath = "../../data/temp/realdata_estimation_data.csv"
+    if isfile(filepath)
+        CSV.write(filepath, df, append=true)
+    else
+        CSV.write(filepath, df)
+    end
+end
+
+
 function read_data(N, T)
-    filepath = "../../data/sunny/clean/grouped_nation.1751_2014.csv"
+    filepath = "../../data/sunny/clean/grouped_allYears_nation.1751_2014.csv"
     df = @chain CSV.read(filepath, DataFrame) begin
         @rsubset :Year >= 1945 && :Year < 1945+T && :group ∈ ["USA","EU","BRIC","Other"][1:N]
         @transform(:group = get.(Ref(country2num), :group, missing))
@@ -612,7 +604,7 @@ function read_global_data(T)
         @transform(:group = get.(Ref(country2num), :group, missing))
         @select(:t = :time .- 44,
                 :i = categorical(:group),
-                :eᵢₜ = :CO2)
+                :eᵢₜ = :ebar)
         @orderby(:t, :i)
     end
 
@@ -653,10 +645,22 @@ function translate_gls(gls, N)
 end
 
 
-function save_ols(df::DataFrame, gls::Dict, N, T; data_type = "real data")
+function save_ols!(df::DataFrame, gls::Dict, N, T; data_type = "real data")
     β, b₀ᵢ = translate_gls(gls, N)
     note = "This is the first-pass OLS estimate of b₀ᵢ and β using real data (using GLS with the identity matrix)."
-    add_row(df, data_type, "First-pass OLS Estimate", N, T;
+    add_row!(df, data_type, "First-pass OLS Estimate", N, T;
+        b₀ᵢ=b₀ᵢ, β=β, iterations=0,
+        runtime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"),
+        notes=note
+    )
+end
+
+
+function save_simulated_params!(df::DataFrame, params, N, T; data_type = "simulated data")
+    β = params[:β]
+    b₀ᵢ = params[:b₀ᵢ]
+    note = "b₀ᵢ and β used to generate simulated data"
+    add_row!(df, data_type, "Parameters in simulation", N, T;
         b₀ᵢ=b₀ᵢ, β=β, iterations=0,
         runtime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"),
         notes=note
@@ -678,16 +682,18 @@ param(plist) = Dict(
 using Plots
 using ProgressMeter
 using CSV, Tables
-plotlyjs()
-Plots.PlotlyJSBackend()
+pyplot()
 function plot_ll_big_sigmas()
     # import Pkg; Pkg.add("PlotlyJS")
 
 
     # get some initial residuals
-    # σₐ² = σᵤ² = 50000.0^2;
+    σₐ² = σᵤ² = 10^11;
+    ρ = starting_params[:ρ];    β = starting_params[:β]
+    σₐ² = starting_params[:σₐ²];  σᵤ² = starting_params[:σᵤ²]
     N = 4; T = 60; ρ = 0.8785;
-    data = read_data(N, T)
+    # data = read_data(N, T)
+    data = dgp(ρ, σₐ², σᵤ², β, N, T; random_seed = 1)
     V = Diagonal(ones(length(data.eᵢₜ)))
     gls = mygls(@formula(eᵢₜ ~ 1 + i + t + t^2), data, V, N)
     v = vec(gls[:resid])
@@ -773,6 +779,101 @@ end
 # plot_ll_big_sigmas()
 
 
+function trend_vec(β)
+    boi = first(β, 4)
+    β = last(β, 2)
+end
+
+function plot_real_data()
+    N=4; T=60
+    data = read_data(N, T)
+    p = @df data plot(:t, :eᵢₜ, group=:i,
+        xlabel="year",
+        ylabel="emisssions",
+        title="Observed Regional Emissions")
+        
+    V = Diagonal(ones(length(data.eᵢₜ)))
+    linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2)
+    gls = mygls(linear_formula, data, V, N)
+    v = vec(gls[:resid])
+    data.v_est = v
+    p2 = @df data plot(:t, :v_est, group=:i,
+        xlabel="year",
+        ylabel="emisssions",
+        title="De-trended Observed Regional Emissions")
+    
+    # plot trend lines on top of data
+    data.e_detrend = gls[:yhat]
+    @df data plot!(p, :t, :e_detrend, group=:i)
+end
+
+function plot_simulated_data()
+    ρ = 0.8785
+    σₐ² = 10^10
+    σᵤ² = σₐ²
+    b₀ = [378017.714, -45391.353, 347855.764, 314643.98]
+    β = [30_000., -6.6]
+    N=4; T=60
+
+    # Generate simulated data from realistic parameter estimates
+    data = dgp(ρ, σₐ², σᵤ², β, N, T; v₀ = 10.0^6, b₀ = b₀)
+    p = @df data plot(:t, :eᵢₜ, group=:i,
+        xlabel="year",
+        ylabel="emisssions",
+        title="Simulated Regional Emissions")
+
+    # Demean and detrend
+    V = Diagonal(ones(length(data.eᵢₜ)))
+    linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2)
+    gls = mygls(linear_formula, data, V, N)
+    v = vec(gls[:resid])
+    data.v_est = v
+    p2 = @df data plot(:t, :v_est, group=:i,
+        xlabel="year",
+        ylabel="emisssions",
+        title="De-trended Simulated Regional Emissions")
+    
+    # plot trend lines on top of data
+    data.e_detrend = gls[:yhat]
+    @df data plot!(p, :t, :e_detrend, group=:i)
+end
+
+
+function plot_gradient(v)
+    ρ = 0.8785
+    σₐ²vec = ℯ.^(-8:1)
+    σᵤ² = 3.6288
+    N=4; T=60
+    # v = 2
+    temp(σₐ²) = ∂nLL∂y("σₐ²", ρ, σₐ², σᵤ², v, N, T)
+    grad = temp.(σₐ²vec)
+    p = plot(σₐ²vec, grad,
+        xlabel="σₐ²",
+        ylabel="gradient",
+        title="Gradient Values over σₐ² (σᵤ² = $σᵤ²)")
+    p
+
+    # Show gradient surface
+    σᵤ²vec = ℯ.^(1:0.5:3)
+    temp2(σₐ², σᵤ²) = ∂nLL∂y("σₐ²", ρ, σₐ², σᵤ², v, N, T)
+    X = repeat(reshape(σₐ²vec, 1, :), length(σᵤ²vec), 1)
+    Y = repeat(σᵤ²vec, 1, length(σₐ²vec))
+    Z = @showprogress map(temp2, X, Y)
+    p2 = surface(σₐ²vec, σᵤ²vec, Z, xscale = :log10, yscale = :log10,
+        xlabel="σα²",
+        ylabel="σμ²",
+        zlabel="σα² gradient",
+        title="Negative Log Likelihood Gradient")
+
+    x = 1:4
+    y = 5:10
+    X = repeat(reshape(x,1,:), length(y), 1)
+    Y = repeat(y, 1, length(x))
+    Z = map((x,y) -> x^2 + y^2, X, Y)
+    surface(x,y, Z)
+
+end
+
 #######################################################################
 #           Iterate to convergence!
 #######################################################################
@@ -787,7 +888,7 @@ function estimate_sigmas(N, T, starting_params;
         analytical = true)
     println()
     display([N,T,starting_params])
-    @info "Starting estimation with N,T:" N T starting_params n_seeds iteration_max convergence_threshold
+    @info "estimate_sigmas()" N T starting_params n_seeds iteration_max convergence_threshold
     df = create_dataframe()
     # Generate different data to see how convergence behaves
     println("\n", "_"^n_seeds)
@@ -804,10 +905,10 @@ function estimate_sigmas(N, T, starting_params;
         # True values from DGP
         b₀ᵢ = unique(data.b₀ᵢ)
         V_true = Σ(ρ, σₐ², σᵤ², N, T)
-        add_row(df, seed, "True", N, T; b₀ᵢ=b₀ᵢ[:], β=β, ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ², LL=LL)
+        add_row!(df, seed, "True", N, T; b₀ᵢ=b₀ᵢ[:], β=β, ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ², LL=LL)
         # Observed sample variance from DGP
         σ_observed = get_sample_variances(data)
-        add_row(df, seed, "Sample", N, T; σₐ²=σ_observed[1], σᵤ²=σ_observed[2])
+        add_row!(df, seed, "Sample", N, T; σₐ²=σ_observed[1], σᵤ²=σ_observed[2])
         # Initialize the variance matrix (identity matrix = OLS in first iteration)
         V = Diagonal(ones(length(data.eᵢₜ)))
         # Linear GLS formula
@@ -831,7 +932,7 @@ function estimate_sigmas(N, T, starting_params;
         
         β = gls[:β][3:4]; b₀ᵢ[1] = gls[:β][1]; b₀ᵢ[2] = sum(gls[:β][1:2]);
         Vnorm_true = norm(V_true - V)
-        add_row(df, seed, "Estimated (calc grad, bounds)", N, T;
+        add_row!(df, seed, "Estimated (calc grad, bounds)", N, T;
             b₀ᵢ=b₀ᵢ, β=β, ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ², LL=LL, iterations=i-1,
             V_norm_finalstep=Vnorm, V_norm_true=Vnorm_true,
             runtime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS")
@@ -855,39 +956,50 @@ function estimate_dgp_params(N, T, starting_params;
         params_lower_bound = [1e-4, 1e-4, 1e-4],
         params_upper_bound = [1 - 1e-4, Inf, Inf],
         data = missing, print_results = false, data_type = "real data",
-        analytical = true)
+        analytical = true, method = "gradient decent", sim_params=missing)
     println("Estimating parameters of real data using iteration method.")
     println(N, " ", T, " ", starting_params)
+    @info "estimate_dgp_params()" N T starting_params iteration_max convergence_threshold params_lower_bound params_upper_bound print_results data_type analytical method
     # dataframe to save to CSV
     df = create_dataframe()
+    df2 = DataFrame(σₐ²=[],  σᵤ²=[], LL=[], grad_a=[], grad_u=[])
     # Load data, or use provided simulated data
     if ismissing(data)
         data = read_data(N, T)
+    end
+    if data_type == "simulated data"
+        save_simulated_params!(df, sim_params, N, T)
     end
     # Initialize the variance matrix (identity matrix = OLS in first iteration)
     V = Diagonal(ones(length(data.eᵢₜ)))
     # Linear GLS formula
     linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2)
-
+    v = zeros(N*T)
 
     # Starting parameter values
     ρ = starting_params[:ρ]; σₐ² = starting_params[:σₐ²];  σᵤ² = starting_params[:σᵤ²]
     Vnorm = Inf; i = 1; LL = -Inf
     while Vnorm > convergence_threshold && i <= iteration_max
         println("\nStarting iteration ", i)
+        @info "Starting iteration $i"
         # GLS to estimate b₀ᵢ and β; get residuals v
         global gls = mygls(linear_formula, data, V, N)
         v = vec(gls[:resid])
         if i == 1
-            save_ols(df, gls, N, T; data_type)
+            save_ols!(df, gls, N, T; data_type)
         end
 
         # ML to get parameter estimates ρ, σₐ², σᵤ²
-        ρ, σₐ², σᵤ², LL = mymle_3(ρ, σₐ², σᵤ², v, N, T;
+        ρ, σₐ², σᵤ², LL = mymle_2(ρ, σₐ², σᵤ², v, N, T;
                                 lower=params_lower_bound, upper=params_upper_bound,
-                                analytical=analytical)
+                                analytical=analytical, method=method)
+        
         Vold = V
         V = Σ(ρ, σₐ², σᵤ², N, T)
+        # Save LL and grad values to dataframe
+        gradvec = nLL_grad2([0.,0.], [σₐ², σᵤ²], ρ, v, N, T)
+        append!(df2, DataFrame(σₐ²=σₐ²,  σᵤ²=σᵤ², LL=LL, grad_a=[gradvec[1]], grad_u=[gradvec[2]]))
+        # Convergence criteria for next loop
         Vnorm = norm(Vold - V)
         println("Vnorm: ", Vnorm)
         println("LL: ", LL, "  ρ: ", ρ, "  σₐ²: ", σₐ², "  σᵤ²: ", σᵤ²)
@@ -896,7 +1008,7 @@ function estimate_dgp_params(N, T, starting_params;
     
     β, b₀ᵢ = translate_gls(gls, N)
     note = "Estimated parameters after convergence of the iterative method"
-    add_row(df, data_type, "Estimated", N, T;
+    add_row!(df, data_type, "Estimated", N, T;
         b₀ᵢ=b₀ᵢ, β=β, ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ², LL=LL, iterations=i-1,
         V_norm_finalstep=Vnorm,
         params_start = [starting_params[:ρ], starting_params[:σₐ²], starting_params[:σᵤ²]],
@@ -904,17 +1016,32 @@ function estimate_dgp_params(N, T, starting_params;
         runtime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"),
         notes=note
     )
-    add_row(df, "", "blank line", N, T; notes="Row intentionally left blank for visual reasons.")
+    add_row!(df, "", "", N, T; notes="Row intentionally left blank for visual reasons.")
 
     # Save dataframe of results
     write_estimation_df(df; N=N)
-    println(note)
-    println("DONE estimating parameters of real data.")
+    write_data_df(df2, data_type; N=N)
+    println("DONE estimating parameters of $data_type.")
+
 
     # print results
     if print_results
         println(df)
     end
+    return v
+end
+
+
+function get_results_σstarts(date)
+    filepath = "../../data/temp/realdata_estimation_results_log_$date.csv"
+    df = @chain CSV.read(filepath, DataFrame,
+            select=["type", "V_norm_finalstep", "??\xb2_start", "??\xb2_start_1"],
+            footerskip=184) begin
+        @rsubset :V_norm_finalstep == 0
+        @select(αstart=cols(Symbol("??\xb2_start")),
+                μstart=cols(Symbol("??\xb2_start_1")))
+    end
+    return(df)
 end
 
 
@@ -937,23 +1064,28 @@ function test_dgp_params_from_real()
     N = 4; T = 60  # 1945-2005
     # parameters estimated from data
     if N == 2
-        b₀ = [200000., 560000.]  # from test_starting_real_estimation()
-        β = [22000., -100.]      # from test_starting_real_estimation()
+        b₀ = [200_000., 560_000.]  # from test_starting_real_estimation()
+        β = [22_000., -100.]      # from test_starting_real_estimation()
     elseif N == 4
-        b₀ = [378017.714, -45391.353, 347855.764, 314643.98]  # from test_starting_real_estimation() for n=4
-        β = [26518., -6.6]      # from test_starting_real_estimation() for n=4
+        # b₀ = [378_017.714, -45_391.353, 347_855.764, 314_643.98]
+        # β = [26_518., -6.6]
+        # β = [32_574.7, -108.555]
+        b₀ = [3.146, -0.454, 3.78, 3.479]  # from test_starting_real_estimation() for n=4, after changing emissions units to 10,000 tons
+        β = [0.265, 0] # from test_starting_real_estimation() for n=4
     end
-    ρ = 0.8785             # from r-scripts/reproducting_andy.R  -> line 70 result2
-    σₐ² = 1.035  # 40               # from test_starting_real_estimation()
-    σᵤ² = 16.224  # 265              # from test_starting_real_estimation()
-    σₐ² = 50000.0^2  # 40               # from comparing simulated to real data
-    σᵤ² = 50000.0^2  # 265              # from comparing simulated to real data
+    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
+    # σₐ² = 1.035  # 40               # from test_starting_real_estimation()
+    # σᵤ² = 16.224  # 265              # from test_starting_real_estimation()
+    # σₐ² = 10^10.56  # 40               # from comparing simulated to real data
+    # σᵤ² = 10^10.56   # 265              # from comparing simulated to real data
+    σₐ² = 3.6288344  # from test_starting_real_estimation()
+    σᵤ² = 3.6288344  # from test_starting_real_estimation()
     params = Dict(:b₀ => b₀, :β => β, :ρ => ρ, :σₐ² => σₐ², :σᵤ² => σᵤ²)
+    @info "test_dgp_params_from_real()" params
 
     # Generate simulated data from realistic parameter estimates
-    simulated_data = dgp(params[:ρ], params[:σₐ²], params[:σᵤ²], params[:β], N, T;
-        v₀ = 0.0, b₀ = params[:b₀])
-    println(params)
+    simulated_data = dgp(ρ, σₐ², σᵤ², β, N, T; v₀ = 0.0, b₀ = b₀)
+    println("ρ = $ρ,  σₐ² = $σₐ²,  σᵤ² = $σᵤ²,  β = $β,  N = $N,  T = $T,  b₀ = $b₀")
     filepath = "../../data/temp/simulated_data N$N T$T rho$ρ sig_a$σₐ² sig_u$σᵤ².csv"
     CSV.write(filepath, simulated_data)
     # @df simulated_data plot(:t, :eᵢₜ, group = :i)
@@ -971,6 +1103,8 @@ function test_dgp_params_from_real()
 
     lower_bounds1 = [0.878, 1e-4, 1e-4]
     upper_bounds1 = [0.879, Inf, Inf]
+    lower_bounds2 = [0.05, 1e-4, 1e-4]
+    upper_bounds2 = [0.99, Inf, Inf]
  
     # @time estimate_dgp_params(N, T, param(plist1); data=simulated_data,
     #     params_lower_bound=lower_bounds1,
@@ -980,11 +1114,13 @@ function test_dgp_params_from_real()
     #     params_lower_bound=lower_bounds1,
     #     params_upper_bound=upper_bounds1)
 
+    # Estimate just σₐ², σᵤ²; setting ρ = ρstart
+    sim_params = Dict(:β => β, :b₀ᵢ => b₀)
     @time estimate_dgp_params(N, T, param(plist10); data=simulated_data,
         params_lower_bound=lower_bounds1,
         params_upper_bound=upper_bounds1,
-        print_results = true, data_type = "simulated data",
-        analytical=true)
+        print_results = false, data_type = "simulated data",
+        analytical=true, sim_params)
 
     # @time estimate_dgp_params(N, T, param(plist4); data=simulated_data,
     #     params_lower_bound=lower_bounds1,
@@ -996,14 +1132,16 @@ function test_dgp_params_from_real()
 
 end
 # test_dgp_params_from_real()
-
-# Takes about 1.5 hours to run and drives sigma_a to 0
+# 2022-09-13 Takes about 1.5 hours to run and drives sigma_a to 0
+# 2022-10-09
+# 2022-12-15
 
 
 function test_starting_real_estimation()
     println("Starting series of estimations using real data.")
     # Starting parameters for the search ρ, σₐ², σᵤ²
-    plist1 = [0.8785, 1, 1]
+    ρ = 0.8785
+    plist1 = [ρ, 1, 1]
     plist2 = [0.1, 0.1, 0.1]
     plist3 = [0.1, 10, 10]
     plist4 = [0.1, 100, 100]
@@ -1012,19 +1150,81 @@ function test_starting_real_estimation()
     plist7 = [0.99, 10, 10]
     plist8 = [0.99, 100, 100]
     plist9 = [0.99, 1000, 1000]
-    plist10 = [0.8785, 50000^2, 50000^2]
+    plist10 = [ρ, 50000^2, 50000^2]
+    plist11 = [ρ, 10^10.5, 10^10.5]
+    plist12 = [ρ, 1.0000000000953714e-10, 3.628834416768247]
+    plist13 = [ρ, 10, 10]
+    plist14 = [ρ, 0.01, 0.01]
 
-    lower_bounds1 = [0.878, 1e-4, 1e-4]
+    lower_bounds1 = [0.878, 1e-10, 1e-10]
     upper_bounds1 = [0.879, Inf, Inf]
-    N = 2;
+    N = 4;
     T = 60;
     # @time estimate_dgp_params(N, T, param(plist1);
     #     params_lower_bound=lower_bounds1,
     #     params_upper_bound=upper_bounds1)
+    plist = [ρ, 0.01, 3]
+    v = @time estimate_dgp_params(N, T, param(plist);
+            params_lower_bound=lower_bounds1,
+            params_upper_bound=upper_bounds1,
+            analytical=true, method = "BFGS",
+            iteration_max = 100)
 
-    @time estimate_dgp_params(4, T, param(plist10);
-        params_lower_bound=lower_bounds1,
-        params_upper_bound=upper_bounds1)
+    date = "2022-12-15"
+    austarts = get_results_σstarts(date)
+    for row in eachrow(df)
+        plist = [ρ, row.αstart, row.μstart]
+        v = @time estimate_dgp_params(N, T, param(plist);
+                params_lower_bound=lower_bounds1,
+                params_upper_bound=upper_bounds1,
+                analytical=true, method = "BFGS",
+                iteration_max = 100)
+    end
+
+    austarts = [[25, 10], [50, 1000], [50, 0.1]]
+    methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS", "momentum gradient", "accelerated gradient"]
+    for au in austarts, method in methods
+        plist = [ρ, au[1], au[2]]
+        v = @time estimate_dgp_params(N, T, param(plist);
+                params_lower_bound=lower_bounds1,
+                params_upper_bound=upper_bounds1,
+                analytical=true, method = method,
+                iteration_max = 100)
+    end
+
+    # vals = [0.01, 0.1, 1, 3, 6, 10, 25, 50, 100, 1000]
+    # for a in vals, u in vals
+    #     plist = [ρ, a, u]
+    #     v = @time estimate_dgp_params(N, T, param(plist);
+    #             params_lower_bound=lower_bounds1,
+    #             params_upper_bound=upper_bounds1,
+    #             analytical=true, method = "BFGS")
+    # end
+
+    # @time estimate_dgp_params(N, T, param(plist1);
+    #     params_lower_bound=lower_bounds1,
+    #     params_upper_bound=upper_bounds1,
+    #     analytical=true, method = "LBFGS")
+
+    # @time estimate_dgp_params(N, T, param(plist1);
+    #     params_lower_bound=lower_bounds1,
+    #     params_upper_bound=upper_bounds1,
+    #     analytical=true, method = "gradient decent")
+
+    # @time estimate_dgp_params(N, T, param(plist1);
+    #     params_lower_bound=lower_bounds1,
+    #     params_upper_bound=upper_bounds1,
+    #     analytical=true, method = "conjugate gradient")
+
+    # @time estimate_dgp_params(N, T, param(plist1);
+    #     params_lower_bound=lower_bounds1,
+    #     params_upper_bound=upper_bounds1,
+    #     analytical=true, method = "momentum gradient")
+
+    # @time estimate_dgp_params(N, T, param(plist1);
+    #     params_lower_bound=lower_bounds1,
+    #     params_upper_bound=upper_bounds1,
+    #     analytical=true, method = "accelerated gradient")
     # results written in "/data/temp/realdata_estimation_results_log.csv"
 
     # @time estimate_dgp_params(N, T, param(plist2))
@@ -1042,8 +1242,10 @@ function test_starting_real_estimation()
     # @time estimate_dgp_params(N, T, param(plist8))
 
     # @time estimate_dgp_params(N, T, param(plist9))
+    return v
 end
-test_starting_real_estimation()
+v = test_starting_real_estimation()
+# plot_gradient(v)
 # about 2 minutes to finish
 
 
@@ -1127,7 +1329,41 @@ function test_estimation()
     end
 end
 
+function check_fixed_effects()
+    # Define paramters with zero error variance to get smooth data
+    N, T = 4, 60
+    b₀ = [3.146, -0.454, 3.78, 3.479]  # from test_starting_real_estimation() for n=4, after changing emissions units to 10,000 tons
+    β = [0.265, 0] # from test_starting_real_estimation() for n=4
+    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
+    σₐ² = 0  # from test_starting_real_estimation()
+    σᵤ² = 0  # from test_starting_real_estimation()
+    @info "check_fixed_effects()"     b₀ β ρ σₐ² σᵤ²
+
+    # Generate simulated data
+    simulated_data = dgp(ρ, σₐ², σᵤ², β, N, T; v₀ = 0.0, b₀ = b₀)
+
+    # Estimate fixed effects
+    plist = [ρ, σₐ², σᵤ²]
+    lower_bounds = [0.878, 1e-4, 1e-4]
+    linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2)
+    V = Diagonal(ones(length(simulated_data.eᵢₜ)))
+    gls = mygls(linear_formula, simulated_data, V, N)
+    β2, b₀ᵢ = translate_gls(gls, N)
+
+    # Predict values using estimated
+    simulated_data2 = dgp(ρ, σₐ², σᵤ², β2, N, T; v₀ = 0.0, b₀ = b₀ᵢ)
+
+    # Compare differences
+    maximum(abs.(simulated_data.eᵢₜ - simulated_data2.eᵢₜ))
+
+    # Compare plots
+    @df simulated_data plot(:t, :eᵢₜ, group = :i)
+    @df simulated_data2 plot!(:t, :eᵢₜ, group = :i)
+end
+
+
 # Close logging file
+@info "End" datetime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS")
 close(io)
 
 
@@ -1176,7 +1412,7 @@ println(nLLgrad)
 
 
 
-Gls: could decompose using Cholskey and augment the data than feed it into glm 
+GLS: could decompose using Cholskey and augment the data than feed it into glm 
 linear model and use CovarianceMatrices from https://gragusa.org/code/ to get HAC SEs
 M.diagonalize()
 
