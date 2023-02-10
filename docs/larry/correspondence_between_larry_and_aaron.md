@@ -1,3 +1,34 @@
+# 2023-01-16
+On Thu, Dec 22, 2022 at 10:39 PM Larry S. KARP <karp@berkeley.edu> wrote:
+
+Hello Aaron,
+
+Thanks for all of this work!  Can I ask you to do the following (roughly in order of importance)
+
+1) We had discussed an experiment that you might have done early on in this process ... . Use simulated data where sigma_{alpha} = sigma_{mu} and see if either of our estimation methods (ML and the "disjoint" method) can recover the correct parameters.  For this experiment I think that the region specific effects can be ignored. If either estimation method can recover reasonable estimates of the sigmas and the rho, then we can conclude that the empirical results you have generated are telling us something about the world: sigma_a really is approximately zero.  But if neither estimation method can recover the parameters, then I guess that we can't conclude anything from the data.  (But I sure would like to know why the estimation fails!)
+
+> Aaron: I did some simulations of the rho estimation that I didn't include in the report. I'll add those to the next report -- the general finding being that the estimate of rho is biased downward for most simulated values of rho, but the true simulated rho value is almost always in the 95% confidence interval. The estimate of rho has a strong interplay with the time trend parameters. My main concern here is the ripple effect of the rho, time trend, and regional fixed effects estimations. If those are biased, I generate incorrect regression errors. The errors are the only data used to estimate the sigmas and generate the likelihood function. So my recent focus has been to try to ensure both the rho and regional fixed effects estimations are as least biased as possible. I've been frustrated by what seems like a simple estimation generating biased results for the rho, time trend, and regional fixed effects. I've been looking through the literature and it seems that the biasedness of autocorrelation coefficient estimators is known and I haven't found a good source on correcting that bias (please let me know if you have a good source and I'll keep looking). I'll clean up my simulations and send you results to document the bias that I see.
+> > Larry: I was not aware of this problem, so I don't have any suggestions for a fix. I see that biases estimates produce biased residuals, but I have no idea why that would create the strange results we have seen.
+
+>I'll then work on doing a write up of the sigma simulation estimations for both the ML and disjoint methods, where sigma_alpha = sigma_mu. I'll ignore regional fixed effects and time trend and just generate simulated data based on generated nu's (from generated alpha's and mu's).
+>> Larry: Great, I am really interested in seeing a systematic treatment of simulations.  I think that we have seen some examples earlier, but not enough detail to tell a story.  It would be great to understand what is going on.  But if the simulations show that the estimation methods do a reasonable job, then we can conclude that the finding that sigma_a = 0 is a real feature of the data.  And if the simulations show that the estimation methods produce sigma_a = 0 even when the true value is positive, then we know that there is a problem with the estimation methods, and we cannot trust them.  Ideally, we could find an estimation method that does  work, but that may be too much to ask.  At this point I would be (more or less) satisfied with either conclusion: (i) the methods work, and the true sigma_a = 0; or (ii) the methods do not work, so we really cannot say anything.
+
+2) Thanks for the write-up. Could you prepare a "replication appendix" for the two estimation methods, a folder that (down the road) I can include with a submission.  Please be painstaking with this.  This would include a latex document explaining everything (with equation references) and a tediously documented code.  I will eventually revise the latex appendix, but I will  not be able to check the code in any useful way. However, it is a real possibility that a referee would look at it and attempt to replicate the results.  This might be years from now, when you have long since moved on. It would be a big drag if at that time things got held up because the referee could not implement the code. 
+
+>Aaron: I'll start working on the replication appendix! I'll reference equation numbers from the October 13, 2022 draft of the paper.
+
+3) I'm glad that you mentioned the MOM. About 18 months ago I prepared a document (attached) to explain the estimation problem to a "statistical consultant" (a grad student in stat); but I'm afraid that he was not much use.  The first method that I suggested was a MOM estimator.  I used two possible MOM estimators in sections 3.1 and 3.2. (These are slightly different because in the first alternative I divided by an estimate of sigma^2 and in the second I did not.)  It seems straightforward to write down the moment condition -- see eqn 4 in the attachment, and the unnumbered equation on the next page for the second alternative.  However, I do not know the theory, so what seems reasonable to me might  be simply wrong. Also, because the moment condition is a matrix equation, it was not obvious what maximand to use.  So I picked the Frobenious norm.  
+
+It would be great if you would implement one or both of the MOM estimators (and also check them using simulated data as in item 1).
+
+>Aaron: After points 1 and 2, I'll start working on the MOM estimators and test using some simulations.
+>>Larry: That would be great. 
+
+
+
+
+
+
 # 2022-10
 > On Wed, Oct 12, 2022, 8:49 PM Larry S. KARP <karp@berkeley.edu> wrote:
 

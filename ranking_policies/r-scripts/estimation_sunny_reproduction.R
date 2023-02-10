@@ -15,8 +15,8 @@
 
 
 ## PACKAGES ====================================================================
-#install.packages("dummies")
-library(dummies)
+install.packages("fastDummies")
+library(fastDummies)
 
 
 ## PREPARE DATA ================================================================

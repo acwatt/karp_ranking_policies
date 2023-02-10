@@ -1,0 +1,3 @@
+Look at derivative of LL:
+- Larry took the derivative of v'V^-1v, holding v constant. But v is the GLS regression errors, which are a function of the parameters.
+- try to derive the derivative of v wrt parameters

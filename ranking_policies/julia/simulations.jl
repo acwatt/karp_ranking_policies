@@ -4,7 +4,7 @@ description: Estimations on simulated data to test estimation issues for Larry
     Karp's "Ranking Policies" project
 author: Aaron C Watt (UCB Grad Student, Ag & Resource Econ)
 email: aaron@acwatt.net
-created: 
+created: 2022-08-01
 last update: 
 notes:
  - Andy Hultgree

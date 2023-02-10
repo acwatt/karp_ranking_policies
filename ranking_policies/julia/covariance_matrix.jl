@@ -71,7 +71,7 @@ country2num = Dict("USA"=>1, "EU"=>2, "BRIC"=>3, "Other"=>4)
 #######################################################################
 #           Equation Functions
 #######################################################################
-
+#------------------- COVARIANCE MATRIX ---------------------
 # Building the covariance matrix for the N=2, T=3 case
 # Not needed anymore but nice to keep for tests
 N = 2;
@@ -91,25 +91,38 @@ function Σ(ρ, σₐ², σᵤ²)
 end
 
 
-
+# Definitions from Eq. (2), (3), (4)
 # Building the covariance matrix for general N, T
 # Indicator functions
+"""eq (2) of 2021-12 writeup"""
 ι(i, j) = (i == j ? 1 : 0)
+"""eq (2) of 2021-12 writeup"""
 κ(s) = (s == 0 ? 0 : 1)
-χ(ρ, i, j, s, N) = (1 - κ(s)) * ι(i, j) + κ(s) * ρ^s / N + ρ^(2 + s) / (N * (1 - ρ))
+"""eq (3) of 2021-12 writeup"""
+χ(ρ, i, j, s, N) = (1 - κ(s)) * ι(i, j) + κ(s) * ρ^s / N + ρ^(2 + s) / (N * (1 - ρ^2))  # realized the last ρ wasn't squared (2023-01-16)
 
 
-# Element of the covariance matrix: Σ = E[vᵢₜvⱼₜ₊ₛ]
+"""Element of the covariance matrix: Σ = E[vᵢₜvⱼₜ₊ₛ] - eq (4) of 2021-12 writeup"""
 Evᵢₜvⱼₜ₊ₛ(ρ, σₐ², σᵤ², i, j, s, N; b = 1) = 1 / b^2 * (σₐ² * ρ^s / (1 - ρ^2) + χ(ρ, i, j, s, N) * σᵤ²)
 
-# i,t, j,t+s Elements of ∂Σ/∂y for y ∈ {ρ, σₐ², σᵤ²}
+
+
+
+#------------------- SYMBOLIC COVARIANCE MATRIX ---------------------
+# Moved to symbolic_covariance_matrix.jl
+
+
+#------------------- COVARIANCE MATRIX DERIVATIVE ---------------------
+
+"""i,t, j,t+s Elements of ∂Σ/∂y for y ∈ {ρ, σₐ², σᵤ²} - Eq (8) of 2021-12 writeup"""
 ∂Σ∂ρ(ρ, σₐ², σᵤ², i, j, s, N) = ρ^(s-1) / N / (ρ^2 - 1)^2 * (
     (s*κ(s) + (2 + s - 2*s*κ(s))*ρ^2 + (s*κ(s) - s)*ρ^4)*σᵤ² +
-    (N*(2-s)*ρ^2 + N*s)*σₐ²
+    ((2-s)*N*ρ^2 + N*s)*σₐ²
 )
 
+"""Eq (9) of 2021-12 writeup"""
 ∂Σ∂σₐ²(ρ, σₐ², σᵤ², i, j, s, N) = ρ^s / (1 - ρ^2)
-
+"""Eq (9) of 2021-12 writeup"""
 ∂Σ∂σᵤ²(ρ, σₐ², σᵤ², i, j, s, N) = χ(ρ, i, j, s, N)
 
 derivatives = Dict("ρ" => ∂Σ∂ρ, "σₐ²" => ∂Σ∂σₐ², "σᵤ²" => ∂Σ∂σᵤ²)
@@ -130,7 +143,7 @@ Return the residuals' analytical N*TxN*T covariance matrix given values of param
 @param N: int>1, number of units/regions
 @param T: int>1, number of time periods
 """
-function Σ(ρ, σₐ², σᵤ², N, T; verbose = false)
+function Σ(ρ::Real, σₐ²::Real, σᵤ²::Real, N, T; verbose = false)
     # Initalize matrix of 0s
     V = zeros(N * T, N * T)
 
@@ -158,6 +171,7 @@ function Σ(ρ, σₐ², σᵤ², N, T; verbose = false)
     end
     return (V)
 end
+
 
 
 """
@@ -256,21 +270,22 @@ METHOD_MAP = Dict("gradient decent" => GradientDescent(),
                   "BFGS" => BFGS(),
                   "LBFGS" => LBFGS(),
                   "momentum gradient" => MomentumGradientDescent(),
-                  "accelerated gradient" => AcceleratedGradientDescent())
+                  "accelerated gradient" => AcceleratedGradientDescent()
+)
 
 """
     mymle(ρstart, σₐ²start, σᵤ²start, v)
 
-Return likelihood-maximizing values of ρ, σₐ², and σᵤ².
-Given vector of residuals, minimize the 
-@param ρstart: float, starting value of ρ
-@param σₐ²start: float, starting value of σₐ²
-@param σᵤ²start: float, starting value of σᵤ²
-@param v: Nx1 vector of residuals
-@param N: int>1, number of units/regions
-@param T: int>1, number of time periods
-@param lower: float 3-vector, lower bounds for parameters ρ, σₐ², σᵤ²
-@param upper: float 3-vector, upper bounds for parameters ρ, σₐ², σᵤ²
+    Return likelihood-maximizing values of ρ, σₐ², and σᵤ².
+    Given vector of residuals, minimize the 
+    @param ρstart: float, starting value of ρ
+    @param σₐ²start: float, starting value of σₐ²
+    @param σᵤ²start: float, starting value of σᵤ²
+    @param v: Nx1 vector of residuals
+    @param N: int>1, number of units/regions
+    @param T: int>1, number of time periods
+    @param lower: float 3-vector, lower bounds for parameters ρ, σₐ², σᵤ²
+    @param upper: float 3-vector, upper bounds for parameters ρ, σₐ², σᵤ²
 """
 function mymle_3(ρstart, σₐ²start, σᵤ²start, v, N, T;
     lower = [1e-4, 1e-4, 1e-4], upper = [1 - 1e-4, Inf, Inf], analytical = true, method = "gradient decent",
@@ -353,7 +368,7 @@ function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
     objective2(σₐ²σᵤ²) = nLL(ρstart, σₐ²σᵤ²[1], σₐ²σᵤ²[2], v, N, T)
 
     # Minimize over parameters
-    println("Analytical gradient: ", nLL_grad2([0.,0.], params0[2:3], ρstart, v, N, T))
+    # println("Analytical gradient: ", nLL_grad2([0.,0.], params0[2:3], ρstart, v, N, T))
     # println("Fin. Diff. gradient: ", nLL_grad_fidiff2!([0.,0.], params0[2:3], ρstart, v, N, T))
 
     # Calculates gradient with no parameter bounds
@@ -384,6 +399,34 @@ function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
     return (ρ, σₐ², σᵤ², LL)
 end
 
+function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
+                θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4), θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf), 
+                analytical = true, method = "gradient decent", show_trace=false
+                )
+    println("Starting MLE with $ρstart, $σₐ²start, $σᵤ²start")
+    @info "mymle_2()" ρstart σₐ²start σᵤ²start lower upper analytical method
+
+    # Function of only parameters (given residuals v)
+    objective2(σₐ²σᵤ²) = nLL(ρstart, σₐ²σᵤ²[1], σₐ²σᵤ²[2], v, N, T)
+
+    if analytical   
+        # Analytical gradient with parameter bounds
+        grad2!(storage, x) = nLL_grad2(storage, x, ρstart, v, N, T)  # estimating σₐ²σᵤ²
+        optimum = optimize(objective2, grad2!, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [σₐ²start, σᵤ²start], Fminbox(METHOD_MAP[method]),
+                           Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1))
+    else
+        # Calculates gradient with parameter bounds
+        optimum = optimize(objective2, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [σₐ²start, σᵤ²start], Fminbox(METHOD_MAP[method]),
+                           Optim.Options(show_trace = show_trace, show_every=1))
+    end 
+
+    # Return the values
+    LL = -optimum.minimum
+    # ρ, σₐ², σᵤ² = optimum.minimizer
+    ρ, σₐ², σᵤ² = ρstart, optimum.minimizer...
+    return (ρ, σₐ², σᵤ², LL)
+end
+
 
 
 
@@ -392,16 +435,16 @@ end
 """
     dgp(ρ, σₐ², σᵤ², β, N, T; v₀, μ₀, σ₀)
 
-Return simulated data from the data generating process given paramters.
-@param ρ: float in [0,1], decay rate of AR1 emissions process
-@param σₐ²: float >0, SD of year-specific emissions shock 
-@param σᵤ²: float >0, SD of region-year-specific emissions shock
-@param β: 2-vector, linear and quadratic time trend parameters
-@param v₀: float, initial emissions shock of AR1 process (v_t where t=0)
-@param b₀: Nx1 array of floats, b₀ᵢ for different regions i in {1, ..., N}
-    if not given, then μ₀ and σ₀ are used to pull b₀ᵢ from a random distribution
-@param μ₀: float, mean of region-specific fixed effect distribution (b₀ᵢ)
-@param σ₀: float >0, SD of region-specific fixed effect distribution (b₀ᵢ)
+    Return simulated data from the data generating process given paramters.
+    @param ρ: float in [0,1], decay rate of AR1 emissions process
+    @param σₐ²: float >0, SD of year-specific emissions shock 
+    @param σᵤ²: float >0, SD of region-year-specific emissions shock
+    @param β: 2-vector, linear and quadratic time trend parameters
+    @param v₀: float, initial emissions shock of AR1 process (v_t where t=0)
+    @param b₀: Nx1 array of floats, b₀ᵢ for different regions i in {1, ..., N}
+        if not given, then μ₀ and σ₀ are used to pull b₀ᵢ from a random distribution
+    @param μ₀: float, mean of region-specific fixed effect distribution (b₀ᵢ)
+    @param σ₀: float >0, SD of region-specific fixed effect distribution (b₀ᵢ)
 """
 function dgp(ρ, σₐ², σᵤ², β, N, T;
     v₀ = 0.0, b₀ = nothing, μ₀ = 0, σ₀ = 10, random_seed::Integer = 1234)
@@ -421,7 +464,7 @@ function dgp(ρ, σₐ², σᵤ², β, N, T;
     # Random shocks
     αₜ = rand(Distributions.Normal(0, σₐ²^0.5), T)
     μᵢₜ = rand(Distributions.Normal(0, σᵤ²^0.5), N * T)
-    println("σₐ²: ", σₐ², "   σᵤ²: ", σᵤ²)
+    println("True DGP values: σₐ²: ", σₐ², "   σᵤ²: ", σᵤ²)
     # assume μᵢₜ is stacked region first:
     # i.e. (i,t)=(1,1) (i,t)=(2,1) ... (i,t)=(N-1,T)  (i,t)=(N,T)
 
@@ -450,6 +493,13 @@ function dgp(ρ, σₐ², σᵤ², β, N, T;
     data.eᵢₜ = (1 / b) * (data.b₀ᵢ + β[1]*data.t + β[2]*data.t .^ 2 + data.vᵢₜ)
     return (data)
 end;
+function dgp(θ, N, T, seed)
+    # Helper function for estimation testing on no-trend simulations
+    β = [0, 0]
+    b₀ = repeat([0], N)
+    return dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T, b₀ = b₀, random_seed=seed)
+end
+
 
 
 
@@ -478,6 +528,7 @@ create_dataframe() = DataFrame(
     β₁ = [], β₂ = [], method = [],
     runtime = [], notes=[]
 )
+
 
 
 """If missing, return missing n-vector.
@@ -541,6 +592,29 @@ function add_row!(df, seed, type, N, T;
 end
 
 
+create_simulation_results_df() = DataFrame(
+    # This function determines the order of the columns
+    seed = Int64[], N = Int64[], T = Int64[],
+    ρ_true = Float64[],   ρ_est = Float64[],    ρ_start = Float64[],    ρ_lower = Float64[],   ρ_upper = Float64[],
+    σₐ²_true = Float64[], σₐ²_est = Float64[],  σₐ²_start = Float64[],  σₐ²_lower = Float64[], σₐ²_upper = Float64[],
+    σᵤ²_true = Float64[], σᵤ²_est = Float64[],  σᵤ²_start = Float64[],  σᵤ²_lower = Float64[], σᵤ²_upper = Float64[],
+    LL = Float64[], runtime = [], notes=[]
+)
+function add_row_simulation_results!(df, seed, type, N, T;
+        θhat = missing, θ₀ = missing, θLB = missing, θUB = missing,
+        LL=missing, runtime=missing, notes=missing, method = missing)
+    push!(df, (
+        seed=seed, type=type, N=N, T=T,
+        ρ_estimate=θhat.ρ,    σₐ²_estimate=θhat.σₐ²,    σᵤ²_estimate=θhat.σᵤ², LL=LL,
+        ρ_start=θ₀.ρ, σₐ²_start=θ₀.σₐ², σᵤ²_start=θ₀.σᵤ², 
+        ρ_lower=θLB.ρ, σₐ²_lower=θLB.σₐ², σᵤ²_lower=θLB.σᵤ², 
+        ρ_upper=θUB.ρ, σₐ²_upper=θUB.σₐ², σᵤ²_upper=θUB.σᵤ², 
+        method=method,   runtime=runtime,     notes=notes
+    ))
+end
+
+
+
 function write_simulation_df(df; N=2)
     # Save dataframe
     filepath = "../../data/temp/simulation_results_log(N=$N).csv"
@@ -566,6 +640,22 @@ function write_estimation_df(df; N=2)
     else
         CSV.write(filepath, df)
     end
+end
+
+
+function write_estimation_df_notrend(df)
+    # Save dataframe
+    filepath = "../../data/temp/simulation_estimation_results_log.csv"
+    if isfile(filepath)
+        CSV.write(filepath, df, append=true)
+    else
+        CSV.write(filepath, df)
+    end
+end
+
+function read_estimation_df_notrend()
+    filepath = "../../data/temp/simulation_estimation_results_log.csv"
+    df = CSV.read(filepath, DataFrame)
 end
 
 
@@ -678,201 +768,7 @@ param(plist) = Dict(
 #######################################################################
 #           Plotting
 #######################################################################
-
-using Plots
-using ProgressMeter
-using CSV, Tables
-pyplot()
-function plot_ll_big_sigmas()
-    # import Pkg; Pkg.add("PlotlyJS")
-
-
-    # get some initial residuals
-    σₐ² = σᵤ² = 10^11;
-    ρ = starting_params[:ρ];    β = starting_params[:β]
-    σₐ² = starting_params[:σₐ²];  σᵤ² = starting_params[:σᵤ²]
-    N = 4; T = 60; ρ = 0.8785;
-    # data = read_data(N, T)
-    data = dgp(ρ, σₐ², σᵤ², β, N, T; random_seed = 1)
-    V = Diagonal(ones(length(data.eᵢₜ)))
-    gls = mygls(@formula(eᵢₜ ~ 1 + i + t + t^2), data, V, N)
-    v = vec(gls[:resid])
-
-
-    # create log-likelihood function of just σₐ², σᵤ²
-    function LL10_plot(σₐ², σᵤ²)
-        # println("σₐ² = ", σₐ², "    σᵤ² = ", σᵤ²)
-        return -log(10, nLL(ρ, σₐ², σᵤ², v, N, T))
-    end
-    function LL_plot(σₐ², σᵤ²)
-        # println("σₐ² = ", σₐ², "    σᵤ² = ", σᵤ²)
-        return -nLL(ρ, σₐ², σᵤ², v, N, T)
-    end
-    # println("β: ", gls[:β])
-    # println(v)
-
-    # Evaluate LL at σₐ² = 1, σᵤ² = 10
-    # println(LL_plot(1,10))
-    # println(LL_plot(5e4^2,5e4^2))
-
-    # σₐ²vec = 2e8:5e10:1e12
-    # σᵤ²vec = 2e12:2e12:6e11
-
-    σₐ²vec = 10 .^(-1:0.1:1)
-    σᵤ²vec = 10 .^(10.54:0.002:10.57)
-    σᵤ²bar = 10^10.56
-    LLvect = @showprogress [LL_plot(a,σᵤ²bar) for a in σₐ²vec]
-    p4 = plot(σₐ²vec, LLvect,
-        xlabel="σα²",
-        ylabel="LL",
-        title="Log Likelihood")
-    p5 = plot(σₐ²vec, LLvect,
-        xlabel="σα²", xscale=:log,
-        ylabel="LL",
-        title="Log Likelihood")
-    p6 = plot(σₐ²vec, LLvect,
-        xlabel="σα²", xscale=:log,
-        ylabel="LL", yscale=:log,
-        title="Log Likelihood")
-    
-    #! I wasn't able to get most of these to save to file in the REPL,
-    #! so I had to take screenshots of the plotting window.
-
-
-    fdsa
-    X = repeat(reshape(σₐ²vec, 1, :), length(σᵤ²vec), 1)
-    Y = repeat(σᵤ²vec, 1, length(σₐ²vec))
-    Z = @showprogress map(LL10_plot, X, Y)
-
-    mat = [σᵤ²vec zeros(size(σᵤ²vec)) Z]
-    header = [0 0 σₐ²vec']
-    mat = [header; zeros(size(header)); mat]
-
-    
-    filepath = "../../data/temp/LL real_data N$N T$T ρ$ρ.csv"
-    CSV.write(filepath,  Tables.table(mat), writeheader=false)
-
-    p3 = surface(σₐ²vec, σᵤ²vec, Z, xscale = :log10, yscale = :log10,
-        xlabel="σα²",
-        ylabel="σμ²",
-        zlabel="log₁₀(LL)",
-        # zlims = (-3.4849, -3.48488),
-        title="Log Likelihood")
-    p3
-    savefig(p3, "../../output/estimation_notes/2022-09-13 3d LL plot of starting values 1.pdf")
-
-    # p2 = plot(contour(σₐ²vec, σᵤ²vec, Z, fill = (true,cgrad(:Spectral, scale = :log))),
-    #     xlabel="σₐ² starting value",
-    #     ylabel="σᵤ² starting value",
-    #     title="Log Likelihood values based on starting param values");
-    # p2
-
-    p1 = contour(σₐ²vec, σᵤ²vec, LL10_plot, fill = true)
-    # p3 = contour(x, y, (x,y)->cos(x)+cos(y), fill=(true,cgrad(:Spectral, scale = :log)))
-    filepath = "../../output/estimation_notes/2022-09-13 3d LL plot of starting values.pdf"
-    p = plot(p1,
-        xlabel="σₐ² starting value",
-        ylabel="σᵤ² starting value",
-        title="Log Likelihood values based on starting param values");
-    savefig(p, filepath)
-end
-# plot_ll_big_sigmas()
-
-
-function trend_vec(β)
-    boi = first(β, 4)
-    β = last(β, 2)
-end
-
-function plot_real_data()
-    N=4; T=60
-    data = read_data(N, T)
-    p = @df data plot(:t, :eᵢₜ, group=:i,
-        xlabel="year",
-        ylabel="emisssions",
-        title="Observed Regional Emissions")
-        
-    V = Diagonal(ones(length(data.eᵢₜ)))
-    linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2)
-    gls = mygls(linear_formula, data, V, N)
-    v = vec(gls[:resid])
-    data.v_est = v
-    p2 = @df data plot(:t, :v_est, group=:i,
-        xlabel="year",
-        ylabel="emisssions",
-        title="De-trended Observed Regional Emissions")
-    
-    # plot trend lines on top of data
-    data.e_detrend = gls[:yhat]
-    @df data plot!(p, :t, :e_detrend, group=:i)
-end
-
-function plot_simulated_data()
-    ρ = 0.8785
-    σₐ² = 10^10
-    σᵤ² = σₐ²
-    b₀ = [378017.714, -45391.353, 347855.764, 314643.98]
-    β = [30_000., -6.6]
-    N=4; T=60
-
-    # Generate simulated data from realistic parameter estimates
-    data = dgp(ρ, σₐ², σᵤ², β, N, T; v₀ = 10.0^6, b₀ = b₀)
-    p = @df data plot(:t, :eᵢₜ, group=:i,
-        xlabel="year",
-        ylabel="emisssions",
-        title="Simulated Regional Emissions")
-
-    # Demean and detrend
-    V = Diagonal(ones(length(data.eᵢₜ)))
-    linear_formula = @formula(eᵢₜ ~ 1 + i + t + t^2)
-    gls = mygls(linear_formula, data, V, N)
-    v = vec(gls[:resid])
-    data.v_est = v
-    p2 = @df data plot(:t, :v_est, group=:i,
-        xlabel="year",
-        ylabel="emisssions",
-        title="De-trended Simulated Regional Emissions")
-    
-    # plot trend lines on top of data
-    data.e_detrend = gls[:yhat]
-    @df data plot!(p, :t, :e_detrend, group=:i)
-end
-
-
-function plot_gradient(v)
-    ρ = 0.8785
-    σₐ²vec = ℯ.^(-8:1)
-    σᵤ² = 3.6288
-    N=4; T=60
-    # v = 2
-    temp(σₐ²) = ∂nLL∂y("σₐ²", ρ, σₐ², σᵤ², v, N, T)
-    grad = temp.(σₐ²vec)
-    p = plot(σₐ²vec, grad,
-        xlabel="σₐ²",
-        ylabel="gradient",
-        title="Gradient Values over σₐ² (σᵤ² = $σᵤ²)")
-    p
-
-    # Show gradient surface
-    σᵤ²vec = ℯ.^(1:0.5:3)
-    temp2(σₐ², σᵤ²) = ∂nLL∂y("σₐ²", ρ, σₐ², σᵤ², v, N, T)
-    X = repeat(reshape(σₐ²vec, 1, :), length(σᵤ²vec), 1)
-    Y = repeat(σᵤ²vec, 1, length(σₐ²vec))
-    Z = @showprogress map(temp2, X, Y)
-    p2 = surface(σₐ²vec, σᵤ²vec, Z, xscale = :log10, yscale = :log10,
-        xlabel="σα²",
-        ylabel="σμ²",
-        zlabel="σα² gradient",
-        title="Negative Log Likelihood Gradient")
-
-    x = 1:4
-    y = 5:10
-    X = repeat(reshape(x,1,:), length(y), 1)
-    Y = repeat(y, 1, length(x))
-    Z = map((x,y) -> x^2 + y^2, X, Y)
-    surface(x,y, Z)
-
-end
+# Moved to plotting_LL.jl
 
 #######################################################################
 #           Iterate to convergence!
@@ -957,7 +853,7 @@ function estimate_dgp_params(N, T, starting_params;
         params_upper_bound = [1 - 1e-4, Inf, Inf],
         data = missing, print_results = false, data_type = "real data",
         analytical = true, method = "gradient decent", sim_params=missing)
-    println("Estimating parameters of real data using iteration method.")
+    println("Estimating parameters of $data_type using iteration method.")
     println(N, " ", T, " ", starting_params)
     @info "estimate_dgp_params()" N T starting_params iteration_max convergence_threshold params_lower_bound params_upper_bound print_results data_type analytical method
     # dataframe to save to CSV
@@ -1032,6 +928,53 @@ function estimate_dgp_params(N, T, starting_params;
 end
 
 
+
+
+"""
+Estimate model with no trend or fixed effects (just the MLE with ρ and σ's).
+Used for testing estimation properties on simulation data.
+θ = [ρ, σₐ², σᵤ²] true parameters for simulated data
+θ₀ = starting value for parameter search
+seed = random seed used for simulated data
+"""
+function estimate_simulation_params_notrend(N, T, θ, θ₀, seed, df;
+        θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4),
+        θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf),
+        print_results = false, data_type = "simulated data",
+        analytical = true, method = "gradient decent")
+    println("\nEstimating parameters of $data_type using MLE")
+    println(N, " ", T, " ", ", Starting search at: ", θ₀)
+    @info "estimate_dgp_params()" N T θ θ₀ seed θLB θUB print_results data_type analytical method
+    # Generate Simulated data
+    data = dgp(θ, N, T, seed)
+
+    # ML to get parameter estimates ρ, σₐ², σᵤ²
+    # mymle2 treats first argument as fixed ρ value
+    ρ, σₐ², σᵤ², LL = mymle_2(θ₀.ρ, θ₀.σₐ², θ₀.σᵤ², data.vᵢₜ, N, T;
+                            θLB, θUB,
+                            analytical=analytical, method=method)
+    println("LL: ", LL, "  ρ: ", ρ, "  σₐ²: ", σₐ², "  σᵤ²: ", σᵤ²)
+    θhat = (ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ²)
+
+    
+    note = "Estimated parameters after simple MLE with no GLS (no trend)"
+    push!(df, (
+        seed = seed, N = N, T = T,
+        ρ_true = θ.ρ, σₐ²_true = θ.σₐ², σᵤ²_true = θ.σᵤ²,
+        ρ_est = θhat.ρ, σₐ²_est = θhat.σₐ², σᵤ²_est = θhat.σᵤ²,
+        ρ_start = θ₀.ρ, σₐ²_start = θ₀.σₐ², σᵤ²_start = θ₀.σᵤ², 
+        ρ_lower = θLB.ρ, σₐ²_lower = θLB.σₐ², σᵤ²_lower = θLB.σᵤ², 
+        ρ_upper = θUB.ρ, σₐ²_upper = θUB.σₐ², σᵤ²_upper = θUB.σᵤ², 
+        LL = LL, runtime = Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"), notes = note
+    ))
+
+    # print results
+    if print_results
+        println(df)
+    end
+end
+
+
 function get_results_σstarts(date)
     filepath = "../../data/temp/realdata_estimation_results_log_$date.csv"
     df = @chain CSV.read(filepath, DataFrame,
@@ -1060,7 +1003,7 @@ starting_params = Dict(:ρ => 0.85,
 
 # save_reformatted_data()
 
-function test_dgp_params_from_real()
+function test_dgp_params_from_real(test_no_trends=false)
     N = 4; T = 60  # 1945-2005
     # parameters estimated from data
     if N == 2
@@ -1072,6 +1015,11 @@ function test_dgp_params_from_real()
         # β = [32_574.7, -108.555]
         b₀ = [3.146, -0.454, 3.78, 3.479]  # from test_starting_real_estimation() for n=4, after changing emissions units to 10,000 tons
         β = [0.265, 0] # from test_starting_real_estimation() for n=4
+    end
+
+    if test_no_trends && N == 4
+        b₀ = [0, 0, 0, 0]
+        β = [0, 0]
     end
     ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
     # σₐ² = 1.035  # 40               # from test_starting_real_estimation()
@@ -1135,6 +1083,79 @@ end
 # 2022-09-13 Takes about 1.5 hours to run and drives sigma_a to 0
 # 2022-10-09
 # 2022-12-15
+
+
+function gen_results_df(params)
+
+end
+
+
+"""
+Estimates σ's over a range of simulated data generated from a range of σ values.
+First, this creates a range of "true" σₐ² and σᵤ² values. For each pair of "true"
+σₐ² and σᵤ² values, it generates 100 simulated datasets. Each simulated dataset is
+generated with no trends (b₀, β = 0). Then it uses the ML method to estimate the 
+σ's for each dataset to see average bias in the N=4, T=60 setting.
+
+Nsteps = # of "true" σ² values in array to test (so full set of pairs is Nsteps × Nsteps)
+Nsim = # of simulated datasets to create for each "true" σ² value pair
+"""
+function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100)
+    # Nsteps = 2; Nsim = 10  # temp
+    N = 4; T = 60  # 1945-2005
+    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
+    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
+    σ²range = range(1e-4, 2*σ²base, length=Nsteps)
+
+    # Define a short analysis function that just takes the data
+    θ₀ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)
+    # θ₀ = [ρ, σₐ², σᵤ²]
+    # θ₀ = [ρ, 1e-3, 1e-3]
+    θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
+    θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
+
+    # For each pair of "true" σₐ², σᵤ² values
+    for σₐ² in σ²range, σᵤ² in σ²range
+        result_df = create_simulation_results_df()
+        # σₐ², σᵤ² = σ²range[1], σ²range[1]
+        θ = (ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ²)
+        # Simulate and estimate Nsim times for these σ values
+        println("\n\n(σₐ²=$σₐ², σᵤ²=$σᵤ²) Running $Nsim simulations")
+        Threads.@threads for seed in 1:Nsim
+            estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
+                θLB, θUB,
+                print_results = false, data_type = "simulated data",
+                analytical = true, method = "gradient decent")
+            # This saves the estimation results to data/temp/simulation_estimation_results_log.csv
+        end
+        # Save dataframe of results
+        write_estimation_df_notrend(result_df)
+    end
+end
+test_simulated_data_with_no_trends(Nsteps = 4, Nsim = 20)
+
+
+    df = @chain read_estimation_df_notrend() begin
+        groupby([:σₐ²_true, :σᵤ²_true])
+        @combine(:abias = mean((:σₐ²_est - :σₐ²_true)./:σₐ²_true),
+                :ubias = mean((:σᵤ²_est - :σᵤ²_true)./:σᵤ²_true))
+    end
+
+function stats_simulated_estimates_with_no_trends()
+    # Load estimation results from simulations
+    df = read_estimation_df_notrend()
+        
+        # @rsubset :Year >= 1945 && :Year < 1945+T && :group ∈ ["USA","EU","BRIC","Other"][1:N]
+        # @transform(:group = get.(Ref(country2num), :group, missing))
+        # @select(:t = :time .- 44,
+        #         :i = categorical(:group),
+        #         :eᵢₜ = :CO2)
+        # @orderby(:t, :i)
+    @by read_estimation_df_notrend() :σₐ²_true :σᵤ²_true begin
+        :abias = 
+        :sx = std(:x)
+    end
+end
 
 
 function test_starting_real_estimation()
@@ -1244,7 +1265,7 @@ function test_starting_real_estimation()
     # @time estimate_dgp_params(N, T, param(plist9))
     return v
 end
-v = test_starting_real_estimation()
+# v = test_starting_real_estimation()
 # plot_gradient(v)
 # about 2 minutes to finish
 
@@ -1292,6 +1313,7 @@ function time_gradient_methods()
     @time estimate_sigmas(2, 50, starting_params; n_seeds=10, analytical=false)
     # 315.076701 seconds (654.42 M allocations: 139.398 GiB, 4.04% gc time)
 end
+# time_gradient_methods()
 
 function test_estimation()
     # Do the estimates get closer as T gets larger? (consistency)

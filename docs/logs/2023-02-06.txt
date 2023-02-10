@@ -1,0 +1,22 @@
+Priorities:
+1. Document simulations in overleaf
+2. Look at derivative of LL
+
+
+
+
+
+
+Summary of simulations
+	- Grid over sigmas $[0, 2\sigma_u^2]^2$, see what method results in less bias
+	- Look at last email / correspondance doc
+- Use least biases method on real data
+
+
+
+
+
+
+Look at derivative of LL:
+- Larry took the derivative of v'V^-1v, holding v constant. But v is the GLS regression errors, which are a function of the parameters.
+- try to derive the derivative of v wrt parameters

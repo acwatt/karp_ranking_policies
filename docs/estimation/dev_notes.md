@@ -1,3 +1,8 @@
+# 2023-01-16
+- realized the last ρ in the definition of χ wasn't squared. Fixed and going to rerun ML estimation
+- 
+
+
 # 2022-12-15
 - need to replicate Andy's code
 - Tested simulated data after adjusting the scale of the data (divided by 10^5)
@@ -28,9 +33,9 @@ Analytical gradient: [1.6546691603988224e-5, 2.785212926555983e-5]
 ```
 
 NEXT:
+- check if sigma_a is squared -- does the LL function gradient keep increasing when sigma_a^2 is negative?
 - see 2022-12-21 meeting notes.docx and end of serial_correlation_tests.jl for most recent work.
 - use ρ est and lb and ub from serial_correlation_tests to est σ's in MLE
 - Can I encorporate serial_correlation_tests MB ρ procedure in MLE?
 
 
-```

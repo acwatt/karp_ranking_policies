@@ -23,6 +23,7 @@ import Statistics as Stat
 import Distributions as Dist
 using GLM
 import Dates
+using ProgressMeter
 
 import Revise
 Revise.includet("reg_utils.jl")  # mygls_aggregate()
@@ -73,13 +74,14 @@ function read_data_simulated_agg()
     end
     return(df)
 end
-function generate_AR1_data()
+function generate_AR1_data(; save_df = true, ρ = 0.8785)
     T = 60; Tmin = -100; Ntot = T - Tmin + 1
-    β = [945.1923, 93.485, 0.0385]; σ²θ = 5; ρ = 0.8785
+    β = [945.1923, 93.485, 0.0385]; σ²θ = 5
     v0 = 0; θ = rand(Dist.Normal(0, sqrt(σ²θ)), Ntot)
-    v = [ρ*v0 + θ[1]]
+    v = zeros(Float64, Ntot)
+    v[1] = ρ*v0 + θ[1]
     for i ∈ 2:Ntot
-        push!(v, ρ*v[i-1] + θ[i])
+        v[i] = ρ*v[i-1] + θ[i]
     end
     df = @chain DataFrame(t = Tmin:T) begin
         @transform(:v = v)
@@ -88,8 +90,10 @@ function generate_AR1_data()
         @transform(:t_lag = SA.lag(:t))
         @rsubset(:t > 0)
     end
-    filepath = "../../data/temp/simulated_data_global T60 rho$ρ sigma$(σ²θ).csv"
-    CSV.write(filepath, df)
+    if save_df
+        filepath = "../../data/temp/simulated_data_global T60 rho$ρ sigma$(σ²θ).csv"
+        CSV.write(filepath, df)
+    end
     return(df)
 end
 
@@ -311,16 +315,19 @@ function estimate_ρ_and_σ_CO(data_type)
     return results
 end
 
-real_params_CO = estimate_ρ_and_σ_CO("real")
-# ["ρ = 0.9056", "σ²μ = 8293.1128", "σ²ε = 46080.9161", "σ² = 13742.7899", "β = [300.6616, 125.7893, -0.3339]"]
+run_OC_estimator = false
 
-sim_params_CO = estimate_ρ_and_σ_CO("simulated")
-# ["ρ = 0.6365", "σ²μ = 3.7377", "σ²ε = 6.2833", "σ² = 5.0445", "β = [-3.4966, 0.5767, -0.0059]"]
+if run_OC_estimator
+    real_params_CO = estimate_ρ_and_σ_CO("real")
+    # ["ρ = 0.9056", "σ²μ = 8293.1128", "σ²ε = 46080.9161", "σ² = 13742.7899", "β = [300.6616, 125.7893, -0.3339]"]
 
-sim_params_CO = estimate_ρ_and_σ_CO("generated");
-#     ["ρ = 0.7563", "σ²μ = 5.121", "σ²ε = 11.9638", "σ² = 5.1806", "β = [11.4331, 1.707, 0.0072]"]
-# True: ρ = 0.8785                                    σ² = 5         β = [10,     2,       0.002];
+    sim_params_CO = estimate_ρ_and_σ_CO("simulated")
+    # ["ρ = 0.6365", "σ²μ = 3.7377", "σ²ε = 6.2833", "σ² = 5.0445", "β = [-3.4966, 0.5767, -0.0059]"]
 
+    sim_params_CO = estimate_ρ_and_σ_CO("generated");
+    #     ["ρ = 0.7563", "σ²μ = 5.121", "σ²ε = 11.9638", "σ² = 5.1806", "β = [11.4331, 1.707, 0.0072]"]
+    # True: ρ = 0.8785                                    σ² = 5         β = [10,     2,       0.002];
+end
 
 
 #==============================================================
@@ -422,24 +429,28 @@ function estimate_ρ_and_σ_PW(data_type; verbose=false)
     return results
 end
 
-real_params_PW = estimate_ρ_and_σ_PW("real");
-println("real_params_PW: $real_params_PW")
-# ["ρ = 0.9277", "σ²μ = 8268.1726", "σ²ε = 59298.9209", "σ² = 8332.6223", "β = [960.1514, 91.7068, 0.0689]"]
 
-sim_params_PW = estimate_ρ_and_σ_PW("simulated");
-println("sim_params_PW: $sim_params_PW")
-# ["ρ = 0.6365", "σ²μ = 3.7377", "σ²ε = 6.2836", "σ² = 5.0442", "β = [-3.4966, 0.5767, -0.0059]"]
+run_PW_estimator = false
 
-gen_params_PW = estimate_ρ_and_σ_PW("generated");
-println("gen_params_PW: $gen_params_PW")
-#     ["ρ = 0.8305", "σ²μ = 4.8378", "σ²ε = 15.5927", "σ² = 4.9299", "β = [11.5403, 2.1223, -0.0008]"]
-# True: ρ = 0.8785                                     σ² = 5         β = [10,      2,      0.002]
+if run_PW_estimator
+    real_params_PW = estimate_ρ_and_σ_PW("real");
+    println("real_params_PW: $real_params_PW")
+    # ["ρ = 0.9277", "σ²μ = 8268.1726", "σ²ε = 59298.9209", "σ² = 8332.6223", "β = [960.1514, 91.7068, 0.0689]"]
 
-ρvec_PW = [estimate_ρ_and_σ_PW("generated")[:ρ] for i in 1:10_000]
-histogram(ρvec_PW, label="", title="Dist of ρ estimates (PW estimator)", bins=100)
-vline!([0.8785], color="red", label="True ρ")
-vline!([Stat.quantile(ρvec_PW, 0.95)], color="green", label="95% quantile")
+    sim_params_PW = estimate_ρ_and_σ_PW("simulated");
+    println("sim_params_PW: $sim_params_PW")
+    # ["ρ = 0.6365", "σ²μ = 3.7377", "σ²ε = 6.2836", "σ² = 5.0442", "β = [-3.4966, 0.5767, -0.0059]"]
 
+    gen_params_PW = estimate_ρ_and_σ_PW("generated");
+    println("gen_params_PW: $gen_params_PW")
+    #     ["ρ = 0.8305", "σ²μ = 4.8378", "σ²ε = 15.5927", "σ² = 4.9299", "β = [11.5403, 2.1223, -0.0008]"]
+    # True: ρ = 0.8785                                     σ² = 5         β = [10,      2,      0.002]
+
+    ρvec_PW = [estimate_ρ_and_σ_PW("generated")[:ρ] for i in 1:10_000]
+    histogram(ρvec_PW, label="", title="Dist of ρ estimates (PW estimator)", bins=100)
+    vline!([0.8785], color="red", label="True ρ")
+    vline!([Stat.quantile(ρvec_PW, 0.95)], color="green", label="95% quantile")
+end
 
 
 
@@ -495,19 +506,19 @@ function myround(v; digits=3)
     end
 end
 
-function estimate_ρ_and_σ_MB(data_type; verbose=false)
+function estimate_ρ_and_σ_MB(data_type; verbose=false, save_df = true, ρ = 0.8785)
     vprint(s) = verbose ? println(s) : nothing
 
     vprint("\nBeginning Mackinnon-Beach ρ,β,σ estimation on $data_type data.")
 
     # Read data
-    data_type = "real"
+    # data_type = "real"
     if data_type == "real"
         df = read_data_real_global()
     elseif data_type == "simulated"
         df = read_data_simulated_agg()
     elseif data_type == "generated"
-        df = generate_AR1_data()
+        df = generate_AR1_data(save_df = save_df, ρ = ρ)
     end
     # Rename vars for ease of use: ebar -> y, ebar_lag -> ylag, etc
     df = @chain df begin
@@ -606,7 +617,7 @@ function estimate_ρ_and_σ_MB(data_type; verbose=false)
 
         Var = [Vcov[i,i] for i ∈ 1:size(Vcov)[1]]
         vprint("Variance-Covariance matrix for (σ², ρ, β₀, β₁, β₂)")
-        display(Vcov)
+        # display(Vcov)
         σ²se = Var[1] ^0.5
         ρse = Var[2] ^0.5
         βse = Var[3:end] .^0.5
@@ -619,8 +630,8 @@ function estimate_ρ_and_σ_MB(data_type; verbose=false)
     σ²θ = fgls_results[:σ²θ]
     Vcov_results = build_param_varcov_matrix(β, σ²θ, ρ, T, df.v, X)
     
-    println("\nfgls_results:")
-    display(fgls_results)
+    # println("\nfgls_results:")
+    # display(fgls_results)
     
     σ²θse = Vcov_results[:σ²se]
     σ²θCI95 = σ²θ ± tcrit*σ²θse
@@ -635,8 +646,8 @@ function estimate_ρ_and_σ_MB(data_type; verbose=false)
         Dict(:parameter => :β₂,  :point_est => β[3], :SE => βse[3], :CIlower => βCI95[3][1], :CIupper => βCI95[3][2]),
         Dict(:parameter => :σ²θ, :point_est => σ²θ,  :SE => σ²θse, :CIlower  => σ²θCI95[1],  :CIupper =>  σ²θCI95[2]),
         Dict(:parameter => :σ²v, :point_est => fgls_results[:σ²v])]
-    println("\nMB_results:")
-    display(results)
+    # println("\nMB_results:")
+    # display(results)
     return results
 end
 
@@ -668,34 +679,50 @@ println("gen_params_MB: $gen_params_MB")
 #     ["ρ = 0.8635", "σ²μ = 4.7284", "σ²ε = 18.5836", "σ² = 5.1545", "β = [14.145, 1.5167, 0.0106]"]
 # True: ρ = 0.8785                                     σ² = 5         β = [10,     2,      0.002]
 
-test_sampling_distribution = false
+test_sampling_distribution = true
 if test_sampling_distribution
-    ρvec_MB = []; ρwidth_MB = []
-    iters = 10_000
-    println("."^Integer(iters/100))
-    for i in 1:iters
-        i%100==1 ? print(".") : nothing
-        res = estimate_ρ_and_σ_MB("generated")
-        push!(ρvec_MB, res[:ρ])
-        push!(ρwidth_MB, 2*1.96*res[:ρse])
+    ρtrue = 0.9
+    iters = 1_000
+    results = repeat([[]], iters)
+    p = Progress(iters, "Generating $iters MB simulation estimates...") 
+    # println("."^Integer(iters/100))
+    Threads.@threads for i in 1:iters
+        # i%100==1 ? print(".") : nothing
+        res = estimate_ρ_and_σ_MB("generated"; save_df = false, ρ = ρtrue)
+        results[i] = res
+        next!(p)
     end
+
+    # extract ρ estimates
+    ρvec_MB = Float64[]; ρCIlower = Float64[]; ρCIupper = Float64[]; ρSE = Float64[];
+    for res in results
+        d = res[1]
+        push!(ρvec_MB, d[:point_est])
+        push!(ρCIlower, d[:CIlower])
+        push!(ρCIupper, d[:CIupper])
+        push!(ρSE, d[:SE])
+    end
+
+
+
     pMB = histogram(ρvec_MB, label="", title="Dist of ρ estimates (MB estimator)", bins=50)
-    vline!([0.8785], color="red", label="True ρ")
+    vline!([ρtrue], color="red", label="True ρ")
     vline!([Stat.quantile(ρvec_MB, 0.95)], color="green", label="95% quantile")
 
-    pMB1 = histogram(ρwidth_MB, label="", title="Width of ρ estimate 95% CIs (MB estimator)", bins=50)
+    pMB1 = histogram(ρSE, label="", title="SE of ρ estimate 95% CIs (MB estimator)", bins=50)
     # vline!([Stat.quantile(ρvec_MB, 0.95)], color="green", label="95% quantile")
 
-    ρupper = [ρ+0.5*w for (ρ,w) in zip(ρvec_MB, ρwidth_MB)]
-    histogram(ρupper, label="", title="Upper bound of ρ estimate 95% CIs (MB estimator)", bins=50)
-    pMB2 = vline!([0.8785], color="red", label="True ρ")
+    histogram(ρCIupper, label="", title="Upper bound of ρ estimate 95% CIs (MB estimator)", bins=50)
+    pMB2 = vline!([ρtrue], color="red", label="True ρ")
 
     import StatsBase as SB
-    cdf_func = SB.ecdf(ρupper)
+    cdf_func = SB.ecdf(ρCIupper)
     plot(cdf_func, label="Empirical CDF of upper bound of 95% CIs")
-    vline!([0.8785], color="red", label="True ρ")
-    pMB3 = hline!([cdf_func(0.8785)], color="green", label="$(round(cdf_func(0.8785)*100, digits=2))% of upper bounds below true ρ")
+    vline!([ρtrue], color="red", label="True ρ")
+    pMB3 = hline!([cdf_func(ρtrue)], color="green", label="$(round(cdf_func(0.8785)*100, digits=2))% of upper bounds below true ρ")
 end
+
+
 
 
 

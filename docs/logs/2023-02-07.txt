@@ -1,0 +1,8 @@
+Tried to run the MLE over simulated data, simulated with no trends (b0 and beta = 0), at various values of sigmas.
+
+On the first MLE for simulated data with 
+σₐ²: 0.0001   σᵤ²: 0.0001, ρ => 0.8785
+starting at  :ρ => 0.8785, :σᵤ² => 3.6288344, :σₐ² => 3.6288344
+
+The LL is positive (900s). But it should be negative; this indicates the likelihood is > 1. Check the nLL function at the starting values. Is it something to do with the errors v?
+Examine the errors v.

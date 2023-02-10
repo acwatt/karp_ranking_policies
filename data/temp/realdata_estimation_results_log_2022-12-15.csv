@@ -1,0 +1,277 @@
+seed,type,??²_estimate,??²_start,??²_estimate,??²_start,iterations,LL,V_norm_finalstep,b??,b??,b??,b??,??,??,runtime,notes,
+real data,Estimated,1266.4037299,50,4.7724541,1000,500,-488,16.756,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 01:01:16,Estimated parameters after convergence of the iterative method
+real data,Estimated,2287.2616364,25,4.7786149,0.1,500,-505,11.495,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:18:37,Estimated parameters after convergence of the iterative method
+real data,Estimated,102.1913113,100,1001.1971828,1000,500,-852,2.09,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 05:47:45,Estimated parameters after convergence of the iterative method
+real data,Estimated,158.8958155,0.01,42266.3303972,0.1,500,-1295,3.838,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:02:09,Estimated parameters after convergence of the iterative method
+real data,Estimated,111.5293941,100,42210.799207,0.1,500,-1295,2.121,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 02:56:07,Estimated parameters after convergence of the iterative method
+real data,Estimated,1056.6757975,1000,42255.6166453,0.1,500,-1296,39.365,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 07:42:54,Estimated parameters after convergence of the iterative method
+real data,Estimated,7540.0450251,0.01,4303991.0169057,0.01,500,-1849,4.182,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 20:01:17,Estimated parameters after convergence of the iterative method
+real data,Estimated,99.7271363,100,4300940.8275816,0.01,500,-1849,0.027,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 01:58:48,Estimated parameters after convergence of the iterative method
+real data,Estimated,1099.5264207,1000,4301040.468807,0.01,500,-1849,0.545,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 06:45:22,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,100,10.8146327,6,82,-342,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 03:13:00,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,100,7.1931867,25,79,-314,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 03:26:02,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,100,10.851521,100,71,-343,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 03:40:02,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,50,13.1573393,1,29,-359,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:40:24,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,100,4.8141363,50,28,-295,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 03:30:16,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,100,13.7040347,1,23,-362,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 03:00:06,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,50,6.007398,3,19,-304,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:43:45,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,50,7.5459039,25,19,-316,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:51:56,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,4.9450806,6,18,-296,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:24:53,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,50,1.9690843,6,16,-319,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:46:14,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,50,1.7449067,10,15,-333,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:48:43,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,100,6.8726432,3,11,-311,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 03:02:09,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,100,12.1604334,10,11,-352,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-16 03:15:18,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,10.7389385,25,10,-342,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:28:57,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,3.7268049,10,9,-291,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:26:48,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,4.5255753,50,8,-294,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:30:41,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,50,12.0332149,50,8,-351,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:53:53,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,50,13.3844881,100,8,-360,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:55:52,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,4.2593623,1,7,-292,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:20:23,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,6.2035251,3,7,-305,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:21:58,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,4.2757337,3,6,-292,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:48:31,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,4.1391784,1,5,-292,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:22:27,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,4.0451338,3,5,-292,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:35:40,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,4.101235,10,5,-292,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 22:03:49,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,4.1441566,25,5,-292,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 22:05:06,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,4.2902356,0.1,5,-293,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:10:35,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,4.53776,10,5,-294,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:50:57,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,5.0467376,6,5,-297,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 22:02:36,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,6.177776,6,5,-305,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:49:53,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,1.8640473,3,5,-325,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 22:01:19,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,20.1375913,1,5,-398,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:59:56,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,30.8072392,1,5,-442,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:34:24,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,32.1213258,1,5,-446,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:46:56,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,44.7950746,50,5,-482,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:40:24,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,78.9296337,100,5,-546,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 22:07:41,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,420.8144208,0.1,5,-742,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:21:12,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,4216.5128554,0.1,5,-1018,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:33:06,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,4210.1247772,0.1,5,-1018,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:45:32,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,4299.4326255,0.01,5,-1020,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:19:57,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,42184.9758815,0.1,5,-1294,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:58:27,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,43005.4865376,0.01,5,-1297,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:31:48,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,42999.6408111,0.01,5,-1297,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:44:07,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,42990.6151985,0.01,5,-1297,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:57:01,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,430002.9760326,0.01,5,-1573,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 22:10:28,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,50,4300577.5972002,0.01,5,-1849,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:34:37,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,3.9692332,3,4,-291,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:23:38,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,3.0431598,3,4,-293,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:12:28,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,3.0535692,6,4,-293,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:36:39,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,5.2194983,6,4,-298,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:24:41,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,5.3028649,10,4,-299,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:37:47,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,5.3008034,100,4,-299,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:31:49,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,5.9309567,6,4,-303,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:13:43,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,8.7571219,10,4,-326,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:25:51,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,9.8898636,10,4,-335,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:14:53,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,12.3621404,25,4,-353,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:52:06,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,19.7256052,25,4,-396,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:39:02,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,23.4554089,25,4,-413,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:26:59,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,26.8527597,50,4,-427,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 22:06:20,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,38.1672827,50,4,-465,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:53:19,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,48.3785007,50,4,-491,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:28:18,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,88.7214105,100,4,-559,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:54:25,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,94.7848016,100,4,-567,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:41:32,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,98.3439456,100,4,-571,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:29:20,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,429.968612,0.01,4,-745,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:09:22,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,25,916.9567804,1000,4,-835,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:32:58,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,10,980.6886317,1000,4,-843,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 22:08:56,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,6,989.1884508,1000,4,-844,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:55:42,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,1,998.3121709,1000,4,-845,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:30:28,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,3,994.8165701,1000,4,-845,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:42:44,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,999.8326711,1000,4,-846,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:18:38,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.01,3.003784,3,3,-293,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:03:50,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.01,5.9931858,6,3,-304,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:04:35,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.01,9.9891262,10,3,-336,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:05:18,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,1.6331344,1,3,-342,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:11:30,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,24.8546828,25,3,-419,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:15:50,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.01,24.9855566,25,3,-420,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:06:02,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.01,1.0534904,1,3,-436,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:03:00,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.01,49.9843841,50,3,-494,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:06:47,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,49.8433288,50,3,-494,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:16:42,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.01,99.983801,100,3,-573,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:07:33,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.1,99.8377154,100,3,-573,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:17:34,Estimated parameters after convergence of the iterative method
+real data,Estimated,0,0.01,999.9832777,1000,3,-846,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 21:08:19,Estimated parameters after convergence of the iterative method
+real data,Estimated,56.1795274,50,42206.0335534,0.1,2,-1294,0,3.146,-0.454,3.78,3.479,0.265,0,,2022-12-15 23:35:31,Estimated parameters after convergence of the iterative method
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 19:00:01,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 20:01:17,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:02:09,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:03:01,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:03:50,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:04:35,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:05:18,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:06:02,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:06:47,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:07:33,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:08:19,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:09:22,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:10:35,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:11:30,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:12:28,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:13:43,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:14:53,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:15:50,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:16:42,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:17:34,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:18:38,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:19:57,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:21:12,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:22:27,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:23:38,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:24:41,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:25:51,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:26:59,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:28:18,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:29:20,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:30:28,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:31:48,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:33:06,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:34:24,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:35:40,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:36:39,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:37:47,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:39:02,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:40:24,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:41:32,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:42:44,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:44:07,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:45:32,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:46:56,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:48:31,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:49:53,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:50:57,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:52:06,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:53:19,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:54:25,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:55:42,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:57:01,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:58:28,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 21:59:56,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 22:01:19,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 22:02:36,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 22:03:49,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 22:05:06,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 22:06:20,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 22:07:41,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 22:08:56,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 22:10:28,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:18:37,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:20:23,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:21:58,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:24:53,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:26:48,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:28:57,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:30:41,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:31:49,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:32:58,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:34:37,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:35:31,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:40:25,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:43:45,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:46:14,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:48:43,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:51:56,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:53:53,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-15 23:55:52,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 01:01:16,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 01:58:48,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 02:56:07,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 03:00:06,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 03:02:09,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 03:13:00,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 03:15:18,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 03:26:02,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 03:30:16,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 03:40:02,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 05:47:45,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+real data,First-pass OLS Estimate,,,,,0,,,2.491,-1.109,3.125,2.823,0.326,-0.001,,2022-12-16 06:45:22,This is the first-pass OLS estimate of b?? and ? using real data (using GLS with the identity matrix).
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.
+,,,,,,,,,,,,,,,,,Row intentionally left blank for visual reasons.

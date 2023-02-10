@@ -1,0 +1,21 @@
+# Chrome tabs:
+https://www.google.com/search?q=bias+in+estimating+autoregressive+correlation&rlz=1C1ONGR_enUS1005US1005&oq=bias+in+estimating+autoregressive+correlation&aqs=chrome..69i57j33i160l3j33i299.28864j1j7&sourceid=chrome&ie=UTF-8
+
+http://stat.wharton.upenn.edu/~steele/Courses/956/Resource/YWSourceFiles/ShamanStine88.pdf
+
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5227053/
+
+https://www.google.com/search?q=time+series+autoregression+estimation+julia&rlz=1C1ONGR_enUS1005US1005&sxsrf=ALiCzsZ2jXhn6bT2sa2WYISyswZkCoS28g%3A1672036103254&ei=Bz-pY7qVD87LkPIP7KiHuAU&ved=0ahUKEwj6tPHv05b8AhXOJUQIHWzUAVcQ4dUDCBA&uact=5&oq=time+series+autoregression+estimation+julia&gs_lcp=Cgxnd3Mtd2l6LXNlcnAQAzIFCCEQoAEyBQghEKABMgUIIRCgATIFCCEQoAE6CggAEEcQ1gQQsAM6BQghEKsCOggIIRAWEB4QHToKCCEQFhAeEA8QHUoECEEYAEoECEYYAFDvAVjCC2DUDGgBcAF4AIAB8gOIAfsFkgEHMC4yLjQtMZgBAKABAcgBCMABAQ&sclient=gws-wiz-serp
+
+https://discourse.julialang.org/t/time-series-in-julia-working-list/62539/4
+
+https://lampspuc.github.io/StateSpaceModels.jl/latest/examples/
+
+
+## estimating covariance
+https://web.stanford.edu/~boyd/papers/pdf/forecasting_covariances.pdf
+
+
+
+NEXT:
+- check if sigma_a is squared -- does the LL function gradient keep increasing when sigma_a^2 is negative?

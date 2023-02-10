@@ -21,6 +21,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r R packages, include=F}
+install.pack
 library(JuliaCall)  # must load this to run Julia in R markdown
 ```
 
