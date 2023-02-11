@@ -1132,29 +1132,37 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100)
         write_estimation_df_notrend(result_df)
     end
 end
-test_simulated_data_with_no_trends(Nsteps = 4, Nsim = 20)
+#@time test_simulated_data_with_no_trends(Nsteps = 2, Nsim = 20)
 
 
-    df = @chain read_estimation_df_notrend() begin
-        groupby([:σₐ²_true, :σᵤ²_true])
-        @combine(:abias = mean((:σₐ²_est - :σₐ²_true)./:σₐ²_true),
-                :ubias = mean((:σᵤ²_est - :σᵤ²_true)./:σᵤ²_true))
-    end
+
+
 
 function stats_simulated_estimates_with_no_trends()
     # Load estimation results from simulations
-    df = read_estimation_df_notrend()
-        
-        # @rsubset :Year >= 1945 && :Year < 1945+T && :group ∈ ["USA","EU","BRIC","Other"][1:N]
-        # @transform(:group = get.(Ref(country2num), :group, missing))
-        # @select(:t = :time .- 44,
-        #         :i = categorical(:group),
-        #         :eᵢₜ = :CO2)
-        # @orderby(:t, :i)
-    @by read_estimation_df_notrend() :σₐ²_true :σᵤ²_true begin
-        :abias = 
-        :sx = std(:x)
+    df = @chain read_estimation_df_notrend() begin
+        groupby([:σₐ²_true, :σᵤ²_true])
+        @combine(:abias = mean(abs.((:σₐ²_est - :σₐ²_true)./:σₐ²_true)),
+                :ubias = mean(abs.((:σᵤ²_est - :σᵤ²_true)./:σᵤ²_true)))
     end
+
+    x = unique(df.σₐ²_true)
+    n = length(x)
+    za = reshape(df.abias, n, n)
+    zu = reshape(df.ubias, n, n)
+
+    heatmap(x, x, log.(abs.(za)), xlabel="true σₐ²", ylabel="true σᵤ²")
+    
+    fontsize = 10
+    ann = [(x[i],x[j], text(round(za[j,i], digits=1), fontsize, :gray, :center))
+                for i in 1:n for j in 1:n]
+    annotate!(ann, linecolor=:white)
+
+    heatmap(x, x, log.(abs.(zu)))
+    fontsize = 10
+    ann = [(x[i],x[j], text(round(zu[j,i], digits=1), fontsize, :gray, :center))
+                for i in 1:n for j in 1:n]
+    annotate!(ann, linecolor=:white)
 end
 
 
