@@ -24,6 +24,10 @@ import Revise
 Revise.includet("reg_utils.jl")  # mygls()
 
 
+#=
+]add Random Distributions DataFrames DataFramesMeta CategoricalArrays LinearAlgebra StatsModels StatsPlots GLM Optim FiniteDifferences Dates Latexify Logging CSV Revise
+=#
+
 """
 NOTES:
 Purpose: Estimate the parameters ρ, σₐ², σᵤ² of Larry Karp's emissions
@@ -643,9 +647,9 @@ function write_estimation_df(df; N=2)
 end
 
 
-function write_estimation_df_notrend(df)
+function write_estimation_df_notrend(df, search_start)
     # Save dataframe
-    filepath = "../../data/temp/simulation_estimation_results_log.csv"
+    filepath = "../../data/temp/simulation_estimation_results_log_start$search_start.csv"
     if isfile(filepath)
         CSV.write(filepath, df, append=true)
     else
@@ -653,8 +657,8 @@ function write_estimation_df_notrend(df)
     end
 end
 
-function read_estimation_df_notrend()
-    filepath = "../../data/temp/simulation_estimation_results_log.csv"
+function read_estimation_df_notrend(search_start)
+    filepath = "../../data/temp/simulation_estimation_results_log_start$search_start.csv"
     df = CSV.read(filepath, DataFrame)
 end
 
@@ -1100,7 +1104,7 @@ generated with no trends (b₀, β = 0). Then it uses the ML method to estimate 
 Nsteps = # of "true" σ² values in array to test (so full set of pairs is Nsteps × Nsteps)
 Nsim = # of simulated datasets to create for each "true" σ² value pair
 """
-function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100)
+function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100, search_start = 0.1)
     # Nsteps = 2; Nsim = 10  # temp
     N = 4; T = 60  # 1945-2005
     ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
@@ -1108,19 +1112,23 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100)
     σ²range = range(1e-4, 2*σ²base, length=Nsteps)
 
     # Define a short analysis function that just takes the data
-    θ₀ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)
+    # search_start = σ²base
+    # search_start = 0.1
+    θ₀ = (ρ=ρ, σₐ²=search_start, σᵤ²=search_start)
     # θ₀ = [ρ, σₐ², σᵤ²]
     # θ₀ = [ρ, 1e-3, 1e-3]
     θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
     θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
 
     # For each pair of "true" σₐ², σᵤ² values
+    total = length(σ²range)^2; i = 0
     for σₐ² in σ²range, σᵤ² in σ²range
         result_df = create_simulation_results_df()
         # σₐ², σᵤ² = σ²range[1], σ²range[1]
         θ = (ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ²)
         # Simulate and estimate Nsim times for these σ values
-        println("\n\n(σₐ²=$σₐ², σᵤ²=$σᵤ²) Running $Nsim simulations")
+        progress = 
+        println("\n\n(σₐ²=$σₐ², σᵤ²=$σᵤ²) Running $Nsim simulations $(round(i/total*100))%")
         Threads.@threads for seed in 1:Nsim
             estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
                 θLB, θUB,
@@ -1129,31 +1137,22 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100)
             # This saves the estimation results to data/temp/simulation_estimation_results_log.csv
         end
         # Save dataframe of results
-        write_estimation_df_notrend(result_df)
+        write_estimation_df_notrend(result_df, search_start)
+        i += 1
     end
 end
-test_simulated_data_with_no_trends(Nsteps = 4, Nsim = 20)
+Threads.nthreads()
+# tested with 2, 20
+# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 0.1)
+@time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 10.0)
 
-
-    df = @chain read_estimation_df_notrend() begin
-        groupby([:σₐ²_true, :σᵤ²_true])
-        @combine(:abias = mean((:σₐ²_est - :σₐ²_true)./:σₐ²_true),
-                :ubias = mean((:σᵤ²_est - :σᵤ²_true)./:σᵤ²_true))
-    end
 
 function stats_simulated_estimates_with_no_trends()
     # Load estimation results from simulations
-    df = read_estimation_df_notrend()
-        
-        # @rsubset :Year >= 1945 && :Year < 1945+T && :group ∈ ["USA","EU","BRIC","Other"][1:N]
-        # @transform(:group = get.(Ref(country2num), :group, missing))
-        # @select(:t = :time .- 44,
-        #         :i = categorical(:group),
-        #         :eᵢₜ = :CO2)
-        # @orderby(:t, :i)
-    @by read_estimation_df_notrend() :σₐ²_true :σᵤ²_true begin
-        :abias = 
-        :sx = std(:x)
+    df = @chain read_estimation_df_notrend(0.1) begin
+        groupby([:σₐ²_true, :σᵤ²_true])
+        @combine(:abias = mean((:σₐ²_est - :σₐ²_true)./:σₐ²_true),
+                :ubias = mean((:σᵤ²_est - :σᵤ²_true)./:σᵤ²_true))
     end
 end
 
