@@ -24,6 +24,10 @@ import Revise
 Revise.includet("reg_utils.jl")  # mygls()
 
 
+#=
+]add Random Distributions DataFrames DataFramesMeta CategoricalArrays LinearAlgebra StatsModels StatsPlots GLM Optim FiniteDifferences Dates Latexify Logging CSV Revise
+=#
+
 """
 NOTES:
 Purpose: Estimate the parameters ρ, σₐ², σᵤ² of Larry Karp's emissions
@@ -209,6 +213,12 @@ end
 # Negative Log Likelihood (want to minimize)
 function nLL(ρ, σₐ², σᵤ², v, N, T)
     V = Σ(ρ,σₐ²,σᵤ²,N,T)
+    nLL = (1/2) * ( v'*V^-1*v + log(det(big.(V))) )
+    nLL = Float64(nLL)
+    return(nLL)
+end
+function nLL(θ, v, N, T)
+    V = Σ(θ.ρ, θ.σₐ², θ.σᵤ², N, T)
     nLL = (1/2) * ( v'*V^-1*v + log(det(big.(V))) )
     nLL = Float64(nLL)
     return(nLL)
@@ -643,9 +653,9 @@ function write_estimation_df(df; N=2)
 end
 
 
-function write_estimation_df_notrend(df)
+function write_estimation_df_notrend(df, search_start)
     # Save dataframe
-    filepath = "../../data/temp/simulation_estimation_results_log.csv"
+    filepath = "../../data/temp/simulation_estimation_results_log_start$search_start.csv"
     if isfile(filepath)
         CSV.write(filepath, df, append=true)
     else
@@ -653,8 +663,8 @@ function write_estimation_df_notrend(df)
     end
 end
 
-function read_estimation_df_notrend()
-    filepath = "../../data/temp/simulation_estimation_results_log.csv"
+function read_estimation_df_notrend(search_start)
+    filepath = "../../data/temp/simulation_estimation_results_log_start$search_start.csv"
     df = CSV.read(filepath, DataFrame)
 end
 
@@ -1100,7 +1110,7 @@ generated with no trends (b₀, β = 0). Then it uses the ML method to estimate 
 Nsteps = # of "true" σ² values in array to test (so full set of pairs is Nsteps × Nsteps)
 Nsim = # of simulated datasets to create for each "true" σ² value pair
 """
-function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100)
+function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100, search_start = 0.1)
     # Nsteps = 2; Nsim = 10  # temp
     N = 4; T = 60  # 1945-2005
     ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
@@ -1108,20 +1118,24 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100)
     σ²range = range(1e-4, 2*σ²base, length=Nsteps)
 
     # Define a short analysis function that just takes the data
-    θ₀ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)
+    # search_start = σ²base
+    # search_start = 0.1
+    θ₀ = (ρ=ρ, σₐ²=search_start, σᵤ²=search_start)
     # θ₀ = [ρ, σₐ², σᵤ²]
     # θ₀ = [ρ, 1e-3, 1e-3]
     θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
     θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
 
     # For each pair of "true" σₐ², σᵤ² values
+    total = length(σ²range)^2; i = 0
     for σₐ² in σ²range, σᵤ² in σ²range
         result_df = create_simulation_results_df()
         # σₐ², σᵤ² = σ²range[1], σ²range[1]
         θ = (ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ²)
         # Simulate and estimate Nsim times for these σ values
-        println("\n\n(σₐ²=$σₐ², σᵤ²=$σᵤ²) Running $Nsim simulations")
+        println("\n\n(σₐ²=$σₐ², σᵤ²=$σᵤ²) Running $Nsim simulations $(round(i/total*100))%")
         Threads.@threads for seed in 1:Nsim
+            
             estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
                 θLB, θUB,
                 print_results = false, data_type = "simulated data",
@@ -1129,41 +1143,149 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100)
             # This saves the estimation results to data/temp/simulation_estimation_results_log.csv
         end
         # Save dataframe of results
-        write_estimation_df_notrend(result_df)
+        write_estimation_df_notrend(result_df, search_start)
+        i += 1
     end
 end
-#@time test_simulated_data_with_no_trends(Nsteps = 2, Nsim = 20)
+
+σ²base = 3.6288344
+# Ran the below lines on the department server, set with 8 cores in settings.json "julia.NumThreads": "8"
+# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 3.6288344)
+# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 0.1)
+# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 10.0)
 
 
-
-
-
-function stats_simulated_estimates_with_no_trends()
+function stats_simulated_estimates_with_no_trends(search_start)
     # Load estimation results from simulations
-    df = @chain read_estimation_df_notrend() begin
+    df = @chain read_estimation_df_notrend(search_start) begin
         groupby([:σₐ²_true, :σᵤ²_true])
-        @combine(:abias = mean(abs.((:σₐ²_est - :σₐ²_true)./:σₐ²_true)),
-                :ubias = mean(abs.((:σᵤ²_est - :σᵤ²_true)./:σᵤ²_true)))
+        @combine(
+            :MAbias_a = mean(abs.(:σₐ²_est - :σₐ²_true)),
+            :MAbias_u = mean(abs.(:σᵤ²_est - :σᵤ²_true)),
+            :Mbias_a = mean(:σₐ²_est - :σₐ²_true),
+            :Mbias_u = mean(:σᵤ²_est - :σᵤ²_true),
+            :MAbias_perc_a = mean(abs.((:σₐ²_est - :σₐ²_true)./:σₐ²_true)),
+            :MAbias_perc_u = mean(abs.((:σᵤ²_est - :σᵤ²_true)./:σᵤ²_true)),
+            :Mbias_perc_a = mean((:σₐ²_est - :σₐ²_true)./:σₐ²_true),
+            :Mbias_perc_u = mean((:σᵤ²_est - :σᵤ²_true)./:σᵤ²_true)
+        )
     end
 
+    # Plot Mean Absolute Bias
     x = unique(df.σₐ²_true)
     n = length(x)
-    za = reshape(df.abias, n, n)
-    zu = reshape(df.ubias, n, n)
-
-    heatmap(x, x, log.(abs.(za)), xlabel="true σₐ²", ylabel="true σᵤ²")
+    za = reshape(df.MAbias_a, n, n)
+    zu = reshape(df.MAbias_u, n, n)
+    titlea = "Mean Absolute bias in σₐ² estimation \n(search starting at white lines, 100 simulations each)\n"
+    titleu = "Mean Absolute bias in σᵤ² estimation \n(search starting at white lines, 100 simulations each)\n"
+    xlabel = "true σₐ²"
+    ylabel = "true σᵤ²"
+    p1 = heatmap_with_values_crosshairs(x, x, za, titlea, xlabel, ylabel; crosshairs=[search_start, search_start])
+    p2 = heatmap_with_values_crosshairs(x, x, zu, titleu, xlabel, ylabel; crosshairs=[search_start, search_start])
     
-    fontsize = 10
-    ann = [(x[i],x[j], text(round(za[j,i], digits=1), fontsize, :gray, :center))
-                for i in 1:n for j in 1:n]
-    annotate!(ann, linecolor=:white)
+    filepath = "../../output/simulation_plots/MLE_bias/Mean Absolute bias start $search_start.png"
+    savefig(plot(p1,p2, layout=(2,1), size=(700,1000)), filepath)
 
-    heatmap(x, x, log.(abs.(zu)))
-    fontsize = 10
-    ann = [(x[i],x[j], text(round(zu[j,i], digits=1), fontsize, :gray, :center))
-                for i in 1:n for j in 1:n]
+    # Plot Mean Bias
+    za = reshape(df.Mbias_a, n, n)
+    zu = reshape(df.Mbias_u, n, n)
+    titlea = "Mean bias in σₐ² estimation \n(search starting at white lines, 100 simulations each)\n"
+    titleu = "Mean bias in σᵤ² estimation \n(search starting at white lines, 100 simulations each)\n"
+    p1 = heatmap_with_values_crosshairs(x, x, za, titlea, xlabel, ylabel; crosshairs=[search_start, search_start])
+    p2 = heatmap_with_values_crosshairs(x, x, zu, titleu, xlabel, ylabel; crosshairs=[search_start, search_start])
+    
+    filepath = "../../output/simulation_plots/MLE_bias/Mean bias start $search_start.png"
+    savefig(plot(p1,p2, layout=(2,1), size=(700,1000)), filepath)
+
+    # Plot Mean Absolute Bias as a percentage of the true parameter value
+    za = reshape(df.MAbias_perc_a, n, n)
+    zu = reshape(df.MAbias_perc_u, n, n)
+    titlea = "Mean Absolute bias % in σₐ² estimation \n(search starting at white lines, 100 simulations each)\n"
+    titleu = "Mean Absolute bias % in σᵤ² estimation \n(search starting at white lines, 100 simulations each)\n"
+    xlabel = "true σₐ²"
+    ylabel = "true σᵤ²"
+    p1 = heatmap_with_values_crosshairs(x, x, za, titlea, xlabel, ylabel; crosshairs=[search_start, search_start])
+    p2 = heatmap_with_values_crosshairs(x, x, zu, titleu, xlabel, ylabel; crosshairs=[search_start, search_start])
+    
+    filepath = "../../output/simulation_plots/MLE_bias/Mean Absolute bias percentage start $search_start.png"
+    savefig(plot(p1,p2, layout=(2,1), size=(700,1000)), filepath)
+
+    # Plot Mean Bias as a percentage of the true parameter value
+    za = reshape(df.Mbias_perc_a, n, n)
+    zu = reshape(df.Mbias_perc_u, n, n)
+    titlea = "Mean bias % in σₐ² estimation \n(search starting at white lines, 100 simulations each)\n"
+    titleu = "Mean bias % in σᵤ² estimation \n(search starting at white lines, 100 simulations each)\n"
+    p1 = heatmap_with_values_crosshairs(x, x, za, titlea, xlabel, ylabel; crosshairs=[search_start, search_start])
+    p2 = heatmap_with_values_crosshairs(x, x, zu, titleu, xlabel, ylabel; crosshairs=[search_start, search_start])
+    
+    filepath = "../../output/simulation_plots/MLE_bias/Mean bias percentage start $search_start.png"
+    savefig(plot(p1,p2, layout=(2,1), size=(700,1000)), filepath)
+end
+stats_simulated_estimates_with_no_trends(σ²base)
+stats_simulated_estimates_with_no_trends(0.1)
+stats_simulated_estimates_with_no_trends(10.0)
+
+function heatmap_with_values_crosshairs(x, y, z_matrix,
+        title, xlabel, ylabel; crosshairs=nothing, fontsize = 10, round_digits=1)
+
+    heatmap(x, y, log.(abs.(z_matrix)), xlabel=xlabel, ylabel=ylabel, legend=nothing)
+    title!(title)
+    if !isnothing(crosshairs)
+        vline!([crosshairs[1]], color=:white, label=nothing, linewidth=3)
+        hline!([crosshairs[2]], color=:white, label=nothing, linewidth=3)
+    end
+
+    # Not sure the order x,y should be in -- I've only used it for x,x, so order was unimportant
+    ann = [(x[i],y[j], text(round(z_matrix[j,i], digits=round_digits), fontsize, :gray, :center))
+                for i in 1:length(x) for j in 1:length(y)]
     annotate!(ann, linecolor=:white)
 end
+
+
+
+"""
+Want to plot the LL function for simulated data -- how much does it change with different seeds?
+"""
+# function plot_simulated_LL(θ, seed)
+    # Generate data
+    seed = 1
+    N,T = 4,60
+    ρ = 0.8785
+    θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)
+    data = dgp(θ, N, T, seed)
+
+    using ProgressMeter
+    f(σₐ², σᵤ²) = -nLL(θ.ρ, σₐ², σᵤ², data.vᵢₜ, N, T)
+    f_a(σₐ²) = -nLL(θ.ρ, σₐ², θ.σᵤ², data.vᵢₜ, N, T)
+    f_u(σᵤ²) = -nLL(θ.ρ, θ.σₐ², σᵤ², data.vᵢₜ, N, T)
+    n = 20
+    x=range(0.01, 10, length=n)
+    z = Float64[]
+    @showprogress 1 "Computing LL" for σₐ² in x, σᵤ² in x
+        push!(z, f(σₐ², σᵤ²))
+    end
+    z_mat = reshape(z, n, n)
+    z_mat = 
+
+    p3 = surface(x, x, z_mat, # xscale = :log10, yscale = :log10,
+        xlabel="σα²",
+        ylabel="σμ²",
+        zlabel="log₁₀(LL)",
+        # zlims = (-3.4849, -3.48488),
+        title="Log Likelihood")
+    p3
+
+    # z_mat = [f(σₐ², σᵤ²) for σₐ² in ]
+    # @time plot(f_a, 0.01, 10)
+    println("Plotting....")
+    y = f_u.(x)
+    # @time plot(x, y)
+    plot(x, -y, yaxis=:log, xlabel="")
+    vline!([σ²base])
+    # @time plot(f_u, 0.01, 10, yaxis=:log)
+    
+# end
+
 
 
 function test_starting_real_estimation()
