@@ -6,3 +6,6 @@ starting at  :ρ => 0.8785, :σᵤ² => 3.6288344, :σₐ² => 3.6288344
 
 The LL is positive (900s). But it should be negative; this indicates the likelihood is > 1. Check the nLL function at the starting values. Is it something to do with the errors v?
 Examine the errors v.
+
+LIKELIHOOD CAN BE >1:
+Since the likelihood is a product of probability densities, if the distribution is small (mostly inside [0,1]) then the value of the density can be >1 and the product of many densities may be >1.

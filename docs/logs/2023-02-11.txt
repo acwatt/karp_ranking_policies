@@ -1,0 +1,15 @@
+Savio:
+- Started a Savio account, waiting for Larry to approve
+
+Bias in MLE:
+- Mapped average bias from 100 simulated datasets at range of different sigma values. See output\simulation_plots\MLE_bias
+- Appears that the starting value has a large impact on the bias.
+- Need to use multistart -- could manually do it, just comparing the LL result from many places in the dist. 
+- Is there an optim.jl way to multistart? Maybe https://github.com/tpapp/MultistartOptimization.jl
+- Shortcut: calculate LL over grid and use max location as starting value of search
+- How much does the value of rho impact the bias?
+
+
+next:
+- develop a multistart search algo and map the bias (need to define an appropriate search range)
+	- could I assume sigma_a is zero, what would sigma_u be? Use that as center of search radius
