@@ -19,6 +19,7 @@ using Latexify  # output symbolic expressions as latex code
 # @force using Reduce.Algebra  # to extend native functions to Sybmol/Expr types
 using Logging
 import CSV
+using ProgressMeter
 
 import Revise
 Revise.includet("reg_utils.jl")  # mygls()
@@ -1313,7 +1314,7 @@ function test_simulated_data_optim_algo(; Nsteps = 4, Nsim = 100, search_start =
     end
 end
 
-σ²base = 3.6288344
+σ²base = 3.6288344  
 # Ran the below lines on the department server, set with 8 cores in settings.json "julia.NumThreads": "8"
 # @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 3.6288344)
 # @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 0.1)
@@ -1408,34 +1409,231 @@ function heatmap_with_values_crosshairs(x, y, z_matrix,
                 for i in 1:length(x) for j in 1:length(y)]
     annotate!(ann, linecolor=:white)
 end
+# The functions below generate bias heatmaps in output\simulation_plots\MLE_bias
+# stats_simulated_estimates_with_no_trends(σ²base)
+# stats_simulated_estimates_with_no_trends(0.1)
+# stats_simulated_estimates_with_no_trends(10.0)
 
+
+
+
+
+
+
+function generate_boundaries(df, θLB, θUB, critical_percentile)
+    # Filter data to max 10% of grid values from this recursion
+    crit_LL = quantile(df.LL, critical_percentile)
+    df2 = @subset(df, :LL .>= crit_LL)
+    println("df $(size(df)) → df2 $(size(df2))")
+    # Create new lower and upper bounds of the higher-resolution grid
+    # Assuming the function is concave, this will create a grid around the max (hopefully)
+    θLB_new = (σₐ² = minimum(df2.σₐ²), σᵤ² = minimum(df2.σᵤ²))
+    θUB_new = (σₐ² = maximum(df2.σₐ²), σᵤ² = maximum(df2.σᵤ²))
+    # Check if new boundaries are the same as old boundaries
+    if θLB_new == θLB && θUB_new == θUB
+        if (1-critical_percentile) <= 0.01
+            println("Minimum critical percentile reached $(round(critical_percentile, digits=4)), exiting recursion.")
+            return df
+        end
+        critical_percentile = critical_percentile * 1.1
+        println("Grid boundaries unchanged... shrinking critical percentile to $critical_percentile")
+        return generate_boundaries(df, θLB, θUB, critical_percentile)
+    end
+    return θLB_new, θUB_new
+end
+
+function recursive_LL_evaluation(f, θLB, θUB, n; df = nothing, dist_threshold=0.01, critical_percentile = 0.9)
+    # Take input: grid endpoints, number of grid points, optional: dataframe
+    println("θLB: $θLB"); println("θUB: $θUB")
+    # Create grid of sigmas to evaluate function over
+    αrange = range(θLB.σₐ², θUB.σₐ², length=n)
+    μrange = range(θLB.σᵤ², θUB.σᵤ², length=n)
+    # Check if distance between grid points is smaller than resolution threshold
+    αdist = αrange[2] - αrange[1]
+    μdist = μrange[2] - μrange[1]
+    # If grid gap distance is < threshold, return dataframe
+    grid_dist = max(αdist, μdist)
+    if grid_dist < dist_threshold
+        println("RESOLUTION REACHED: Stopping function mapping at grid distance $grid_dist")
+        @info "RESOLUTION REACHED: Stopping function mapping at grid distance $grid_dist"
+        return df
+    end
+    @info "Mapping function at grid distance $grid_dist, $((αdist, μdist))"
+    println("Mapping function at grid distance $grid_dist, $((αdist, μdist))")
+    # If not under threshold, evaluate in new grid and add values to df
+    σpairs = [(σₐ², σᵤ²) for σₐ² in αrange for σᵤ² in μrange]
+    p = Progress(n^2)
+    # Create pre-defined list to store values to avoid threadding issues
+    LL_list = Array{NamedTuple{}}(undef, n^2)
+    Threads.@threads for i ∈ 1:n^2
+        (σₐ², σᵤ²) = σpairs[i]
+        LL = f(σₐ², σᵤ²)
+        LL_list[i] = (σₐ²=σₐ², σᵤ²=σᵤ², LL=LL)
+        next!(p)
+    end
+    # Create empty dataframe and fill with tuple values
+    df2 = DataFrame(σₐ²=Float64[], σᵤ²=Float64[], LL=Float64[])
+    for t in LL_list; push!(df2, t); end
+    
+    # Combine previous dataframe with current dataframe, if previous df exists
+    df = isnothing(df) ? df2 : reduce(vcat, [df, df2])
+    # Create new grid boundaries based on old
+    θLB_new, θUB_new = generate_boundaries(df2, θLB, θUB, critical_percentile)
+
+    # Evaluate again over new grid
+    return recursive_LL_evaluation(f, θLB_new, θUB_new, n; 
+        df = df, dist_threshold=dist_threshold, critical_percentile=critical_percentile)
+end
+
+
+
+"""
+Find the true max of the LL function for each seeded simulated data.
+Use these "true" maximums to compare to the optim.jl algos for the same seed.
+"""
+function find_manual_simulation_maximum(θ, seed)
+    # Generate data
+    # seed = 1
+    N,T = 4,60
+    data = dgp(θ, N, T, seed)
+    v = data.vᵢₜ
+    f(σₐ², σᵤ²) = -nLL(θ.ρ, σₐ², σᵤ², v, N, T)
+    θLB0 = (σₐ² = 0.1, σᵤ² = 0.1)
+    θUB0 = (σₐ² = 10, σᵤ² = 10)
+    n = 10
+    @time df = recursive_LL_evaluation(f, θLB0, θUB0, n, dist_threshold=1e-4)
+    sort!(df, :LL)
+    r1 = df[end,:]
+    df2 = DataFrame(seed = [seed], ρ = [θ.ρ], σₐ² = [θ.σₐ²], σᵤ² = [θ.σᵤ²],
+        σₐ²hat = [r1.σₐ²], σᵤ²hat = [r1.σᵤ²], LL = [r1.LL])
+    return df2
+end
+
+function save_manual_simulation_maximums()
+    Nsim = 100
+    σ²base = 3.6288344; ρ = 0.8785
+    θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)
+    for seed in 1:Nsim
+        df = find_manual_simulation_maximum(θ, seed)
+        filepath = "../../data/temp/LL/LL_simulated_manualmax.csv"
+        if isfile(filepath)
+            CSV.write(filepath, df, append=true)
+        else
+            CSV.write(filepath, df)
+        end
+    end
+
+end
+
+save_manual_simulation_maximums()
 
 
 """
 Want to plot the LL function for simulated data -- how much does it change with different seeds?
 """
-# function plot_simulated_LL(θ, seed)
-    # Generate data
-    seed = 1
-    N,T = 4,60
-    ρ = 0.8785
-    θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)
-    θ₀ = (ρ=ρ, σₐ²=2*σ²base, σᵤ²=2*σ²base)
-    data = dgp(θ, N, T, seed)
-    v = data.vᵢₜ
+function plot_simulated_LL(θ, seed)
+    # SURFACE
+    # using PlotlyJS
+    plotly()
+    # zoom in on the max
+    # df from recursive_LL_evaluation()
+    df2 = unique(df)
+    df2 = sort(df2, :LL)
+    crit_LL = quantile(df2.LL, 0.7)
+    df2 = @subset(df2, :LL .> crit_LL)
+    crit_LL2 = quantile(df2.LL, 0.9)
+    colors = Int.(df2.LL .> crit_LL2) .+ 1
+    colors = colors .+ Int.(df2.LL .== maximum(df2.LL))
+    sum(Int.(df2.LL .== maximum(df2.LL)))
 
-    using ProgressMeter
-    f(σₐ², σᵤ²) = -nLL(θ.ρ, σₐ², σᵤ², data.vᵢₜ, N, T)
-    f_a(σₐ²) = -nLL(θ.ρ, σₐ², θ.σᵤ², data.vᵢₜ, N, T)
-    f_u(σᵤ²) = -nLL(θ.ρ, θ.σₐ², σᵤ², data.vᵢₜ, N, T)
-    n = 20
-    x=range(0.01, 10, length=n)
-    z = Float64[]
-    @showprogress 1 "Computing LL" for σₐ² in x, σᵤ² in x
-        push!(z, f(σₐ², σᵤ²))
+    gr()
+    G = 1_000_000
+    G = 1
+    x = df2.σₐ²*G
+    y = df2.σᵤ²*G
+    z = df2.LL*G
+
+    x1, y1, z1 = last.([x, y, z])
+
+    p=Plots.plot(df2.σₐ²,  df2.σᵤ², df2.LL, zcolor = colors, m = (8, 0.8, Plots.stroke(1)), leg = false, cbar = true, w = 0,
+        title = "Max Point: σₐ²=$x1, \nσᵤ²=$y1, \nLL=$z1")
+    annotate!([last(x)], [last(y)], [], ["$(last(z))"])
+    filepath = "../../output/simulation_plots/LL_function/LL_surface_highres_Sa$(θ.σₐ²)_Su$(θ.σᵤ²).png"
+    Plots.savefig(p, filepath)
+
+
+
+    p=PlotlyJS.plot(
+        df2,
+        x=:σₐ², y=:σᵤ², z=:LL,
+        type="scatter3d", mode="markers",
+        marker=attr(
+            size=12,
+            color=colors,                # set color to an array/list of desired values
+            colorscale="Viridis",   # choose a colorscale
+            opacity=1
+        )
+    )
+    filepath = "../../output/simulation_plots/LL_function/LL_surface_highres_Sa$(θ.σₐ²)_Su$(θ.σᵤ²).png"
+    PlotlyJS.savefig(p, filepath)
+
+
+    # Save data to CSV
+    df = DataFrame(σₐ² = x, σᵤ² = y, LL = z)
+    filepath = "../../data/temp/LL/LL_Sa$(θ.σₐ²)_Su$(θ.σᵤ²)_seed$(seed).csv"
+    if isfile(filepath)
+        CSV.write(filepath, df, append=true)
+    else
+        CSV.write(filepath, df)
     end
-    z_mat = reshape(z, n, n)
-    z_mat = 
+
+
+    X = reshape(x, n, n)  # should be columns of x values (changing across the row - identical rows)
+    Y = reshape(y, n, n)  # should be rows of y values (changing down the column - identical columns)
+    Z = reshape(z, n, n)
+
+
+    # SURFACE
+    # using PlotlyJS
+    plotly()
+    # zoom in on the max
+    df2 = @subset(df, :σₐ² .> 2, :σᵤ² .> 2)  # need to subset the df so that there is still a grid of points
+    x = unique(df2.σₐ²)
+    y = unique(df2.σᵤ²)
+    Z = reshape(df2.LL, length(x), length(y))
+    PlotlyJS.plot(PlotlyJS.surface(x=x, y=y, z=Z),
+        Layout(;title="LogLikelihood for simulated data generated with σ²=$(σ²base)",
+            xaxis=attr(title="σα²"),
+            yaxis=attr(title="σμ²")))
+
+    # CONTOUR
+    PlotlyJS.plot(PlotlyJS.contour(z=Z,
+        x=x, # horizontal axis
+        y=y, # vertical axis
+        contours_start=-341,
+        contours_end=maximum(z),
+        # contours_size=1,
+        contours_coloring="heatmap"),
+        Layout(;title="LogLikelihood for simulated data generated with σ²=$(σ²base)",
+                xaxis=attr(title="σα²"),
+                yaxis=attr(title="σμ²")))
+
+    p6 = PlotlyJS.contour(z=log.(-Z),
+        x=rang, # horizontal axis
+        y=rang, # vertical axis
+        # contours_start=5,
+        # contours_end=log.(-Z)),
+        # contours_size=1,
+        contours_coloring="heatmap")
+    p7 = PlotlyJS.scatter(;x=[], y=[], mode="markers")
+    PlotlyJS.plot(p6)
+
+
+    filepath = "../../output/simulation_plots/LL_function/LL_surface_Sa$(θ.σₐ²)_Su$(θ.σᵤ²).png"
+    savefig(p1, filepath)
+
+
+
 
     p3 = surface(x, x, z_mat, # xscale = :log10, yscale = :log10,
         xlabel="σα²",
@@ -1454,7 +1652,7 @@ Want to plot the LL function for simulated data -- how much does it change with 
     vline!([σ²base])
     # @time plot(f_u, 0.01, 10, yaxis=:log)
     
-# end
+end
 
 
 
