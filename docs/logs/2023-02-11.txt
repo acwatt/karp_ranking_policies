@@ -11,5 +11,14 @@ Bias in MLE:
 
 
 next:
+- compare algo's estimates against "true" maximums in data\temp\LL\LL_simulated_manualmax.csv for seeds 1-100
+- compare different methods (looks like the momentum gradient and conjugate gradient might be good)
+- if close for some, need to test against different underlying sigmas (since seeds 1-100 are only based on sigma_base)
+
+If algos aren't close to true maximums of LL functions:
 - develop a multistart search algo and map the bias (need to define an appropriate search range)
 	- could I assume sigma_a is zero, what would sigma_u be? Use that as center of search radius
+	- Check grid of sigma's for LL value and use maximums as starting points (maybe 10x10 grid, and pick top 5 that aren't adjacent)
+
+Research how to generate MLE SEs: 
+- want to know what range of values rationalize the data... 

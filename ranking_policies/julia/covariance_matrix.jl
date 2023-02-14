@@ -414,7 +414,7 @@ function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
                 analytical = true, method = "gradient decent", show_trace=false
                 )
     println("Starting MLE with $ρstart, $σₐ²start, $σᵤ²start")
-    @info "mymle_2()" ρstart σₐ²start σᵤ²start lower upper analytical method
+    @info "mymle_2()" ρstart σₐ²start σᵤ²start θLB θUB analytical method
 
     # Function of only parameters (given residuals v)
     objective2(σₐ²σᵤ²) = nLL(ρstart, σₐ²σᵤ²[1], σₐ²σᵤ²[2], v, N, T)
@@ -437,6 +437,128 @@ function mymle_2(ρstart, σₐ²start, σᵤ²start, v, N, T;
     return (ρ, σₐ², σᵤ², LL)
 end
 
+
+function mymle_2(θ₀, v, N, T;
+                θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4), θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf), 
+                analytical = true, method = "gradient decent", show_trace=false
+                )
+    println("Starting MLE with $ρstart, $σₐ²start, $σᵤ²start")
+    @info "mymle_2()" θ₀ θLB θUB analytical method
+
+    # Function of only parameters (given residuals v)
+    objective2(σₐ²σᵤ²) = nLL(θ₀.ρ, σₐ²σᵤ²[1], σₐ²σᵤ²[2], v, N, T)
+
+    if analytical   
+        # Analytical gradient with parameter bounds
+        grad2!(storage, σₐ²σᵤ²) = nLL_grad2(storage, σₐ²σᵤ², θ₀.ρ, v, N, T)  # estimating σₐ²σᵤ²
+        optimum = optimize(objective2, grad2!, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], Fminbox(METHOD_MAP[method]),
+                           Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1))
+        
+    else
+        # Calculates gradient with parameter bounds
+        optimum = optimize(objective2, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [σₐ²start, σᵤ²start], Fminbox(METHOD_MAP[method]),
+                           Optim.Options(show_trace = show_trace, show_every=1))
+    end 
+
+    # Return the values
+    LL = -optimum.minimum
+    # ρ, σₐ², σᵤ² = optimum.minimizer
+    ρ, σₐ², σᵤ² = ρstart, optimum.minimizer...
+    return (ρ, σₐ², σᵤ², LL)
+end
+
+function mymle_2_testing_optim_algos(θ₀, v, N, T;
+                θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4), θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf), 
+                analytical = true, method = "gradient decent", show_trace=false
+                )
+    println("Starting MLE with $ρstart, $σₐ²start, $σᵤ²start")
+    @info "mymle_2()" θ₀ θLB θUB analytical method
+
+    # Function of only parameters (given residuals v)
+    objective2(σₐ²σᵤ²) = nLL(θ₀.ρ, σₐ²σᵤ²[1], σₐ²σᵤ²[2], v, N, T)
+    LL_2params(σₐ²σᵤ²) = -nLL(θ₀.ρ, σₐ²σᵤ²[1], σₐ²σᵤ²[2], v, N, T)
+
+    if analytical   
+        # Analytical gradient with parameter bounds
+        grad2!(storage, σₐ²σᵤ²) = nLL_grad2(storage, σₐ²σᵤ², θ₀.ρ, v, N, T)  # estimating σₐ²σᵤ²
+        optimum = optimize(objective2, grad2!, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], Fminbox(METHOD_MAP[method]),
+                           Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1))
+
+        optimum1 = optimize(objective2, grad2!, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], Fminbox(METHOD_MAP["LBFGS"]),
+                           Optim.Options(show_trace = true, show_every=1, g_tol = 1e-8))
+
+        optimum2 = optimize(objective2, grad2!, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], Fminbox(METHOD_MAP["conjugate gradient"]),
+                           Optim.Options(show_trace = true, show_every=1, g_tol = 1e-8))
+
+        optimum3 = optimize(objective2, grad2!, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], Fminbox(METHOD_MAP["gradient decent"]),
+                           Optim.Options(show_trace = true, show_every=1, g_tol = 1e-8))
+
+        optimum4 = optimize(objective2, grad2!, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], Fminbox(METHOD_MAP["BFGS"]),
+                           Optim.Options(show_trace = true, show_every=1, g_tol = 1e-8))
+
+        optimum5 = optimize(objective2, grad2!, [θ₀.σₐ², θ₀.σᵤ²], METHOD_MAP["momentum gradient"],
+                           Optim.Options(show_trace = true, show_every=1, g_tol = 1e-8))
+
+        optimum6 = optimize(objective2, grad2!, [θ₀.σₐ², θ₀.σᵤ²], METHOD_MAP["accelerated gradient"],
+                           Optim.Options(show_trace = true, show_every=1, g_tol = 1e-8))
+        
+        println("\nLBFGS:")
+        println(optimum1.minimizer)
+        println(optimum1.minimizer .- [θ.σₐ², θ.σᵤ²])
+        println("\nconjugate gradient:")
+        println(optimum2.minimizer)
+        println(optimum2.minimizer .- [θ.σₐ², θ.σᵤ²])
+        println("\ngradient decent:")
+        println(optimum3.minimizer)
+        println(optimum3.minimizer .- [θ.σₐ², θ.σᵤ²])
+        println("\nBFGS:")
+        println(optimum4.minimizer)
+        println(optimum4.minimizer .- [θ.σₐ², θ.σᵤ²])
+        println("\nmomentum gradient:")
+        println(optimum5.minimizer)
+        println(optimum5.minimizer .- [θ.σₐ², θ.σᵤ²])
+        println("\naccelerated gradient:")
+        println(optimum6.minimizer)
+        println(optimum6.minimizer .- [θ.σₐ², θ.σᵤ²])
+        
+    else
+        # Calculates gradient with parameter bounds
+        optimum = optimize(objective2, [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [σₐ²start, σᵤ²start], Fminbox(METHOD_MAP[method]),
+                           Optim.Options(show_trace = show_trace, show_every=1))
+    end 
+
+    # Return the values
+    LL = -optimum.minimum
+    # ρ, σₐ², σᵤ² = optimum.minimizer
+    ρ, σₐ², σᵤ² = ρstart, optimum.minimizer...
+    return (ρ, σₐ², σᵤ², LL)
+end
+
+"""Optimize wrapper for minimizing a function of σₐ², σᵤ²"""
+function myoptimize2(f, g!, θ₀, θLB, θUB, method, show_trace=false)
+    try
+        result = minimize(
+            f, g!, 
+            [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], 
+            Fminbox(METHOD_MAP[method]),
+            Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1)
+        )
+    try
+        result = minimize(
+            f, g!, 
+            [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], 
+            Fminbox(METHOD_MAP[method]),
+            Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1)
+        )
+    catch e
+        if isa(e, DomainError)
+            sqrt(complex(x[2], 0))
+        elseif isa(e, BoundsError)
+            sqrt(x)
+        end
+    end
+    
+end
 
 
 
@@ -608,8 +730,9 @@ create_simulation_results_df() = DataFrame(
     ρ_true = Float64[],   ρ_est = Float64[],    ρ_start = Float64[],    ρ_lower = Float64[],   ρ_upper = Float64[],
     σₐ²_true = Float64[], σₐ²_est = Float64[],  σₐ²_start = Float64[],  σₐ²_lower = Float64[], σₐ²_upper = Float64[],
     σᵤ²_true = Float64[], σᵤ²_est = Float64[],  σᵤ²_start = Float64[],  σᵤ²_lower = Float64[], σᵤ²_upper = Float64[],
-    LL = Float64[], runtime = [], notes=[]
+    LL = Float64[], method=[], runtime = [], notes=[]
 )
+
 function add_row_simulation_results!(df, seed, type, N, T;
         θhat = missing, θ₀ = missing, θLB = missing, θUB = missing,
         LL=missing, runtime=missing, notes=missing, method = missing)
@@ -653,9 +776,9 @@ function write_estimation_df(df; N=2)
 end
 
 
-function write_estimation_df_notrend(df, search_start)
+function write_estimation_df_notrend(df, search_start; suffix="")
     # Save dataframe
-    filepath = "../../data/temp/simulation_estimation_results_log_start$search_start.csv"
+    filepath = "../../data/temp/simulation_estimation$(suffix)_results_log_start$search_start.csv"
     if isfile(filepath)
         CSV.write(filepath, df, append=true)
     else
@@ -970,12 +1093,11 @@ function estimate_simulation_params_notrend(N, T, θ, θ₀, seed, df;
     note = "Estimated parameters after simple MLE with no GLS (no trend)"
     push!(df, (
         seed = seed, N = N, T = T,
-        ρ_true = θ.ρ, σₐ²_true = θ.σₐ², σᵤ²_true = θ.σᵤ²,
-        ρ_est = θhat.ρ, σₐ²_est = θhat.σₐ², σᵤ²_est = θhat.σᵤ²,
-        ρ_start = θ₀.ρ, σₐ²_start = θ₀.σₐ², σᵤ²_start = θ₀.σᵤ², 
-        ρ_lower = θLB.ρ, σₐ²_lower = θLB.σₐ², σᵤ²_lower = θLB.σᵤ², 
-        ρ_upper = θUB.ρ, σₐ²_upper = θUB.σₐ², σᵤ²_upper = θUB.σᵤ², 
-        LL = LL, runtime = Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"), notes = note
+        ρ_true   = θ.ρ,     ρ_est = θhat.ρ,      ρ_start = θ₀.ρ,      ρ_lower = θLB.ρ,     ρ_upper = θUB.ρ,
+        σₐ²_true = θ.σₐ², σₐ²_est = θhat.σₐ²,  σₐ²_start = θ₀.σₐ²,  σₐ²_lower = θLB.σₐ², σₐ²_upper = θUB.σₐ²,
+        σᵤ²_true = θ.σᵤ², σᵤ²_est = θhat.σᵤ²,  σᵤ²_start = θ₀.σᵤ²,  σᵤ²_lower = θLB.σᵤ², σᵤ²_upper = θUB.σᵤ²,
+        LL = LL, method = method,
+        runtime = Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS"), notes = note
     ))
 
     # print results
@@ -1095,10 +1217,6 @@ end
 # 2022-12-15
 
 
-function gen_results_df(params)
-
-end
-
 
 """
 Estimates σ's over a range of simulated data generated from a range of σ values.
@@ -1111,18 +1229,13 @@ Nsteps = # of "true" σ² values in array to test (so full set of pairs is Nstep
 Nsim = # of simulated datasets to create for each "true" σ² value pair
 """
 function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100, search_start = 0.1)
-    # Nsteps = 2; Nsim = 10  # temp
     N = 4; T = 60  # 1945-2005
     ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
     σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
     σ²range = range(1e-4, 2*σ²base, length=Nsteps)
 
     # Define a short analysis function that just takes the data
-    # search_start = σ²base
-    # search_start = 0.1
     θ₀ = (ρ=ρ, σₐ²=search_start, σᵤ²=search_start)
-    # θ₀ = [ρ, σₐ², σᵤ²]
-    # θ₀ = [ρ, 1e-3, 1e-3]
     θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
     θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
 
@@ -1130,7 +1243,6 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100, search_sta
     total = length(σ²range)^2; i = 0
     for σₐ² in σ²range, σᵤ² in σ²range
         result_df = create_simulation_results_df()
-        # σₐ², σᵤ² = σ²range[1], σ²range[1]
         θ = (ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ²)
         # Simulate and estimate Nsim times for these σ values
         println("\n\n(σₐ²=$σₐ², σᵤ²=$σᵤ²) Running $Nsim simulations $(round(i/total*100))%")
@@ -1140,10 +1252,63 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100, search_sta
                 θLB, θUB,
                 print_results = false, data_type = "simulated data",
                 analytical = true, method = "gradient decent")
-            # This saves the estimation results to data/temp/simulation_estimation_results_log.csv
         end
         # Save dataframe of results
         write_estimation_df_notrend(result_df, search_start)
+        # This saves the estimation results to data/temp/simulation_estimation_results_log.csv
+        i += 1
+    end
+end
+
+"""
+Estimates σ's using different optim.jl algos to test which has least bias when 
+the starting value is "far away". From previous testing in test_simulated_data_with_no_trends(),
+I found the starting the search at both σ² = σ²base = 3.6288344 when the true σ² were
+2*σ²base resulted in significant bias when using gradient decent. So this seems like a good case
+to test gradient decent against other algos. Might even need to test a manual multi-start
+algo that optimizes from multiple starting values.
+
+- Create simulated data from both σ² = σ²base, treating trends and fixed effects as zero (b₀, β = 0).
+- This eliminates the GLS step (thus no iteration is needed).
+- Just testing if we can accurately find the maximizing MLE.
+- Simulate and repeat estimation Nsim times, testing for each optim.jl algo
+
+Question: Does the true σ² values maximize ML?
+
+Nsteps = # of "true" σ² values in array to test (so full set of pairs is Nsteps × Nsteps)
+Nsim = # of simulated datasets to create for each "true" σ² value pair
+search_start = value of both σ²'s to start optimization search at
+"""
+function test_simulated_data_optim_algo(; Nsteps = 4, Nsim = 100, search_start = 0.1)
+    # Nsteps = 2; Nsim = 1  # temp
+    N = 4; T = 60  # 1945-2005
+    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
+    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
+
+    # Define a short analysis function that just takes the data
+    θ = (ρ=ρ, σₐ²=2*σ²base, σᵤ²=2*σ²base)
+    θ₀ = (ρ=ρ, σₐ²=search_start, σᵤ²=search_start)
+    θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
+    θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
+
+    # For each pair of "true" σₐ², σᵤ² values
+    methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS", "momentum gradient", "accelerated gradient"]
+    method = "momentum gradient"
+    total = length(methods); i = 0
+    for method in methods
+        result_df = create_simulation_results_df()
+        # Simulate and estimate Nsim times for these σ values
+        @info "\n\n(σₐ²=$(θ.σₐ²), σᵤ²=$(θ.σᵤ²)) Running $Nsim simulations - $(round(i/total*100))% of outer loop"
+        Threads.@threads for seed in 1:Nsim
+            
+            estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
+                θLB, θUB,
+                print_results = false, data_type = "simulated data",
+                analytical = true, method = method)
+        end
+        # Save dataframe of results
+        write_estimation_df_notrend(result_df, search_start, suffix="_methods")
+        # This saves the estimation results to data/temp/simulation_estimation_methods_results_log.csv
         i += 1
     end
 end
@@ -1152,7 +1317,10 @@ end
 # Ran the below lines on the department server, set with 8 cores in settings.json "julia.NumThreads": "8"
 # @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 3.6288344)
 # @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 0.1)
-# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 10.0)
+# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 10)
+
+# Ran the below lines to test which optim.jl algos perform the best
+@time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
 
 
 function stats_simulated_estimates_with_no_trends(search_start)
@@ -1221,9 +1389,9 @@ function stats_simulated_estimates_with_no_trends(search_start)
     filepath = "../../output/simulation_plots/MLE_bias/Mean bias percentage start $search_start.png"
     savefig(plot(p1,p2, layout=(2,1), size=(700,1000)), filepath)
 end
-stats_simulated_estimates_with_no_trends(σ²base)
-stats_simulated_estimates_with_no_trends(0.1)
-stats_simulated_estimates_with_no_trends(10.0)
+# stats_simulated_estimates_with_no_trends(σ²base)
+# stats_simulated_estimates_with_no_trends(0.1)
+# stats_simulated_estimates_with_no_trends(10.0)
 
 function heatmap_with_values_crosshairs(x, y, z_matrix,
         title, xlabel, ylabel; crosshairs=nothing, fontsize = 10, round_digits=1)
@@ -1252,7 +1420,9 @@ Want to plot the LL function for simulated data -- how much does it change with 
     N,T = 4,60
     ρ = 0.8785
     θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)
+    θ₀ = (ρ=ρ, σₐ²=2*σ²base, σᵤ²=2*σ²base)
     data = dgp(θ, N, T, seed)
+    v = data.vᵢₜ
 
     using ProgressMeter
     f(σₐ², σᵤ²) = -nLL(θ.ρ, σₐ², σᵤ², data.vᵢₜ, N, T)
