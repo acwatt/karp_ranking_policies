@@ -1,3 +1,73 @@
+Correspondences moved to https://docs.google.com/document/d/17ZyOMPmuz2MUdNK1LzS30kqZ25YvoQIKmIUSsoiPVmI/edit?usp=sharing
+
+
+
+# 2023-02-16
+Larry S. KARP  Feb 16, 2023, 3:17 PM (4 days ago) to me
+
+> After sending `Estimation_Documentation_acWatt_2023-02-15.pdf`
+
+Hello Aaron, thanks for this note.  It is really interesting. I don't think that it is necessary that the eventual appendix include code, although it will be necessary to create a folder that contains all of the code, and some way for a reader to know what parts of the code were used to produce what results. 
+
+Good luck on your orals.  I'll be interested in hearing about your research project.
+
+I know that you set the \beta and b's to zero.  What value did you choose for \rho?  I don't think that \rho = 0 would be especially informative, although perhaps that would be a place to start....
+> Aaron: Rho -- I forgot to say in the documentation, but the assumed value of rho is 0.8785, the value that Andy originally estimated.  I've added that to the documentation.
+
+
+Here are some observations based on the results that you sent me:
+
+(i) If the starting value equals the true value, then we get a fractional bias of about 0.1.  That seems like an acceptable value. The fact that it is not smaller is presumably due to the small sample size, both T and N_{sim}.  So, it appears that the MLE estimator "works ok 'away from the boundary'." 
+
+
+(ii) In almost every case, the bias is positive.  No idea why that should be the case. However, it is reassuring that some of the biases are negative.  That gives us some confidence that this is a real result, not a programming error.  However, it is weird that the MLE for the actual data returned a zero estimate of sig_a.  Obviously not consistent with a positive bias. 
+
+
+(iii) The biases for sig_a and sig_{mu} are of the same order of magnitude.  That is reassuring, because some of the important formulae use ratio of the variance.
+ 
+
+(iv) The worst cases are when the true variances are very small.  In those cases, if we start at the correct value, we still get a reasonable fractional bias (about 0.1).  But if we move by just a couple of grid points, we fall off the cliff, e.g. going from 0.1 to 1073.  In contrast, when the true values of the variances are "somewhat large", then we hardly lose anything in going from a starting value very close to the true value, to a starting value far from the true value. 
+
+
+(v) This suggests that the estimation is extremely fragile when the true variances are very small, but moderately robust when the true variances are not small. 
+This observation makes me wonder if there is a numerical problem, e.g., arising from dividing by a very small number. Of course, we could make the variances large, just by changing the units.  I wonder if this would alleviate the problem. 
+
+
+(vi) Another possibility is that, with evenly spaced grid points, a movement across two grid points represents a very large change when the initial value is close to zero,  but a moderate change when the initial value is far from zero.  If this is indeed the problem, then a possible solution is to use different grids. Chebyshev nodes concentrate the nodes near the endpoints of the grids.  However, it is striking that there is such an asymmetry: starting too small is much worse than starting too large, in most cases. That fact suggests that a symmetrical grid might not be the right response.  It might be better to do something like a constant percent increase from one point to the next, rather than a constant absolute change (which is what I think that you used).
+
+
+My gut reactions:
+
+
+1) I'm now (somewhat) convinced that we have the right likelihood function. It would be informative to prepare several (three?) contour plots of the likelihood for our data. We can detrend the data and estimate the regional effect and rho. Each of the plots is conditioned on a set of the b, \beta and \rho. The contour plot shows the liklelihood function over the two sigmas, conditional on the other parameters. I understand  that your brute force approach requires this kind of plot. I'm not sure what is the best way to detrend, and estimate regional effects, and rho.
+
+2) It sounds like you are planning to devote a major effort to disentangling the two reasons for incorrect estimates (small sample + variation in data, versus failure to optimize correctly). I agree that it would be very interesting to know the answer to this, but  I would not put it at the top of the list.  After all, we can't do anything about the small sample, and an algorithm that works great for one data set might not be best for another. 
+Because  MLE seems to do OK when the starting value is close to the true value, I like your suggestion of using an algorithm that picks many starting values and then selects the estimates corresponding to the highest ML. 
+Of course it would be nice to understand the sensitivity wrt the starting value.  Does this occur because the likelihood function is  not concave, or for some other reason?
+I guess that a plot of the likelihood function wrt to the two sigmas would give us the answer.
+
+3) As a next step, I would be interested in seeing a comparison of the estimation methods: MLE, the "two step" procedure (by which I mean using the cross section and the time series separately) and the 
+MOM (but I pulled that out of my hat.  It sounds reasonable to me, but I am not an econometrician.  It might have a serious problem that I am unaware of.  Do you have an opinion regarding it?
+
+4) I'm really interested in why most of the biases are positive (rather than a more or less even mix of + and -).  But I have no idea how to address that question, so I am comfortable in merely describing rather 
+than explaining it.
+
+5) I do think that it would be worth experimenting with a (perhaps "proportional") grid, i.e. one that concentrates the nodes around the small values.
+
+
+thanks a lot.
+Larry
+
+
+
+
+
+
+
+
+
+
+#
 # 2023-01-16
 On Thu, Dec 22, 2022 at 10:39 PM Larry S. KARP <karp@berkeley.edu> wrote:
 
@@ -28,7 +98,7 @@ It would be great if you would implement one or both of the MOM estimators (and 
 
 
 
-
+#
 # 2022-10
 > On Wed, Oct 12, 2022, 8:49 PM Larry S. KARP <karp@berkeley.edu> wrote:
 
