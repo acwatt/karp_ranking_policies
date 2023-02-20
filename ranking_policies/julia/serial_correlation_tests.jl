@@ -177,14 +177,16 @@ end
 function estimate_ρ_real()
     # Get 5% critical value of normal distribution
     z_c = Dist.cquantile(Dist.Normal(), 0.05/2)
+    z_c99 = Dist.cquantile(Dist.Normal(), 0.01/2)
     # Run linear regression, get residuals
     v = regression_residuals_simulated()
     # Calculate autocorrelation coefficients
     df = autocorrelations(v)
     # lower and upper confidence bounds for plotting
-    N = length(v)
+    N = length(v)  # 60 (aggretated data)
     lb = -z_c / sqrt(N)
     ub =  z_c / sqrt(N)
+    ub99 =  z_c99 / sqrt(N)
     # Plot the correlation coefficients
     @df df plot(:ρ, line=:stem, marker=:dot, markersize=8,
         label="ρₖ", xlabel="k", ylabel="ρ",
