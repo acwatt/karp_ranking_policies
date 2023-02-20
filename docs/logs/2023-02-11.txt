@@ -11,7 +11,9 @@ Bias in MLE:
 
 
 next:
+- check boundaries on search -- is the lower boundary above the smallest point?
 - compare algo's estimates against "true" maximums in data\temp\LL\LL_simulated_manualmax.csv for seeds 1-100
+	- see mymle_2_testing_optim_algos() and myoptimize2()
 - compare different methods (looks like the momentum gradient and conjugate gradient might be good)
 - if close for some, need to test against different underlying sigmas (since seeds 1-100 are only based on sigma_base)
 
@@ -22,3 +24,14 @@ If algos aren't close to true maximums of LL functions:
 
 Research how to generate MLE SEs: 
 - want to know what range of values rationalize the data... 
+
+
+
+
+Multistart:
+https://julianonconvex.github.io/Nonconvex.jl/stable/algorithms/hyperopt/
+https://github.com/tpapp/MultistartOptimization.jl
+
+
+Should I use a Hessian?
+http://julianlsolvers.github.io/Optim.jl/latest/#user/gradientsandhessians/#example
