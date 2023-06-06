@@ -5,7 +5,7 @@ description: Estimations on simulated data to test estimation issues for Larry
 author: Aaron C Watt (UCB Grad Student, Ag & Resource Econ)
 email: aaron@acwatt.net
 created: 2022-08-01
-last update: 
+last update: 2022-12-21
 notes:
  - Andy Hultgree
  - 

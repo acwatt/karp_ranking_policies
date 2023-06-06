@@ -1,3 +1,47 @@
+See docs/logs for more recent daily dev logs.
+
+# Code structure
+Move much code from covariance_matrix.jl to the following files:
+
+main.jl
+- runs tests with arguments
+- generates outputs
+- switches to turn on and off? Or just commented out?
+
+model.jl
+- contains model functions
+
+estimators.jl
+- loads simple, MLE, GMM estimators
+
+estimators_simple.jl
+estimators_mle.jl
+estimators_gmm.jl
+
+simulations.jl
+- generates simulated data using model.jl
+
+data_loader.jl
+- loads real data into memory
+- transforms data as needed
+
+plots.jl
+- various plot functions to gererate output
+
+tests.jl
+- generates test statistics and output for various tests of estimators
+- uses simulations.jl to generate fake data and estimate bias
+- uses data_loader to load real data to estimate parameters
+
+tests_autocorrelation.jl
+- tests estimators of the rho autocorrelation coefficient
+
+tests_mle.jl
+- tests various versions of the MLE sigma estimator
+- uses simulations.jl to generate
+
+
+
 # 2023-01-16
 - realized the last ρ in the definition of χ wasn't squared. Fixed and going to rerun ML estimation
 - 

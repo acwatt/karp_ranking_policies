@@ -1,3 +1,14 @@
+#==============================================================================
+file: covariance_matrix.jl
+description: Main file for project. 
+    Contains: model functions, estimation algorithms, real data loading
+author: Aaron C Watt (UCB Grad Student, Ag & Resource Econ)
+email: aaron@acwatt.net
+created: 2022-01-02
+last update: 2023-06-05
+See notes section below for more details.
+==============================================================================#
+
 # Loading packages can often take a long time, but Julia is very fast once packages are loaded
 # using Zygote  # for reverse-mode auto-differentiation
 using Random  # Random numbers

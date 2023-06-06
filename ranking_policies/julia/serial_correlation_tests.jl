@@ -2,7 +2,7 @@
     Script: serial_correlation_tests.jl
     Author: Aaron C Watt
     Date Created: 
-    Date Updated:
+    Date Updated: 2022-12-21
     Purpose:
     - test/plot autocorrelation coefficient in simulated and real emissions data.
 
