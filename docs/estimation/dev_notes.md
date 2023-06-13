@@ -8,15 +8,16 @@ main.jl
 - generates outputs
 - switches to turn on and off? Or just commented out?
 
-model.jl
+Model.jl
 - contains model functions
 
-estimators.jl
+Estimators.jl
 - loads simple, MLE, GMM estimators
 
-estimators_simple.jl
-estimators_mle.jl
-estimators_gmm.jl
+EstimatorsAR1.jl
+EstimatorsMLE.jl
+EstimatorsGMM.jl
+EstimatorsHelper.jl
 
 simulations.jl
 - generates simulated data using model.jl
