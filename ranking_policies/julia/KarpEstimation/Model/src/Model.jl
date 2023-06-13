@@ -8,7 +8,7 @@ last update:
 See docs/code/Model.md for more notes
 ==============================================================================#
 module Model
-#------------------- COVARIANCE MATRIX ---------------------
+##################### COVARIANCE MATRIX #####################
 # Building the covariance matrix for the N=2, T=3 case
 # Not needed anymore but nice to keep for tests
 N = 2;
@@ -43,7 +43,7 @@ end
 Evᵢₜvⱼₜ₊ₛ(ρ, σₐ², σᵤ², i, j, s, N; b = 1) = 1 / b^2 * (σₐ² * ρ^s / (1 - ρ^2) + χ(ρ, i, j, s, N) * σᵤ²)
 
 
-#------------------- SYMBOLIC COVARIANCE MATRIX ---------------------
+##################### SYMBOLIC COVARIANCE MATRIX #####################
 # Moved to symbolic_covariance_matrix.jl
 
 
@@ -51,7 +51,7 @@ Evᵢₜvⱼₜ₊ₛ(ρ, σₐ², σᵤ², i, j, s, N; b = 1) = 1 / b^2 * (σ�
 
 
 
-#------------------- COVARIANCE MATRIX DERIVATIVE ---------------------
+##################### COVARIANCE MATRIX DERIVATIVE #####################
 """i,t, j,t+s Elements of ∂Σ/∂y for y ∈ {ρ, σₐ², σᵤ²} - Eq (8) of 2021-12 writeup"""
 ∂Σ∂ρ(ρ, σₐ², σᵤ², i, j, s, N) = ρ^(s-1) / N / (ρ^2 - 1)^2 * (
     (s*κ(s) + (2 + s - 2*s*κ(s))*ρ^2 + (s*κ(s) - s)*ρ^4)*σᵤ² +
@@ -108,6 +108,78 @@ function Σ(ρ::Real, σₐ²::Real, σᵤ²::Real, N, T; verbose = false)
     return (V)
 end
 
+
+##################### DATA GENERATING PROCESS #####################
+
+"""
+    dgp(ρ, σₐ², σᵤ², β, N, T; v₀, μ₀, σ₀)
+
+Return simulated data from the data generating process given paramters.
+
+# Arguments
+- `ρ::Float64`: decay rate of AR1 emissions process ∈ [0,1]
+- `σₐ²::Float64`: SD of year-specific emissions shock , >0
+- `σᵤ²::Float64`: SD of region-year-specific emissions shock, >0
+- `β::Array{Float64,2}`: linear and quadratic time trend parameters
+- `v₀::Float64`: initial emissions shock of AR1 process (v_t where t=0)
+- `b₀::Array{Float64,N}`: b₀ᵢ for different regions i in {1, ..., N}
+    if not given, then μ₀ and σ₀ are used to pull b₀ᵢ from a random distribution
+- `μ₀::Float64`: mean of region-specific fixed effect distribution (b₀ᵢ)
+- `σ₀::Float64`: SD of region-specific fixed effect distribution (b₀ᵢ), >0
+"""
+function dgp(ρ, σₐ², σᵤ², β, N, T;
+    v₀ = 0.0, b₀ = nothing, μ₀ = 0, σ₀ = 10, random_seed::Integer = 1234)
+    @info "dgp()" ρ σₐ² σᵤ² β N T b₀ μ₀ σ₀ random_seed
+    # Initial conditions
+    Random.seed!(random_seed)
+    b = 1  # unidentified scale parameter
+    # Start the emissions 200 years back when they were very small and take the last T years
+    T_final = T
+    T = T + 200
+
+    # Get region-specific fixed effects if not given
+    if b₀ === nothing
+        b₀ = rand(Distributions.Normal(μ₀, σ₀), N)
+    end
+
+    # Random shocks
+    αₜ = rand(Distributions.Normal(0, σₐ²^0.5), T)
+    μᵢₜ = rand(Distributions.Normal(0, σᵤ²^0.5), N * T)
+    println("True DGP values: σₐ²: ", σₐ², "   σᵤ²: ", σᵤ²)
+    # assume μᵢₜ is stacked region first:
+    # i.e. (i,t)=(1,1) (i,t)=(2,1) ... (i,t)=(N-1,T)  (i,t)=(N,T)
+
+    # Fill in the aggregate shocks
+    vₜ = [v₀]
+    vᵢₜ = []
+    for t in 1:T
+        s = 0  # this period's sum of shocks
+        for i in 1:N
+            # Note that vₜ index starts at 1 instead of 0, so it's ahead of the others
+            append!(vᵢₜ, ρ * vₜ[t] + αₜ[t] + μᵢₜ[(t-1)*N+i])
+            s += last(vᵢₜ)
+        end
+        append!(vₜ, s / N)  # Aggregate shock = average of this period's shocks
+    end
+    
+    data = DataFrame(t = repeat(1:T_final, inner = N),
+        i = categorical(repeat(1:N, outer = T_final)),
+        b₀ᵢ = repeat(b₀, outer = T_final),
+        αₜ = repeat(last(αₜ,T_final), inner = N),
+        μᵢₜ = last(μᵢₜ, N * T_final),
+        vᵢₜ = last(vᵢₜ, N * T_final),
+        vₜ = repeat(last(vₜ, T_final), inner = N))
+
+    # Generate the resulting emissions
+    data.eᵢₜ = (1 / b) * (data.b₀ᵢ + β[1]*data.t + β[2]*data.t .^ 2 + data.vᵢₜ)
+    return (data)
+end;
+function dgp(θ, N, T, seed)
+    # Helper function for estimation testing on no-trend simulations
+    β = [0, 0]
+    b₀ = repeat([0], N)
+    return dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T, b₀ = b₀, random_seed=seed)
+end
 
 
 end
