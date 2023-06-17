@@ -1,7 +1,7 @@
 """
 Functions to estimate Maximum Likelihood model
 """
-module EstimatorsMLE
+module MLE
 
 #######################################################################
 #           Helper Functions
@@ -107,6 +107,13 @@ function nLL_grad_fidiff2!(gradient_vec, σₐ²σᵤ², ρ, v, N, T)
     gradient_vec[2] = g[1][2]  # σᵤ²
     return gradient_vec
 end
+
+############################### gradient tests ###############################
+# println("Fin. Diff. gradient: ", nLL_grad_fidiff!([0.,0.,0.], params0, v, N, T))
+# println("Fin. Diff. gradient: ", nLL_grad_fidiff2!([0.,0.], params0[2:3], ρstart, v, N, T))
+
+# println("Fin. Diff. gradient: ", nLL_grad_fidiff!([0.,0.,0.], params0, v, N, T))
+# println("Fin. Diff. gradient: ", nLL_grad_fidiff2!([0.,0.], params0[2:3], ρstart, v, N, T))
 
 
 #######################################################################

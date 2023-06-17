@@ -7,16 +7,17 @@ created: 2023-06-13
 last update: 
 See docs/code/Estimators.md for more notes
 """
-module Estimators
+module Est
 # Import dependencies
 using Optim
 
 
 ############ Define specific estimators ############
-# Uses: 
+# Uses packages: 
 include("EstimatorsAR1.jl")
-# Uses: Optim
+# Uses packages: Optim
 include("EstimatorsMLE.jl")
+# Uses packages:
 include("EstimatorsGMM.jl")
 
 

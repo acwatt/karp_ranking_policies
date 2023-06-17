@@ -8,6 +8,9 @@ last update:
 See docs/code/Model.md for more notes
 ==============================================================================#
 module Model
+
+
+
 ##################### COVARIANCE MATRIX #####################
 # Building the covariance matrix for the N=2, T=3 case
 # Not needed anymore but nice to keep for tests
