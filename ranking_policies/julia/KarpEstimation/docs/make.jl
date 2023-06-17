@@ -1,3 +1,5 @@
-using Documenter, Example
+push!(LOAD_PATH,"../src/")
+using Documenter, KarpEstimation
 
-makedocs(sitename="My Documentation")
+#  for Aaron Watt's work on Larry Karp's Ranking Policies Model Estimation Project
+makedocs(sitename="Ranking Policies Estimation Documentation")
