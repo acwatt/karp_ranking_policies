@@ -19,7 +19,7 @@ EstimatorsMLE.jl
 EstimatorsGMM.jl
 EstimatorsHelper.jl
 
-simulations.jl
+DGPSimulation.jl
 - generates simulated data using model.jl
 
 data_loader.jl
