@@ -1,5 +1,31 @@
 
 module HF
+using DataFramesMeta
+using CSV
+
+############################################
+#               File system functions
+############################################
+function get_project_root_path(; root_folder_name = "karp_ranking_policies")
+    # Search for project root folder by looking for a folder with the root names
+    # Assumes that the project root folder is a parent of the current working directory
+    dir = dirname(@__DIR__)
+    parts = splitpath(dir)
+    for i in 1:length(parts)
+        if parts[i] == root_folder_name
+            return joinpath(parts[1:i]...)
+        end
+    end
+    return nothing
+end
+
+ROOT = HF.get_project_root_path()
+DATA = joinpath(ROOT, "data")
+TEMP = joinpath(DATA, "temp")
+
+############################################
+#               Data functions
+############################################
 create_dataframe() = DataFrame(
     # This function determines the order of the columns
     seed = [], type = [], N = [], T = [],
@@ -100,7 +126,7 @@ end
 
 function write_simulation_df(df; N=2)
     # Save dataframe
-    filepath = "../../data/temp/simulation_results_log(N=$N).csv"
+    filepath = joinpath(TEMP, "simulation_results_log(N=$N).csv")
     if isfile(filepath)
         CSV.write(filepath, df,append=true)
     else
@@ -117,7 +143,7 @@ function write_estimation_df(df; N=2)
         end
     end
     # Save dataframe
-    filepath = "../../data/temp/realdata_estimation_results_log.csv"
+    filepath = joinpath(TEMP, "realdata_estimation_results_log.csv")
     if isfile(filepath)
         CSV.write(filepath, df, append=true)
     else
@@ -128,7 +154,7 @@ end
 
 function write_estimation_df_notrend(df, search_start; suffix="")
     # Save dataframe
-    filepath = "../../data/temp/simulation_estimation$(suffix)_results_log_start$search_start.csv"
+    filepath = joinpath(TEMP, "simulation_estimation$(suffix)_results_log_start$search_start.csv")
     if isfile(filepath)
         CSV.write(filepath, df, append=true)
     else
@@ -137,16 +163,16 @@ function write_estimation_df_notrend(df, search_start; suffix="")
 end
 
 function read_estimation_df_notrend(search_start)
-    filepath = "../../data/temp/simulation_estimation_results_log_start$search_start.csv"
+    filepath = joinpath(TEMP, "simulation_estimation_results_log_start$search_start.csv")
     df = CSV.read(filepath, DataFrame)
 end
 
 
 function write_data_df(df, data_type; N=4)
-    @transform!(df, type = data_type)
-    @transform!(df, N = N)
+    @transform!(df, :type = data_type)
+    @transform!(df, :N = N)
     # Save dataframe
-    filepath = "../../data/temp/realdata_estimation_data.csv"
+    filepath = joinpath(TEMP, "realdata_estimation_data.csv")
     if isfile(filepath)
         CSV.write(filepath, df, append=true)
     else
@@ -156,7 +182,7 @@ end
 
 
 function read_data(N, T)
-    filepath = "../../data/sunny/clean/grouped_allYears_nation.1751_2014.csv"
+    filepath = joinpath(DATA, "sunny", "clean", "grouped_allYears_nation.1751_2014.csv")
     df = @chain CSV.read(filepath, DataFrame) begin
         @rsubset :Year >= 1945 && :Year < 1945+T && :group ∈ ["USA","EU","BRIC","Other"][1:N]
         @transform(:group = get.(Ref(country2num), :group, missing))
@@ -171,7 +197,7 @@ end
 
 
 function read_global_data(T)
-    filepath = "../../data/sunny/clean/ts_allYears_nation.1751_2014.csv"
+    filepath = joinpath(DATA, "sunny", "clean", "ts_allYears_nation.1751_2014.csv")
     df = @chain CSV.read(filepath, DataFrame) begin
         @rsubset :Year >= 1945 && :Year < 1945+T && :group ∈ ["USA","EU","BRIC","Other"][1:N]
         @transform(:group = get.(Ref(country2num), :group, missing))
@@ -203,7 +229,7 @@ end
 function save_reformatted_data()
     N=2; T=60;
     data = read_data(N, T)
-    filepath = "../../data/temp/realdata_reformated(N=$N).csv"
+    filepath = joinpath(TEMP, "realdata_reformated(N=$N).csv")
     CSV.write(filepath, data)
 end
 
@@ -241,13 +267,13 @@ function save_simulated_params!(df::DataFrame, params, N, T; data_type = "simula
 end
 
 function get_results_σstarts(date)
-    filepath = "../../data/temp/realdata_estimation_results_log_$date.csv"
+    filepath = joinpath(TEMP, "realdata_estimation_results_log_$date.csv")
     df = @chain CSV.read(filepath, DataFrame,
             select=["type", "V_norm_finalstep", "??\xb2_start", "??\xb2_start_1"],
             footerskip=184) begin
         @rsubset :V_norm_finalstep == 0
-        @select(αstart=cols(Symbol("??\xb2_start")),
-                μstart=cols(Symbol("??\xb2_start_1")))
+        @select(:αstart=cols(Symbol("??\xb2_start")),
+                :μstart=cols(Symbol("??\xb2_start_1")))
     end
     return(df)
 end

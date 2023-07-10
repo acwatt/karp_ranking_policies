@@ -14,11 +14,11 @@ using Optim
 
 ############ Define specific estimators ############
 # Uses packages: 
-include("EstimatorsAR1.jl")
+include("EstimatorsAR1.jl")  # AR1
 # Uses packages: Optim
-include("EstimatorsMLE.jl")
+include("EstimatorsMLE.jl")  # MLE
 # Uses packages:
-include("EstimatorsGMM.jl")
+include("EstimatorsGMM.jl")  # GMM
 
 
 

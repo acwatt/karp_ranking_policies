@@ -7,8 +7,11 @@ created: 2023-06-13
 last update: 
 See docs/code/Model.md for more notes
 ==============================================================================#
-module Model
-
+# module Model  # removing module so functions can be directly called in EstimatorsMLE
+using Random
+using Distributions
+using CategoricalArrays
+using DataFrames
 
 
 ##################### COVARIANCE MATRIX #####################
@@ -185,4 +188,4 @@ function dgp(θ, N, T, seed)
 end
 
 
-end
+# end

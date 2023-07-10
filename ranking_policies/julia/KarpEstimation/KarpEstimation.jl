@@ -34,15 +34,15 @@ import CSV
 using ProgressMeter
 
 import Revise
-Revise.includet("reg_utils.jl")  # mygls()
+Revise.includet("../reg_utils.jl")  # mygls()
 
 #=
 ]add Random Distributions DataFrames DataFramesMeta CategoricalArrays LinearAlgebra StatsModels StatsPlots GLM Optim FiniteDifferences Dates Latexify Logging CSV Revise
 =#
 
-include("Utilities/HelperFunctions.jl")  # HF
-include("Model/Model.jl")  # Model
-include("")
+Revise.includet("Utilities/HelperFunctions.jl")  # HF
+# include("Model/Model.jl")  # M
+Revise.includet("Estimators/Estimators.jl")  # Est
 
 """
 NOTES:
@@ -76,6 +76,9 @@ Last update: 2022-12-15
 #######################################################################
 #           Setup
 #######################################################################
+# CODE = dirname(@__FILE__)
+# ROOT = HF.get_project_root_path()
+
 io = open("log.txt", "a")
 logger = SimpleLogger(io)
 # debuglogger = ConsoleLogger(stderr, Logging.Debug)
@@ -84,6 +87,7 @@ s = "\n"^20 * "="^60 * "\nCOVARIANCE MATRIX ESTIMATION BEGIN\n" * "="^60
 @info s datetime=Dates.format(Dates.now(), "yyyy-mm-dd HH:MM:SS")
 num2country = Dict(1=>"USA", 2=>"EU", 3=>"BRIC", 4=>"Other")
 country2num = Dict("USA"=>1, "EU"=>2, "BRIC"=>3, "Other"=>4)
+
 
 
 #######################################################################
@@ -471,11 +475,11 @@ function estimate_simulation_params_notrend(N, T, θ, θ₀, seed, df;
     println(N, " ", T, " ", ", Starting search at: ", θ₀)
     @info "estimate_dgp_params()" N T θ θ₀ seed θLB θUB print_results data_type analytical method
     # Generate Simulated data
-    data = dgp(θ, N, T, seed)
+    data = Model.dgp(θ, N, T, seed)
 
     # ML to get parameter estimates ρ, σₐ², σᵤ²
     # mymle2 treats first argument as fixed ρ value
-    ρ, σₐ², σᵤ², LL = MLE.mymle_2(θ₀.ρ, θ₀.σₐ², θ₀.σᵤ², data.vᵢₜ, N, T;
+    ρ, σₐ², σᵤ², LL = Est.MLE.mymle_2(θ₀.ρ, θ₀.σₐ², θ₀.σᵤ², data.vᵢₜ, N, T;
                             θLB, θUB,
                             analytical=analytical, method=method)
     println("LL: ", LL, "  ρ: ", ρ, "  σₐ²: ", σₐ², "  σᵤ²: ", σᵤ²)
@@ -587,6 +591,45 @@ end
 # 2022-12-15
 
 
+"""Single test of base parameter estimation on simulated data with no trends"""
+function test_simulated_data_with_no_trends(; simple = true)
+    N = 4; T = 60  # 1945-2005
+    ρ = 0.8785  # from r-scripts/reproducting_andy.R  -> line 70 result2
+    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
+
+    θ₀ = (ρ=ρ, σₐ²=σ²base/2, σᵤ²=σ²base/2)  # Starting parameter in optimization search
+    θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)  # True paramter
+    θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)  # Lower bound of search
+    θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)  # Upper bound of search
+
+    result_df = HF.create_simulation_results_df()
+    estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
+        θLB, θUB,
+        print_results = true, data_type = "simulated data",
+        analytical = true, method = "gradient decent"
+    )
+
+    # For each pair of "true" σₐ², σᵤ² values
+    total = length(σ²range)^2; i = 0
+    for σₐ² in σ²range, σᵤ² in σ²range
+        result_df = HF.create_simulation_results_df()
+        θ = (ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ²)
+        # Simulate and estimate Nsim times for these σ values
+        println("\n\n(σₐ²=$σₐ², σᵤ²=$σᵤ²) Running $Nsim simulations $(round(i/total*100))%")
+        Threads.@threads for seed in 1:Nsim
+            
+            estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
+                θLB, θUB,
+                print_results = false, data_type = "simulated data",
+                analytical = true, method = "gradient decent")
+        end
+        # Save dataframe of results
+        HF.write_estimation_df_notrend(result_df, search_start)
+        # This saves the estimation results to data/temp/simulation_estimation_results_log.csv
+        i += 1
+    end
+end
+
 
 """
 Estimates σ's over a range of simulated data generated from a range of σ values.
@@ -600,7 +643,7 @@ Estimates σ's over a range of simulated data generated from a range of σ value
 """
 function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100, search_start = 0.1)
     N = 4; T = 60  # 1945-2005
-    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
+    ρ = 0.8785  # from r-scripts/reproducting_andy.R  -> line 70 result2
     σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
     σ²range = range(1e-4, 2*σ²base, length=Nsteps)
 
@@ -612,7 +655,7 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100, search_sta
     # For each pair of "true" σₐ², σᵤ² values
     total = length(σ²range)^2; i = 0
     for σₐ² in σ²range, σᵤ² in σ²range
-        result_df = create_simulation_results_df()
+        result_df = HF.create_simulation_results_df()
         θ = (ρ=ρ, σₐ²=σₐ², σᵤ²=σᵤ²)
         # Simulate and estimate Nsim times for these σ values
         println("\n\n(σₐ²=$σₐ², σᵤ²=$σᵤ²) Running $Nsim simulations $(round(i/total*100))%")
@@ -662,11 +705,12 @@ function test_simulated_data_optim_algo(; Nsteps = 4, Nsim = 100, search_start =
     θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
 
     # For each pair of "true" σₐ², σᵤ² values
-    methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS", "momentum gradient", "accelerated gradient"]
+    methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS"] #, "momentum gradient", "accelerated gradient"]
+    # MomentumGradientDescent and AcceleratedGradientDescent do not work with Fminbox
     method = "momentum gradient"
     total = length(methods); i = 0
     for method in methods
-        result_df = create_simulation_results_df()
+        result_df = HF.create_simulation_results_df()
         # Simulate and estimate Nsim times for these σ values
         @info "\n\n(σₐ²=$(θ.σₐ²), σᵤ²=$(θ.σᵤ²)) Running $Nsim simulations - $(round(i/total*100))% of outer loop"
         Threads.@threads for seed in 1:Nsim
@@ -677,7 +721,7 @@ function test_simulated_data_optim_algo(; Nsteps = 4, Nsim = 100, search_start =
                 analytical = true, method = method)
         end
         # Save dataframe of results
-        write_estimation_df_notrend(result_df, search_start, suffix="_methods")
+        HF.write_estimation_df_notrend(result_df, search_start, suffix="_methods")
         # This saves the estimation results to data/temp/simulation_estimation_methods_results_log.csv
         i += 1
     end
@@ -690,7 +734,7 @@ end
 # @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 10)
 
 # Ran the below lines to test which optim.jl algos perform the best
-@time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
+@time test_simulated_data_optim_algo(Nsim = 10, search_start = σ²base)
 
 
 
@@ -804,8 +848,7 @@ function save_manual_simulation_maximums()
     end
 
 end
-
-save_manual_simulation_maximums()
+# save_manual_simulation_maximums()
 
 
 

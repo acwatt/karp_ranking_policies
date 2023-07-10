@@ -2,6 +2,10 @@
 Functions to estimate Maximum Likelihood model
 """
 module MLE
+using Optim
+using LinearAlgebra
+include("../Model/Model.jl")  # Model
+
 
 #######################################################################
 #           Helper Functions
@@ -128,13 +132,7 @@ function myoptimize2(f, g!, θ₀, θLB, θUB, method, show_trace=false)
             Fminbox(METHOD_MAP[method]),
             Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1)
         )
-    try
-        result = minimize(
-            f, g!, 
-            [θLB.σₐ², θLB.σᵤ²], [θUB.σₐ², θUB.σᵤ²], [θ₀.σₐ², θ₀.σᵤ²], 
-            Fminbox(METHOD_MAP[method]),
-            Optim.Options(show_trace = show_trace, show_every=1, g_tol = 1e-8, time_limit = 1)
-        )
+    #! What was I trying to catch here?
     catch e
         if isa(e, DomainError)
             sqrt(complex(x[2], 0))
@@ -412,6 +410,12 @@ function mymle_2_testing_optim_algos(θ₀, v, N, T;
     ρ, σₐ², σᵤ² = ρstart, optimum.minimizer...
     return (ρ, σₐ², σᵤ², LL)
 end
+
+
+#######################################################################
+#                            Test Functions
+#######################################################################
+
 
 
 end
