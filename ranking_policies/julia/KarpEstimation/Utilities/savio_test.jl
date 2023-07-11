@@ -9,4 +9,8 @@ function parallel_test()
         sleep(1/10000)
     end
 end
-@benchmark parallel_test()
+t = @benchmark parallel_test()
+
+display(t)
+println(t)
+println(mean(t))
