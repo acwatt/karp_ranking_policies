@@ -1,0 +1,3 @@
+savio1: karp_sim_methods_compare
+    - compare Optim.jl methods of estimating MLE of sigmas for simulated data
+    - averages results over many random seeds for simulated data generation
