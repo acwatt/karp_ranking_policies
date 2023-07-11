@@ -35,6 +35,7 @@ using ProgressMeter
 
 import Revise
 #! Add ROOT path stuff here and make all relative paths to root
+# cd("ranking_policies/julia/KarpEstimation")
 Revise.includet("../reg_utils.jl")  # mygls()
 
 #=
@@ -720,6 +721,7 @@ function test_simulated_data_optim_algo(; Nsim = 100, search_start = 0.1)
     iters = [(m, n) for m in methods for n in 1:Nsim]
     dfs = Array{DataFrame}(undef, length(iters))
     println(length(iters))
+    p = Progress(length(iters))
     Threads.@threads for i in 1:length(iters)
         println("Sim $i")
         method, seed = iters[i]
@@ -730,6 +732,7 @@ function test_simulated_data_optim_algo(; Nsim = 100, search_start = 0.1)
             print_results = false, data_type = "simulated data",
             analytical = true, method = method)
         dfs[i] = result_df
+        next!(p)
     end
     # Summarize results over all seeds
     cat_df = reduce(vcat, dfs)
