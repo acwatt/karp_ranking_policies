@@ -4,7 +4,7 @@
 using Distributed
 
 @everywhere begin
-    project_env = splitpath(@__DIR__)[1:end-1]
+    project_env = joinpath(splitpath(@__DIR__)[1:end-1])
     using Pkg; Pkg.activate(project_env)
     Pkg.instantiate(); Pkg.precompile()
 end
