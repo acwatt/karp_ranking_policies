@@ -3,7 +3,7 @@ module HF
 using DataFramesMeta
 using CSV
 using Dates
-# using Statistics
+using Statistics: mean, std
 
 ############################################
 #               File system functions

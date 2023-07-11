@@ -34,6 +34,7 @@ import CSV
 using ProgressMeter
 
 import Revise
+#! Add ROOT path stuff here and make all relative paths to root
 Revise.includet("../reg_utils.jl")  # mygls()
 
 #=
@@ -712,25 +713,23 @@ function test_simulated_data_optim_algo(; Nsim = 100, search_start = 0.1)
     θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
     θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
 
-    # For each pair of "true" σₐ², σᵤ² values
     methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS"] #, "momentum gradient", "accelerated gradient"]
     # MomentumGradientDescent and AcceleratedGradientDescent do not work with Fminbox
-    method = "momentum gradient"
-    total = length(methods); i = 0
-    dfs = []
-    for method in methods
+
+    # Iterate over method-seeds pairs
+    iters = [(m, n) for m in methods for n in 1:Nsim]
+    dfs = Array{DataFrame}(undef, length(iters))
+    println(length(iters))
+    Threads.@threads for i in 1:length(iters)
+        println("Sim $i")
+        method, seed = iters[i]
         result_df = HF.create_simulation_results_df()
-        # Simulate and estimate Nsim times for these σ values
-        @info "\n\n(σₐ²=$(θ.σₐ²), σᵤ²=$(θ.σᵤ²)) Running $Nsim simulations - $(round(i/total*100))% of outer loop"
-        Threads.@threads for seed in 1:Nsim
-            
-            estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
-                θLB, θUB,
-                print_results = false, data_type = "simulated data",
-                analytical = true, method = method)
-        end
-        push!(dfs, result_df)
-        i += 1
+        # Simulate and estimate for these σ values
+        estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
+            θLB, θUB,
+            print_results = false, data_type = "simulated data",
+            analytical = true, method = method)
+        dfs[i] = result_df
     end
     # Summarize results over all seeds
     cat_df = reduce(vcat, dfs)
@@ -743,7 +742,9 @@ end
 
 
 # Ran the below lines to test which optim.jl algos perform the best
+df_ = @time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
 df_ = @time test_simulated_data_optim_algo(Nsim = 16, search_start = σ²base)
+# local: 218.963896 second (7.81 G allocations: 369.491 GiB, 41.93% gc time, 0.11% compilation time: 28% of which was recompilation)
 
 # @time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
 # @time test_simulated_data_optim_algo(Nsim = 10, search_start = σ²base)
