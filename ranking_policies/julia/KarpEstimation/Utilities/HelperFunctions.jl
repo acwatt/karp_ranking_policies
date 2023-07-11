@@ -2,6 +2,8 @@
 module HF
 using DataFramesMeta
 using CSV
+using Dates
+# using Statistics
 
 ############################################
 #               File system functions
@@ -19,7 +21,7 @@ function get_project_root_path(; root_folder_name = "karp_ranking_policies")
     return nothing
 end
 
-ROOT = HF.get_project_root_path()
+ROOT = get_project_root_path()
 DATA = joinpath(ROOT, "data")
 TEMP = joinpath(DATA, "temp")
 
@@ -109,6 +111,21 @@ create_simulation_results_df() = DataFrame(
     σᵤ²_true = Float64[], σᵤ²_est = Float64[],  σᵤ²_start = Float64[],  σᵤ²_lower = Float64[], σᵤ²_upper = Float64[],
     LL = Float64[], method=[], runtime = [], notes=[]
 )
+
+function summarize_simulation_results(df)
+    df1 = select(df, Not([:seed,:σₐ²_est, :σᵤ²_est, :LL, :method]))[1:1,:]
+    df2 = @chain df begin
+        @transform(:σₐ²_diff = abs.(:σₐ²_est - :σₐ²_true), :σᵤ²_diff = abs.(:σᵤ²_est - :σᵤ²_true))
+        @by(:method, 
+            :σₐ²_diff_mean = mean(:σₐ²_diff), :σₐ²_diff_std = std(:σₐ²_diff), 
+            :σᵤ²_diff_mean = mean(:σᵤ²_diff), :σᵤ²_diff_std = std(:σᵤ²_diff),
+            :LL_mean = mean(:LL), :LL_std = std(:LL), :seeds = length(unique(:seed))
+        )
+        @transform(:N = unique(df.N)[1], :T = unique(df.T)[1])
+        leftjoin(df1, on=[:N,:T])
+    end
+    return df2
+end
 
 function add_row_simulation_results!(df, seed, type, N, T;
         θhat = missing, θ₀ = missing, θLB = missing, θUB = missing,

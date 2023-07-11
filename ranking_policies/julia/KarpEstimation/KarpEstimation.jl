@@ -41,8 +41,10 @@ Revise.includet("../reg_utils.jl")  # mygls()
 =#
 
 Revise.includet("Utilities/HelperFunctions.jl")  # HF
-# include("Model/Model.jl")  # M
 Revise.includet("Estimators/Estimators.jl")  # Est
+module Model
+    include("Model/Model.jl")
+end
 
 """
 NOTES:
@@ -61,7 +63,7 @@ First, I test this on generated data that we know the parameter values
 
 Lastly, I (still need to) estimate the paramters on the actual data that
     Larry provided.
-
+Status: in the process of moving functions to separate files
 Time to run: Most of the functions at the end that actually run the
     estimations also have time estimates in a comment after them. These
     were run on a linux computer with 32 GB of RAM and 
@@ -70,7 +72,7 @@ Time to run: Most of the functions at the end that actually run the
     meaning it will take up all available CPU during most compuations
     until the script has complete.
 
-Last update: 2022-12-15
+Last update: 2023-07-10
 """
 
 #######################################################################
@@ -673,6 +675,13 @@ function test_simulated_data_with_no_trends(; Nsteps = 4, Nsim = 100, search_sta
     end
 end
 
+σ²base = 3.6288344  
+# Ran the below lines on the department server, set with 8 cores in settings.json "julia.NumThreads": "8"
+# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 3.6288344)
+# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 0.1)
+# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 10)
+
+
 """
 Estimates σ's using different optim.jl algos to test which has least bias when 
     the starting value is "far away". From previous testing in test_simulated_data_with_no_trends(),
@@ -692,8 +701,7 @@ Estimates σ's using different optim.jl algos to test which has least bias when
     Nsim = # of simulated datasets to create for each "true" σ² value pair
     search_start = value of both σ²'s to start optimization search at
 """
-function test_simulated_data_optim_algo(; Nsteps = 4, Nsim = 100, search_start = 0.1)
-    # Nsteps = 2; Nsim = 1  # temp
+function test_simulated_data_optim_algo(; Nsim = 100, search_start = 0.1)
     N = 4; T = 60  # 1945-2005
     ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
     σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
@@ -709,6 +717,7 @@ function test_simulated_data_optim_algo(; Nsteps = 4, Nsim = 100, search_start =
     # MomentumGradientDescent and AcceleratedGradientDescent do not work with Fminbox
     method = "momentum gradient"
     total = length(methods); i = 0
+    dfs = []
     for method in methods
         result_df = HF.create_simulation_results_df()
         # Simulate and estimate Nsim times for these σ values
@@ -720,23 +729,35 @@ function test_simulated_data_optim_algo(; Nsteps = 4, Nsim = 100, search_start =
                 print_results = false, data_type = "simulated data",
                 analytical = true, method = method)
         end
-        # Save dataframe of results
-        HF.write_estimation_df_notrend(result_df, search_start, suffix="_methods")
-        # This saves the estimation results to data/temp/simulation_estimation_methods_results_log.csv
+        push!(dfs, result_df)
         i += 1
     end
+    # Summarize results over all seeds
+    cat_df = reduce(vcat, dfs)
+    summary_df = HF.summarize_simulation_results(cat_df)
+    # Save dataframe of results
+    HF.write_estimation_df_notrend(summary_df, "all", suffix="_methods_summaries")
+    # This saves the estimation results to data/temp/simulation_estimation_methods_summaries_results_log.csv
+    return summary_df
 end
 
-σ²base = 3.6288344  
-# Ran the below lines on the department server, set with 8 cores in settings.json "julia.NumThreads": "8"
-# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 3.6288344)
-# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 0.1)
-# @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 10)
 
 # Ran the below lines to test which optim.jl algos perform the best
-@time test_simulated_data_optim_algo(Nsim = 10, search_start = σ²base)
+df_ = @time test_simulated_data_optim_algo(Nsim = 16, search_start = σ²base)
+
+# @time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
+# @time test_simulated_data_optim_algo(Nsim = 10, search_start = σ²base)
+# 114.5 seconds to run with 0% compilation time
 
 
+
+
+"""
+Estimate σ's for single optim algorithm over range of N (# of time periods)
+"""
+function test_simulated_data_consistency(;)
+    println("temp")
+end
 
 
 
