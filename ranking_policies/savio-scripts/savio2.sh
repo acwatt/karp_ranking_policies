@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=karp_sim_methods_compare
+#SBATCH --job-name=savio_node_test1
 #SBATCH --account=fc_rankpolicy
 #SBATCH --partition=savio3
 #SBATCH --nodes=1
