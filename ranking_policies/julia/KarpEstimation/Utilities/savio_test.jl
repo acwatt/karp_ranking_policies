@@ -1,5 +1,5 @@
 # Test savio
-import Pkg; Pkg.add("BenchmarkTools")
+# import Pkg; Pkg.add("BenchmarkTools")
 using BenchmarkTools
 # Test parallel computing using Threads.@threads
 # @benchmark sort(data) setup=(data=rand(10))
@@ -12,5 +12,4 @@ end
 t = @benchmark parallel_test()
 
 display(t)
-println(t)
 println(mean(t))
