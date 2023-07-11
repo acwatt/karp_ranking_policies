@@ -12,6 +12,7 @@ end
 @everywhere begin
     # import Pkg; Pkg.add("BenchmarkTools")
     using BenchmarkTools
+    using ProgressMeter
     # Test parallel computing using Threads.@threads
     # @benchmark sort(data) setup=(data=rand(10))
 
