@@ -720,7 +720,7 @@ function test_simulated_data_optim_algo(; Nsim = 100, search_start = 0.1)
     # Iterate over method-seeds pairs
     iters = [(m, n) for m in methods for n in 1:Nsim]
     dfs = Array{DataFrame}(undef, length(iters))
-    println(length(iters))
+    println("# of tasks: $(length(iters))")
     p = Progress(length(iters))
     Threads.@threads for i in 1:length(iters)
         println("Sim $i")
@@ -746,13 +746,16 @@ end
 
 # Ran the below lines to test which optim.jl algos perform the best
 println("Comparing Optim Algos: 1 sim")
+println("# of Threads:$(Threads.nthreads())")
 df_ = @time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
 println("Comparing Optim Algos: 16 sim")
+println("# of Threads:$(Threads.nthreads())")
 df_ = @time test_simulated_data_optim_algo(Nsim = 16, search_start = σ²base)
 # local: 218.963896 second (7.81 G allocations: 369.491 GiB, 41.93% gc time, 0.11% compilation time: 28% of which was recompilation)
-# remote: 1090.737793 seconds (7.85 G allocations: 371.329 GiB, 38.37% gc time)
+# remote: 852.189523 seconds (7.85 G allocations: 371.329 GiB, 26.80% gc time)
 
 println("Comparing Optim Algos: 100 sim")
+println("# of Threads:$(Threads.nthreads())")
 # df_ = @time test_simulated_data_optim_algo(Nsim = 100, search_start = σ²base)
 # local: 1245.314972 seconds (46.14 G allocations: 2.133 TiB, 43.12% gc time, 0.02% compilation time)
 # remote cmd: 975.362874 seconds (7.81 G allocations: 369.438 GiB, 19.01% gc time)
