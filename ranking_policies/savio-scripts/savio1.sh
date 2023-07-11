@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=karp_sim_methods_compare
 #SBATCH --account=fc_rankpolicy
-#SBATCH --partition=savio
+#SBATCH --partition=savio3
 #SBATCH --nodes=1
 #SBATCH --time=00:00:30
 #SBATCH --mail-type=ALL
