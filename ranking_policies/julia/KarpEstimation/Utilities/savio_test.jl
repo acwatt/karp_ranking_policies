@@ -54,5 +54,6 @@ function distributed_test()
     return nothing
 end
 
+println("# of Threads:$(Threads.nthreads())")
 t = @benchmark distributed_test(); display(t)
 # @everywhere println("hello from $(myid()):$(gethostname()) with $(Threads.nthreads()) threads")
