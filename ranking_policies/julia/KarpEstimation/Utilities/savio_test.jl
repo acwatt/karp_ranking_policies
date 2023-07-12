@@ -41,14 +41,13 @@
 # t = @benchmark parallel_test()
 # t = @benchmark distributed_test(); display(t)
 
-using Distributed
-@everywhere begin
-    project_env = joinpath(splitpath(@__DIR__)[1:end-1])
-    println(project_env)
-    using Pkg; Pkg.activate(project_env)
-    Pkg.instantiate(); Pkg.precompile()
-end
+# @everywhere begin
+project_env = joinpath(splitpath(@__DIR__)[1:end-1])
+println(project_env)
+using Pkg; Pkg.activate(project_env)
+Pkg.instantiate(); Pkg.precompile()
+# end
 
-using SlurmClusterManager
+using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 @everywhere println("hello from $(myid()):$(gethostname()) with $(Threads.nthreads()) threads")
