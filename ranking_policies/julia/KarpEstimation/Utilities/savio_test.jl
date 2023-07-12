@@ -56,8 +56,11 @@ end
 
 println("# of Threads:$(Threads.nthreads())")
 println("# of workers:$(nprocs())")
-t = @benchmark distributed_test(); display(t)
+# t = @benchmark distributed_test(); display(t)
 # @everywhere println("hello from $(myid()):$(gethostname()) with $(Threads.nthreads()) threads")
 
+@everywhere begin
+    using Distributions
+end
 
-include("../KarpEstimation.jl")
+# include("../KarpEstimation.jl")
