@@ -59,8 +59,10 @@ println("# of workers:$(nprocs())")
 # t = @benchmark distributed_test(); display(t)
 # @everywhere println("hello from $(myid()):$(gethostname()) with $(Threads.nthreads()) threads")
 
-@everywhere begin
-    using Distributions
-end
+@everywhere println(@__DIR__)
+
+# @everywhere begin
+#     using Distributions
+# end
 
 # include("../KarpEstimation.jl")
