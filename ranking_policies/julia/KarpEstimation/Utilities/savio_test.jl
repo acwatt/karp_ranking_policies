@@ -41,9 +41,12 @@
 # t = @benchmark parallel_test()
 # t = @benchmark distributed_test(); display(t)
 
-
-
-
+@everywhere begin
+    project_env = joinpath(splitpath(@__DIR__)[1:end-1])
+    println(project_env)
+    using Pkg; Pkg.activate(project_env)
+    Pkg.instantiate(); Pkg.precompile()
+end
 
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
