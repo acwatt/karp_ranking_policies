@@ -2,7 +2,7 @@
 #SBATCH --job-name=savio_node_test2
 #SBATCH --account=fc_rankpolicy
 #SBATCH --partition=savio3
-#SBATCH --nodes=2
+#SBATCH --nodes=4
 #SBATCH --ntasks-per-node=32
 #SBATCH --time=00:30:00
 #SBATCH --mail-type=ALL
