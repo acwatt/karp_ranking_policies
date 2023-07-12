@@ -3,6 +3,7 @@
 #SBATCH --account=fc_rankpolicy
 #SBATCH --partition=savio3
 #SBATCH --nodes=1
+#SBATCH --ntasks-per-node=32
 #SBATCH --time=00:30:00
 #SBATCH --mail-type=ALL
 #SBATCH --mail-user=aaron.watt@berkeley.edu
