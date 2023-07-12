@@ -1,4 +1,4 @@
-#!/usr/bin/env julia
+#!/usr/bin/env julia --threads=auto --project=./julia/KarpEstimation
 # Test savio
 
 
