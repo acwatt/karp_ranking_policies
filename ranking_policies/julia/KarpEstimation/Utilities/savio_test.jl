@@ -47,4 +47,4 @@
 
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
-@everywhere println("hello from $(myid()):$(gethostname())")
+@everywhere println("hello from $(myid()):$(gethostname()) with $(Threads.nthreads()) threads")
