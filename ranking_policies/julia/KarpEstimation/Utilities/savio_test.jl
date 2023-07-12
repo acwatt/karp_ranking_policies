@@ -39,6 +39,7 @@
 # end
 
 using Distributed, SlurmClusterManager
+using BenchmarkTools
 addprocs(SlurmManager())
 
 function distributed_test() 
