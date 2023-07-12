@@ -31,16 +31,19 @@
 # t = @benchmark parallel_test()
 # t = @benchmark distributed_test(); display(t)
 
-# @everywhere begin
-# project_env = joinpath(splitpath(@__DIR__)[1:end-1])
-# println(project_env)
-# using Pkg; Pkg.activate(project_env)
-# Pkg.instantiate(); Pkg.precompile()
-# end
-
 using Distributed, SlurmClusterManager
-using BenchmarkTools
+# using BenchmarkTools
 addprocs(SlurmManager())
+# instantiate and precompile environment in all processes
+@everywhere begin
+project_env = joinpath(splitpath(@__DIR__)[1:end-1])
+println(project_env)
+using Pkg; Pkg.activate(project_env)
+Pkg.instantiate(); Pkg.precompile()
+end
+@everywhere begin
+    using Distributions
+end
 
 function distributed_test() 
     pmap(1:100) do i
@@ -59,10 +62,6 @@ println("# of workers:$(nprocs())")
 # t = @benchmark distributed_test(); display(t)
 # @everywhere println("hello from $(myid()):$(gethostname()) with $(Threads.nthreads()) threads")
 
-@everywhere println(@__DIR__)
 
-# @everywhere begin
-#     using Distributions
-# end
 
 # include("../KarpEstimation.jl")
