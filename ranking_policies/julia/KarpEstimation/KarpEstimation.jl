@@ -742,21 +742,89 @@ function test_simulated_data_optim_algo(; Nsim = 100, search_start = 0.1)
     # This saves the estimation results to data/temp/simulation_estimation_methods_summaries_results_log.csv
     return summary_df
 end
+"""
+Distributed Estimates σ's using different optim.jl algos to test which has least bias when 
+    the starting value is "far away". From previous testing in test_simulated_data_with_no_trends(),
+    I found the starting the search at both σ² = σ²base = 3.6288344 when the true σ² were
+    2*σ²base resulted in significant bias when using gradient decent. So this seems like a good case
+    to test gradient decent against other algos. Might even need to test a manual multi-start
+    algo that optimizes from multiple starting values.
+
+    - Create simulated data from both σ² = σ²base, treating trends and fixed effects as zero (b₀, β = 0).
+    - This eliminates the GLS step (thus no iteration is needed).
+    - Just testing if we can accurately find the maximizing MLE.
+    - Simulate and repeat estimation Nsim times, testing for each optim.jl algo
+
+    Question: Does the true σ² values maximize ML?
+
+    Nsteps = # of "true" σ² values in array to test (so full set of pairs is Nsteps × Nsteps)
+    Nsim = # of simulated datasets to create for each "true" σ² value pair
+    search_start = value of both σ²'s to start optimization search at
+"""
+function test_simulated_data_optim_algo_distributed(; Nsim = 100, search_start = 0.1)
+    N = 4; T = 60  # 1945-2005
+    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
+    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
+
+    # Define a short analysis function that just takes the data
+    θ = (ρ=ρ, σₐ²=2*σ²base, σᵤ²=2*σ²base)
+    θ₀ = (ρ=ρ, σₐ²=search_start, σᵤ²=search_start)
+    θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
+    θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
+
+    methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS"] #, "momentum gradient", "accelerated gradient"]
+    # MomentumGradientDescent and AcceleratedGradientDescent do not work with Fminbox
+
+    # Iterate over method-seeds pairs
+    iters = [(m, n) for m in methods for n in 1:Nsim]
+    dfs = Array{DataFrame}(undef, length(iters))
+    println("# of tasks: $(length(iters))")
+    @showprogress @distributed for i in 1:length(iters)
+        println("Sim $i")
+        method, seed = iters[i]
+        result_df = HF.create_simulation_results_df()
+        # Simulate and estimate for these σ values
+        estimate_simulation_params_notrend(N, T, θ, θ₀, seed, result_df;
+            θLB, θUB,
+            print_results = false, data_type = "simulated data",
+            analytical = true, method = method)
+        dfs[i] = result_df
+    end
+    # Summarize results over all seeds
+    cat_df = reduce(vcat, dfs)
+    summary_df = HF.summarize_simulation_results(cat_df)
+    # Save dataframe of results
+    HF.write_estimation_df_notrend(summary_df, "all", suffix="_methods_summaries")
+    # This saves the estimation results to data/temp/simulation_estimation_methods_summaries_results_log.csv
+    return summary_df
+end
+
+
+# # Ran the below lines to test which optim.jl algos perform the best
+# println("Comparing Optim Algos: 1 sim")
+# println("# of Threads:$(Threads.nthreads())")
+# df_ = @time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
+# println("Comparing Optim Algos: 16 sim")
+# println("# of Threads:$(Threads.nthreads())")
+# df_ = @time test_simulated_data_optim_algo(Nsim = 16, search_start = σ²base)
+# # local: 218.963896 second (7.81 G allocations: 369.491 GiB, 41.93% gc time, 0.11% compilation time: 28% of which was recompilation)
+# # remote batch: 916.522670 seconds (7.85 G allocations: 371.329 GiB, 30.08% gc time)
+# # remote cmd: 895.401775 seconds (7.89 G allocations: 373.220 GiB, 27.09% gc time)
 
 
 # Ran the below lines to test which optim.jl algos perform the best
 println("Comparing Optim Algos: 1 sim")
 println("# of Threads:$(Threads.nthreads())")
-df_ = @time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
+df_ = @time test_simulated_data_optim_algo_distributed(Nsim = 1, search_start = σ²base)
 println("Comparing Optim Algos: 16 sim")
 println("# of Threads:$(Threads.nthreads())")
-df_ = @time test_simulated_data_optim_algo(Nsim = 16, search_start = σ²base)
+df_ = @time test_simulated_data_optim_algo_distributed(Nsim = 16, search_start = σ²base)
 # local: 218.963896 second (7.81 G allocations: 369.491 GiB, 41.93% gc time, 0.11% compilation time: 28% of which was recompilation)
 # remote batch: 916.522670 seconds (7.85 G allocations: 371.329 GiB, 30.08% gc time)
 # remote cmd: 895.401775 seconds (7.89 G allocations: 373.220 GiB, 27.09% gc time)
 
-println("Comparing Optim Algos: 100 sim")
-println("# of Threads:$(Threads.nthreads())")
+# println("Comparing Optim Algos: 100 sim")
+# println("# of Threads:$(Threads.nthreads())")
 # df_ = @time test_simulated_data_optim_algo(Nsim = 100, search_start = σ²base)
 # local: 1245.314972 seconds (46.14 G allocations: 2.133 TiB, 43.12% gc time, 0.02% compilation time)
 # remote cmd: 975.362874 seconds (7.81 G allocations: 369.438 GiB, 19.01% gc time)
@@ -764,6 +832,33 @@ println("# of Threads:$(Threads.nthreads())")
 # @time test_simulated_data_optim_algo(Nsim = 1, search_start = σ²base)
 # @time test_simulated_data_optim_algo(Nsim = 10, search_start = σ²base)
 # 114.5 seconds to run with 0% compilation time
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
