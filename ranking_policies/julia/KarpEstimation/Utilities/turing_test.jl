@@ -35,7 +35,7 @@ function model1_no_trends()
     N = 4; T = 60  # 1945-2005
     ρ = 0.8785  # from r-scripts/reproducting_andy.R  -> line 70 result2
     σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
-    θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)  # True paramter)
+    θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)  # True paramters
     seed = 1234
     data = Model.dgp(θ, N, T, seed)
 
@@ -183,76 +183,312 @@ end
     return
 end
 
-#! Add the fixed ρ version to estimate_model()
-# Estimate the MLE
-opt6 = optimize(karp_model3(eit, et), MLE())
-# Estimate the MLE, fixed ρ
-opt7 = optimize(karp_model3(eit, et, ρ=θ.ρ), MLE())
 
-function estimate_model(model; datatype="real", maxiter=10_000, seeds=100)
-    # Estimate the MLE on real data
-    if datatype == "real"
-        # load the data, then transform eit to eit/1000
-        data = @chain HF.read_data(N, T) @transform(:eᵢₜ = :eᵢₜ ./ 1000)
-    elseif datatype == "simulated"
-        # simulate data based on approximate parameters recovered from data
-        b₀ = [3.146, -0.454, 3.78, 3.479]
-        β = [0.265, 0]
-        data = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
-    end
+"""Generate outcome emission variables used in MLE from dataframe."""
+function gen_MLE_data(data)
     eit = data.eᵢₜ
     et = combine(groupby(data, :t), :eᵢₜ => mean => :eₜ).eₜ
-
-    # Initialize dataframe to store the results
-    optim_df = DataFrame(UID=Int64[], LL=Float64[], iters=Float64[], 
-                    σα²=Float64[], σμ²=Float64[], ρ=Float64[],
-                    b01=Float64[], b02=Float64[], b03=Float64[], b04=Float64[],
-                    β1=Float64[], β2=Float64[],
-                iconverge=Bool[], gconverge=Bool[], fconverge=Bool[], gtol=Float64[],
-                N=Int64[], T=Int64[], ρfixed=Bool[]
-    )
-    optim_dict = Dict()
-    UID = 1
-
-    # run optimize on the model 100 times, adding the results to a dataframe
-    @showprogress for seed in 1:seeds
-        Random.seed!(seed)
-        opt = optimize(model(eit, et),
-                        MLE(), ConjugateGradient(),
-                        Optim.Options(iterations=maxiter))
-        @show push!(optim_df, (
-            UID, opt.lp,  # Log likelihood value
-            opt.optim_result.iterations,  # number of iterations
-            opt.values[:σα²], opt.values[:σμ²], opt.values[:ρ],
-            opt.values[Symbol("b₀[1]")], opt.values[Symbol("b₀[2]")], opt.values[Symbol("b₀[3]")], opt.values[Symbol("b₀[4]")],
-            opt.values[:β₁], opt.values[:β₂],
-            opt.optim_result.iteration_converged,  # did it hit max iterations?
-            opt.optim_result.g_converged, # did it converge from the gradient?
-            opt.optim_result.f_converged,  # did it converge from the LL value?
-            opt.optim_result.g_abstol,  # gradient tolerance setting
-            length(eit) ÷ length(et), length(et), false,  # N, T, ρ is fixed
-        ))
-        optim_dict[UID] = opt
-        UID += 1
-    end
-
-    # Find best run (highest LL), and return that result
-    best_run = optim_df[findmax(optim_df.LL)[2], :]
-    best_optim = optim_dict[best_run.UID]
-    dict = Dict{String,Any}()
-    @pack! dict = best_run, best_optim, optim_df, optim_dict
-    return dict
+    return (; eit, et)
 end
 
-res1 = estimate_model(karp_model3; maxiter=50_000)
-res1["best_run"]
-#! Would want to use coeftable but there's a negative in the vcov matrix
-# 
-mat = [res1["best_optim"].values sqrt.(abs.(diag(vcov(res1["best_optim"]))))]
-# Create 95% confidence intervals
-LB = mat[:, 1] .- 1.96*mat[:, 2]
-UB = mat[:, 1] .+ 1.96*mat[:, 2]
-mat = [mat LB UB]
+"""Return outcome emission variables used in MLE."""
+function get_MLE_data(;N=4, T=60)
+    # load real data, then transform eit to eit/1000
+    data = @chain HF.read_data(N, T) @transform(:eᵢₜ = :eᵢₜ ./ 1000)
+    return gen_MLE_data(data)
+end
+function get_MLE_data(θ; N=4, T=60)
+    # simulate data based on approximate parameters recovered from data
+    b₀ = [3.146, -0.454, 3.78, 3.479]
+    β = [0.265, 0]
+    data = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
+    return gen_MLE_data(data)
+end
+
+"""Return model initialized with data.
+    
+    `initialize_model(karp_model3, false, θ)`
+    If datetype is "real", initialize with real data. Otherwise, initialize with simulated data.
+    If ρfixed is true, use θ.ρ as the fixed ρ value in initializing the model. 
+        Otherwise, use `missing`, which estimates ρ.
+"""
+function initialize_model(model, ρfixed, θ, datatype)
+    # Get real or simulated data
+    Y = datatype=="real" ? get_MLE_data() : get_MLE_data(θ)
+    # Initialize the model
+    ρ = ρfixed ? θ.ρ : missing
+    return model(Y.eit, Y.et; ρ=ρ)
+end
+
+"""Run MLE on model, storing results in df and dict."""
+function multistart_MLE(m, Nseeds; maxiter=maxiter)
+    # Initialize list, dictionary, and unique ID to store the results from each estimation
+    dfs = Array{DataFrame}(undef, Nseeds)
+    dict = Dict{Int64, Turing.TuringOptimExt.ModeResult}()
+    ρfixed = !ismissing(m.defaults.ρ)
+
+    # run optimize on the model `seeds` times, adding summary results to df
+    # storing the full results in a dictionary indexed by UID
+    p = Progress(Nseeds)
+    Threads.@threads for seed in 1:Nseeds
+    # for seed in 1:Nseeds
+        Random.seed!(seed)
+        # Estimate the model
+        #! Handle convergence failure warning
+        #! See Optim.converged(M)
+        opt = optimize(m, MLE(), ConjugateGradient(),
+                       Optim.Options(iterations=maxiter))
+        # Store the results
+        df = DataFrame(
+            seed=seed,
+            LL=opt.lp,  # Log likelihood value
+            iters=opt.optim_result.iterations,  # number of iterations
+            σα²=opt.values[:σα²],  # Estimated parameters
+            σμ²=opt.values[:σμ²],
+            ρ= ρfixed ? m.defaults.ρ : opt.values[:ρ],
+            b01=opt.values[Symbol("b₀[1]")],
+            b02=opt.values[Symbol("b₀[2]")],
+            b03=opt.values[Symbol("b₀[3]")],
+            b04=opt.values[Symbol("b₀[4]")],
+            β1=opt.values[:β₁],
+            β2=opt.values[:β₂],
+            iconverge=opt.optim_result.iteration_converged,  # did it hit max iterations?
+            gconverge=opt.optim_result.g_converged, # did it converge from the gradient?
+            fconverge=opt.optim_result.f_converged,  # did it converge from the LL value?
+            gtol=opt.optim_result.g_abstol,  # gradient tolerance setting
+            N=length(m.args.eᵢₜ) ÷ length(m.args.eₜ),
+            T=length(m.args.eₜ),
+            ρfixed=!ismissing(m.defaults.ρ),  # is ρ fixed in the model
+        )
+        dfs[seed] = df
+        dict[seed] = opt
+        next!(p)
+    end
+    df = vcat(dfs...)
+    return (; df, dict)
+end
+
+
+"""Run MLE on model, returning a dataframe of results.
+
+    `estimate_MLE(karp_model3, ρfixed=false, θ=missing, maxiter=10_000, seeds=100)` will 
+        estimate karp_model3 on real data, 100 times, including estimating ρ.
+    If datetype is "real", estimate with real data. Otherwise, estimate with simulated data.
+    If datetype is "simulated", θ must be a named tuple with attributes: θ.ρ, θ.σₐ², θ.σᵤ²
+
+    - ρ fixed, simulated data, must give θ
+    - ρ fixed, real data, must give θ
+    - ρ free, simulated data, must give θ
+    - ρ free, real data, can leave θ missing
+"""
+function estimate_MLE(model; ρfixed=false, θ=missing, datatype="real", maxiter=10_000, Nseeds=100)
+    # Initialize the model with data
+    println("\nInitializing model with $datatype data and ρfixed=$ρfixed")
+    model_obj = initialize_model(model, ρfixed, θ, datatype)
+
+    # Run MLE with different random seeds to get multiple starting points
+    println("\nRuning Multistart Search for MLE")
+    ms_res = multistart_MLE(model_obj, Nseeds; maxiter=maxiter)
+
+    # Find best run (highest LL), and return that result
+    println("\nFinding best run.")
+    best_run = ms_res.df[findmax(ms_res.df.LL)[2], :]
+    best_optim = ms_res.dict[best_run.seed]
+    return (; best_run, best_optim, ms_res)
+end
+
+"""Return a dataframe of coefficients, SEs, and 95% CIs from the best run."""
+function coef_df(res)
+    # Create matrix of coefficients and standard errors
+    #! Would want to use coeftable but there's a negative in the vcov matrix
+    mat = [res.best_optim.values  sqrt.(abs.(diag(vcov(res.best_optim))))]
+    # Create 95% confidence intervals
+    LB = mat[:, 1] .- 1.96*mat[:, 2]
+    UB = mat[:, 1] .+ 1.96*mat[:, 2]
+    mat = [names(mat)[1] mat LB UB]
+    # Add seed, LL, and convergence info to the matrix
+    convergence = res.best_optim.optim_result.iteration_converged ? "Max Iterations" :
+        res.best_optim.optim_result.f_converged ? "Function Convergence" :
+        res.best_optim.optim_result.g_converged ? "Gradient Convergence" : "Unknown"
+    mat = [mat
+           :LL   res.best_run.LL   nothing nothing nothing
+           :seed res.best_run.seed nothing nothing nothing
+           :Iterations res.best_run.iters nothing nothing nothing
+           :Termination convergence nothing nothing nothing ]
+    df = DataFrame(mat, Symbol.(["Parameter", "Estimate", "Standard Erorr", "CI Lower 95", "CI Upper 95"]))
+    return df
+end
+
+
+"""Plot the log likelihood surface over σ's from a chain and model"""
+function plot_sampler(chain, model, param_values; label="", angle=(30, 65))
+    # Evaluate log likelihood function at values of σs
+    evaluate(σα², σμ²) = logjoint(model, merge((;
+        # σα²=invlink.(Ref(InverseGamma(2, 3)), σα²), 
+        # σμ²=invlink.(Ref(InverseGamma(2, 3)), σμ²)),
+        σα², 
+        σμ²),
+        param_values
+    ))
+
+    # Extract values from chain.
+    val = get(chain, [:σα², :σμ², :lp])
+    # σα² = link.(Ref(InverseGamma(2, 3)), val.σα²)
+    # σμ² = link.(Ref(InverseGamma(2, 3)), val.σμ²)
+    σα² = val.σα²
+    σμ² = val.σμ²
+    lps = val.lp
+
+    # How many surface points to sample.
+    granularity = 100
+
+    # Range start/stop points.
+    spread = 0.5
+    σα²_start = minimum(σα²) - spread * std(σα²)
+    σα²_stop = maximum(σα²) + spread * std(σα²)
+    σμ²_start = minimum(σμ²) - spread * std(σμ²)
+    σμ²_stop = maximum(σμ²) + spread * std(σμ²)
+    σα²_rng = collect(range(σα²_start; stop=σα²_stop, length=granularity))
+    σμ²_rng = collect(range(σμ²_start; stop=σμ²_stop, length=granularity))
+
+    # Make surface plot.
+    p = surface(
+        σα²_rng,
+        σμ²_rng,
+        evaluate;
+        camera=angle,
+        #   ticks=nothing,
+        colorbar=false,
+        color=:inferno,
+        title=label,
+    )
+
+    line_range = 1:length(σμ²)
+
+    scatter3d(
+        σα²[line_range],
+        σμ²[line_range],
+        lps[line_range];
+        mc=:viridis,
+        marker_z=lps[line_range],
+        msw=0,
+        legend=false,
+        colorbar=false,
+        alpha=0.5,
+        xlabel="σα²",
+        ylabel="σμ²",
+        zlabel="Log probability",
+        title=label,
+        # camera=angle,
+    )
+
+    return p
+end
+
+"""Plot the log likelihood surface over σ's from model"""
+function plot_LL(est_model, model; label="", angle=(30, 65), lower=missing, upper=missing, zlims=missing, granularity=100)
+
+    param_values = (;est_model.best_run.ρ, 
+                 b₀=[est_model.best_optim.values[Symbol("b₀[$i]")] for i in 1:4],
+                 β₁=est_model.best_run.β1,
+                 β₂=est_model.best_run.β2
+)
+    # Evaluate log likelihood function at values of σs
+    function evaluate(σα², σμ²)
+        logjoint(model, merge((;
+        # σα²=invlink.(Ref(InverseGamma(2, 3)), σα²), 
+        # σμ²=invlink.(Ref(InverseGamma(2, 3)), σμ²)),
+        σα², 
+        σμ²),
+        param_values
+    ))
+    end
+
+    # Range start/stop points.
+    if ismissing(lower) | ismissing(upper)
+        df = coef_df(est_model)
+    else
+        df = nothing
+    end
+    if ismissing(lower)
+        σα²_start = max(df[1,"CI Lower 95"],0)
+        σμ²_start = max(df[2,"CI Lower 95"],0)
+    elseif typeof(lower) <: Real
+        σα²_start = lower
+        σμ²_start = lower
+    elseif typeof(lower) <: AbstractArray
+        σα²_start = lower[1]
+        σμ²_start = lower[2]
+    end
+    if ismissing(upper)
+        σα²_stop = df[1,"CI Upper 95"]
+        σμ²_stop = df[2,"CI Upper 95"]
+    elseif typeof(upper) <: Real
+        σα²_stop = upper
+        σμ²_stop = upper
+    elseif typeof(upper) <: AbstractArray
+        σα²_stop = upper[1]
+        σμ²_stop = upper[2]
+    end
+    if ismissing(zlims)
+        zlims = (nothing, nothing)
+    end
+    [x1, x2] = log.([σα²_start, σα²_stop])
+    σα²_rng = exp.(range(x1; stop=x2, length=granularity))
+    σμ²_rng = collect(range(σμ²_start; stop=σμ²_stop, length=granularity))
+
+
+    # Make surface plot.
+    p = surface(
+        σα²_rng,
+        σμ²_rng,
+        evaluate;
+        camera=angle,
+        #   ticks=nothing,
+        colorbar=false,
+        color=:inferno,
+        title=label,
+        xlabel="σα²",
+        ylabel="σμ²",
+        zlabel="Log probability",
+        zlims=zlims,
+        title=label,
+    )
+
+    return p
+end
+
+
+# Estimate the MLE on real data, free ρ
+m1 = initialize_model(karp_model3, false, missing, "real")
+res_freeρ = estimate_MLE(karp_model3; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20)
+# 7:42 min parallel
+res_freeρ.best_run
+coef_df(res_freeρ)
+plot_LL(res_freeρ, m1; angle=(30, 40), lower=0, upper=1)
+plot_LL(res_freeρ, m1; angle=(30, 40), lower=[1e-10,0.398], upper=[0.1, 0.4], zlims=[-320, -230])
+
+# Estimate the MLE on real data, fixed ρ
+θ = (ρ=0.929347, σₐ²=3.6288344, σᵤ²=3.6288344)  # True paramters
+res_fixedρ = estimate_MLE(karp_model3; ρfixed=true, θ=θ, datatype="real", maxiter=50_000, Nseeds=20)
+res_fixedρ.best_run
+coef_df(res_fixedρ)
+
+
+# Explore the posterior
+m1 = initialize_model(karp_model3, false, missing, "real")
+c = Turing.sample(m1, NUTS(), MCMCThreads(), 1000, 10; discard_initial=1000)
+param_values = (;res_freeρ.best_run.ρ, 
+                 b₀=[res_freeρ.best_optim.values[Symbol("b₀[$i]")] for i in 1:4],
+                 β₁=res_freeρ.best_run.β1,
+                 β₂=res_freeρ.best_run.β2
+)
+plot_sampler(c, m1, param_values; angle=(30, 45))
+anim = @animate for vert=10:20:90, rad=10:10:360
+    @show rad, vert
+    plot_sampler(c, m1, param_values; angle=(rad, vert))
+end
+gif(anim, "LL_turing_NUTSsampler_points.gif", fps = 10)
 
 
 """
