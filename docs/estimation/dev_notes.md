@@ -1,4 +1,5 @@
 See docs/logs for more recent daily dev logs.
+See google doc for more progress notes: https://docs.google.com/document/d/17ZyOMPmuz2MUdNK1LzS30kqZ25YvoQIKmIUSsoiPVmI/edit
 
 # Code structure
 Move much code from covariance_matrix.jl to the following files:
