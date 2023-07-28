@@ -1,6 +1,7 @@
 
 module HF
 using DataFramesMeta
+using CategoricalArrays
 using CSV
 using Dates
 using Statistics: mean, std
@@ -24,6 +25,8 @@ end
 ROOT = get_project_root_path()
 DATA = joinpath(ROOT, "data")
 TEMP = joinpath(DATA, "temp")
+num2country = Dict(1=>"USA", 2=>"EU", 3=>"BRIC", 4=>"Other")
+country2num = Dict("USA"=>1, "EU"=>2, "BRIC"=>3, "Other"=>4)
 
 ############################################
 #               Data functions
