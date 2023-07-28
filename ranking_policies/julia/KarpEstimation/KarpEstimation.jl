@@ -32,6 +32,7 @@ using Latexify  # output symbolic expressions as latex code
 using Logging
 import CSV
 using ProgressMeter
+using Parameters # for @unpack
 
 import Revise
 #! Add ROOT path stuff here and make all relative paths to root
@@ -39,7 +40,7 @@ import Revise
 Revise.includet("../reg_utils.jl")  # mygls()
 
 #=
-]add Random Distributions DataFrames DataFramesMeta CategoricalArrays LinearAlgebra StatsModels StatsPlots GLM Optim FiniteDifferences Dates Latexify Logging CSV Revise
+]add Random Distributions DataFrames DataFramesMeta CategoricalArrays LinearAlgebra StatsModels StatsPlots GLM Optim FiniteDifferences Dates Latexify Logging CSV Revise Parameters
 =#
 
 Revise.includet("Utilities/HelperFunctions.jl")  # HF
@@ -683,6 +684,43 @@ end
 # @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 0.1)
 # @time test_simulated_data_with_no_trends(Nsteps = 10, Nsim = 100, search_start = 10)
 
+function test_optim_algo(;
+    datatype="simulated", distributed=false,
+    Nsim = 100, search_start = 0.1
+    )
+    N = 4; T = 60  # 1945-2005
+    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
+    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
+
+    # Define parameters for generating simulated data
+    θ = (ρ=ρ, σₐ²=2*σ²base, σᵤ²=2*σ²base)
+    # Define parameters for search
+    search_params = (
+        θ₀ = (ρ=ρ, σₐ²=search_start, σᵤ²=search_start),
+        θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4),
+        θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
+    )
+
+    methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS"] #, "momentum gradient", "accelerated gradient"]
+    # MomentumGradientDescent and AcceleratedGradientDescent do not work with Fminbox
+
+    # Iterate over method-seeds pairs
+    iters = [(m, n) for m in methods for n in 1:Nsim]
+    println("# of tasks: $(length(iters))")
+    dfs = Array{DataFrame}(undef, length(iters))
+
+
+    # Summarize results over all seeds
+    cat_df = reduce(vcat, dfs)
+    summary_df = HF.summarize_simulation_results(cat_df)
+    # Save dataframe of results
+    HF.write_estimation_df_notrend(summary_df, "all", suffix="_methods_summaries")
+    # This saves the estimation results to data/temp/simulation_estimation_methods_summaries_results_log.csv
+    return summary_df
+
+end
+
+test_optim_algo(;"simulated", distributed=true, Nsim = 100, search_start = 0.1)
 
 """
 Estimates σ's using different optim.jl algos to test which has least bias when 
@@ -703,24 +741,8 @@ Estimates σ's using different optim.jl algos to test which has least bias when
     Nsim = # of simulated datasets to create for each "true" σ² value pair
     search_start = value of both σ²'s to start optimization search at
 """
-function test_simulated_data_optim_algo(; Nsim = 100, search_start = 0.1)
-    N = 4; T = 60  # 1945-2005
-    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
-    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
-
-    # Define a short analysis function that just takes the data
-    θ = (ρ=ρ, σₐ²=2*σ²base, σᵤ²=2*σ²base)
-    θ₀ = (ρ=ρ, σₐ²=search_start, σᵤ²=search_start)
-    θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
-    θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
-
-    methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS"] #, "momentum gradient", "accelerated gradient"]
-    # MomentumGradientDescent and AcceleratedGradientDescent do not work with Fminbox
-
-    # Iterate over method-seeds pairs
-    iters = [(m, n) for m in methods for n in 1:Nsim]
-    dfs = Array{DataFrame}(undef, length(iters))
-    println("# of tasks: $(length(iters))")
+function test_simulated_data_optim_algo_parallel(iters, θ, search_params)
+    @unpack θ₀, θLB, θUB = search_params
     p = Progress(length(iters))
     Threads.@threads for i in 1:length(iters)
         println("Sim $i")
@@ -734,13 +756,7 @@ function test_simulated_data_optim_algo(; Nsim = 100, search_start = 0.1)
         dfs[i] = result_df
         next!(p)
     end
-    # Summarize results over all seeds
-    cat_df = reduce(vcat, dfs)
-    summary_df = HF.summarize_simulation_results(cat_df)
-    # Save dataframe of results
-    HF.write_estimation_df_notrend(summary_df, "all", suffix="_methods_summaries")
-    # This saves the estimation results to data/temp/simulation_estimation_methods_summaries_results_log.csv
-    return summary_df
+    return dfs
 end
 """
 Distributed Estimates σ's using different optim.jl algos to test which has least bias when 
@@ -761,24 +777,8 @@ Distributed Estimates σ's using different optim.jl algos to test which has leas
     Nsim = # of simulated datasets to create for each "true" σ² value pair
     search_start = value of both σ²'s to start optimization search at
 """
-function test_simulated_data_optim_algo_distributed(; Nsim = 100, search_start = 0.1)
-    N = 4; T = 60  # 1945-2005
-    ρ = 0.8785                        # from r-scripts/reproducting_andy.R  -> line 70 result2
-    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
-
-    # Define a short analysis function that just takes the data
-    θ = (ρ=ρ, σₐ²=2*σ²base, σᵤ²=2*σ²base)
-    θ₀ = (ρ=ρ, σₐ²=search_start, σᵤ²=search_start)
-    θLB = (ρ=0.878, σₐ²=1e-4, σᵤ²=1e-4)
-    θUB = (ρ=0.879, σₐ²=Inf, σᵤ²=Inf)
-
-    methods = ["LBFGS", "conjugate gradient", "gradient decent", "BFGS"] #, "momentum gradient", "accelerated gradient"]
-    # MomentumGradientDescent and AcceleratedGradientDescent do not work with Fminbox
-
-    # Iterate over method-seeds pairs
-    iters = [(m, n) for m in methods for n in 1:Nsim]
-    dfs = Array{DataFrame}(undef, length(iters))
-    println("# of tasks: $(length(iters))")
+function test_simulated_data_optim_algo_distributed(iters, θ, search_params)
+    @unpack θ₀, θLB, θUB = search_params
     @showprogress @distributed for i in 1:length(iters)
         println("Sim $i")
         method, seed = iters[i]
@@ -790,13 +790,7 @@ function test_simulated_data_optim_algo_distributed(; Nsim = 100, search_start =
             analytical = true, method = method)
         dfs[i] = result_df
     end
-    # Summarize results over all seeds
-    cat_df = reduce(vcat, dfs)
-    summary_df = HF.summarize_simulation_results(cat_df)
-    # Save dataframe of results
-    HF.write_estimation_df_notrend(summary_df, "all", suffix="_methods_summaries")
-    # This saves the estimation results to data/temp/simulation_estimation_methods_summaries_results_log.csv
-    return summary_df
+    return dfs
 end
 
 
@@ -1205,6 +1199,7 @@ end
 # stats_simulated_estimates_with_no_trends(σ²base)
 # stats_simulated_estimates_with_no_trends(0.1)
 # stats_simulated_estimates_with_no_trends(10.0)
+
 
 
 
