@@ -36,10 +36,10 @@ using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 # instantiate and precompile environment in all processes
 @everywhere begin
-project_env = joinpath(splitpath(@__DIR__)[1:end-1])
-println(project_env)
-using Pkg; Pkg.activate(project_env)
-Pkg.instantiate(); Pkg.precompile()
+    project_env = joinpath(splitpath(@__DIR__)[1:end-1])
+    println(project_env)
+    using Pkg; Pkg.activate(project_env)
+    Pkg.instantiate(); Pkg.precompile()
 end
 @everywhere begin
     using Distributions
