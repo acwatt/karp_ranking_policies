@@ -178,6 +178,48 @@ end
 
     return
 end
+@model function karp_model4(eᵢₜ, eₜ; 
+        ρ=missing, 
+        σα²dist=InverseGamma(1, 1), 
+        σμ²dist=InverseGamma(1, 1),
+        ρdist=truncated(Normal(0.87, 0.05); lower=0, upper=1),
+        b₀sd=2, β₁sd=0.5, β₂sd=0.1
+    )
+    T = length(eₜ)
+    N = length(eᵢₜ) ÷ T
+    # Set variance priors
+    σα² ~ σα²dist
+    σμ² ~ σμ²dist
+
+    # Set FE and time trend priors
+    b₀ ~ MvNormal(zeros(N), b₀sd)
+    B₀ = mean(b₀)
+    β₁ ~ truncated(Normal(0, β₁sd); lower=0)
+    β₂ ~ Normal(0, β₂sd)
+
+    # Set AR(1) coefficient prior
+    if ismissing(ρ)
+        ρ ~ ρdist
+    end
+
+    # Initialize an empty vector to store the model AR(1) errors
+    vₜ₋₁ = Vector{Real}(undef, T+1)
+    # This has T+1 elements because we need to store vₜ₋₁[1] = 0
+    vₜ₋₁[1] = 0
+
+    # DGP models
+    for t = 1:T
+        # Period Avg observation
+        eₜ[t] ~ Normal(B₀ + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²/N))
+        vₜ₋₁[t+1] = eₜ[t] - B₀ - β₁*t - β₂*t^2
+        for i = 1:N
+            # Period-unit observation
+            eᵢₜ[i + (t-1)*N] ~ Normal(b₀[i] + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²))
+        end
+    end
+
+    return
+end
 
 """Generate outcome emission variables used in MLE from dataframe."""
 function gen_MLE_data(data)
@@ -207,12 +249,12 @@ end
     If ρfixed is true, use θ.ρ as the fixed ρ value in initializing the model. 
         Otherwise, use `missing`, which estimates ρ.
 """
-function initialize_model(model, ρfixed, θ, datatype)
+function initialize_model(model, ρfixed, θ, datatype; kwargs...)
     # Get real or simulated data
     Y = datatype=="real" ? get_MLE_data() : get_MLE_data(θ)
     # Initialize the model
     ρ = ρfixed ? θ.ρ : missing
-    return model(Y.eit, Y.et; ρ=ρ)
+    return model(Y.eit, Y.et; ρ=ρ, kwargs...)
 end
 
 """Run MLE on model, storing results in df and dict."""
@@ -221,6 +263,7 @@ function multistart_MLE(m, Nseeds; maxiter=maxiter)
     dfs = Array{DataFrame}(undef, Nseeds)
     dict = Dict{Int64, Turing.TuringOptimExt.ModeResult}()
     ρfixed = !ismissing(m.defaults.ρ)
+    x0 = 
 
     # run optimize on the model `seeds` times, adding summary results to df
     # storing the full results in a dictionary indexed by UID
@@ -231,8 +274,12 @@ function multistart_MLE(m, Nseeds; maxiter=maxiter)
         # Estimate the model
         #! Handle convergence failure warning
         #! See Optim.converged(M)
-        opt = optimize(m, MLE(), ConjugateGradient(),
-                       Optim.Options(iterations=maxiter))
+        opt = optimize(m, MLE(), x0, ConjugateGradient(),
+                       Optim.Options(iterations=maxiter,
+                                     store_trace=true,
+                                     extended_trace=true
+                       )
+        )
         # Store the results
         df = DataFrame(
             seed=seed,
@@ -275,20 +322,20 @@ end
     - ρ free, simulated data, must give θ
     - ρ free, real data, can leave θ missing
 """
-function estimate_MLE(model; ρfixed=false, θ=missing, datatype="real", maxiter=10_000, Nseeds=100)
+function estimate_MLE(model; ρfixed=false, θ=missing, datatype="real", maxiter=10_000, Nseeds=100, kwargs...)
     # Initialize the model with data
     println("\nInitializing model with $datatype data and ρfixed=$ρfixed")
-    model_obj = initialize_model(model, ρfixed, θ, datatype)
+    model_obj = initialize_model(model, ρfixed, θ, datatype; kwargs...)
 
     # Run MLE with different random seeds to get multiple starting points
     println("\nRuning Multistart Search for MLE")
-    ms_res = multistart_MLE(model_obj, Nseeds; maxiter=maxiter)
+    ms_result = multistart_MLE(model_obj, Nseeds; maxiter=maxiter)
 
     # Find best run (highest LL), and return that result
     println("\nFinding best run.")
-    best_run = ms_res.df[findmax(ms_res.df.LL)[2], :]
-    best_optim = ms_res.dict[best_run.seed]
-    return (; best_run, best_optim, ms_res)
+    best_run = ms_result.df[findmax(ms_result.df.LL)[2], :]
+    best_optim = ms_result.dict[best_run.seed]
+    return (; best_run, best_optim, ms_result)
 end
 
 """Return a dataframe of coefficients, SEs, and 95% CIs from the best run."""
@@ -428,7 +475,7 @@ function plot_LL(est_model, model; label="", angle=(30, 65), lower=missing, uppe
     if ismissing(zlims)
         zlims = (nothing, nothing)
     end
-    [x1, x2] = log.([σα²_start, σα²_stop])
+    x1, x2 = log.([σα²_start, σα²_stop])
     σα²_rng = exp.(range(x1; stop=x2, length=granularity))
     σμ²_rng = collect(range(σμ²_start; stop=σμ²_stop, length=granularity))
 
@@ -447,43 +494,127 @@ function plot_LL(est_model, model; label="", angle=(30, 65), lower=missing, uppe
         ylabel="σμ²",
         zlabel="Log probability",
         zlims=zlims,
-        title=label,
     )
 
     return p
 end
 
+"""Return starting value used in optim.
+    Requires optim be run with store_trace=true and extended_trace=true
+"""
+function get_iteration_x(optim_result, iter)
+    if iter == "start"
+        i = 1
+    elseif iter == "end"
+        i = length(Optim.x_trace(optim_result))
+    else
+        i = iter
+    end
+    # get starting x from trace
+    x0 = Optim.x_trace(optim_result)[i]
+    # apply appropriate transforms for each parameter
+    x0 = [ℯ.^x0[1:2]; x0[3:6]; ℯ^x0[7]; x0[8]; cdf(Normal(), x0[end])]
+    return x0
+end
+"""Return dictionary of starting parameter values used in optim for each seed.
+    Requires optim be run with store_trace=true and extended_trace=true
+    iter = "start" is the starting search parameter value
+    iter = "end" is the final search parameter value
+"""
+function get_iteration_x_dict(opt_dict; iter="start")
+    x0_dict = Dict()
+    for seed in keys(opt_dict)
+        x0_dict[seed] = get_iteration_x(opt_dict[seed].optim_result, iter)
+    end
+    return x0_dict
+end
 
-# Estimate the MLE on real data, free ρ
+
+###############################################
+# Test the optimization function and output
 m1 = initialize_model(karp_model3, false, missing, "real")
-res_freeρ = estimate_MLE(karp_model3; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20)
-# 7:42 min parallel
-res_freeρ.best_run
-coef_df(res_freeρ)
-plot_LL(res_freeρ, m1; angle=(30, 40), lower=0, upper=1)
-plot_LL(res_freeρ, m1; angle=(30, 40), lower=[1e-10,0.398], upper=[0.1, 0.4], zlims=[-320, -230])
-
-# Estimate the MLE on real data, fixed ρ
-θ = (ρ=0.929347, σₐ²=3.6288344, σᵤ²=3.6288344)  # True paramters
-res_fixedρ = estimate_MLE(karp_model3; ρfixed=true, θ=θ, datatype="real", maxiter=50_000, Nseeds=20)
-res_fixedρ.best_run
-coef_df(res_fixedρ)
-
-
-# Explore the posterior
-m1 = initialize_model(karp_model3, false, missing, "real")
-c = Turing.sample(m1, NUTS(), MCMCThreads(), 1000, 10; discard_initial=1000)
-param_values = (;res_freeρ.best_run.ρ, 
-                 b₀=[res_freeρ.best_optim.values[Symbol("b₀[$i]")] for i in 1:4],
-                 β₁=res_freeρ.best_run.β1,
-                 β₂=res_freeρ.best_run.β2
+opt = optimize(m1, MLE(), ConjugateGradient(),
+               Optim.Options(iterations=100, store_trace=true, extended_trace=true)
 )
+
+
+###############################################  ESIMATE σα², σμ², ρ
+# Estimate the MLE on real data, estimate ρ
+result_freeρ = estimate_MLE(karp_model3; ρfixed=false, datatype="real", maxiter=50, Nseeds=20)
+
+# Retrieve starting parameter values from multistarted results
+x0_dict = get_iteration_x_dict(result_freeρ.ms_result.dict)
+density([x0_dict[i][1] for i in keys(x0_dict)], 
+    label="σα²", bins=length(x0_dict), bandwidth=0.1)
+sort([x0_dict[i][1] for i in keys(x0_dict)])
+
+# min parallel for Nseeds=5,  7:42 min parallel for Nseeds=20
+@chain result_freeρ.ms_result.df @orderby(:LL)
+result_freeρ.best_run
+coef_df(result_freeρ)
+plot_LL(result_freeρ, m1; angle=(30, 40), lower=0, upper=1)
+plot_LL(result_freeρ, m1; angle=(30, 40), lower=[1e-10,0.398], upper=[0.1, 0.4], zlims=[-320, -230])
+
+# Access the Turing chain and explore the posterior distribution for σα² and σμ²
+c = Turing.sample(m1, NUTS(), MCMCThreads(), 1000, 10; discard_initial=1000)
+# Condition on the other parameters fitted values
+param_values = (;result_freeρ.best_run.ρ, 
+                 b₀=[result_freeρ.best_optim.values[Symbol("b₀[$i]")] for i in 1:4],
+                 β₁=result_freeρ.best_run.β1,
+                 β₂=result_freeρ.best_run.β2
+)
+# Plot the posterior distribution
 plot_sampler(c, m1, param_values; angle=(30, 45))
+# Rotate the posterior distribution to get a better look
 anim = @animate for vert=10:20:90, rad=10:10:360
     @show rad, vert
     plot_sampler(c, m1, param_values; angle=(rad, vert))
 end
 gif(anim, "LL_turing_NUTSsampler_points.gif", fps = 10)
+
+
+
+# Experiment with different priors on σα² and σμ²  (est runtime = 5 min)
+result_freeρ_uniform1 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20,
+    σα²dist=Uniform(0, 1e10)
+)
+result_freeρ_uniform2 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20,
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+)
+result_freeρ_uniform3 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20,
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+    ρdist=Uniform(-1, 1)
+)
+result_freeρ_uniform4 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20,
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+    ρdist=Uniform(-1, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1
+)
+result_freeρ_uniform1.best_run
+result_freeρ_uniform2.best_run
+result_freeρ_uniform3.best_run
+result_freeρ_uniform4.best_run
+coef_df(result_freeρ_uniform1)
+@chain result_freeρ_uniform1.ms_result.df @orderby(:LL)
+
+# Examine the starting parameter values
+x0_dict2 = get_iteration_x_dict(result_freeρ_uniform1.ms_result.dict)
+xend_dict2 = get_iteration_x_dict(result_freeρ_uniform1.ms_result.dict; iter="end")
+density([log10(x0_dict2[i][1]) for i in keys(x0_dict2)], 
+    label="σα²", bandwidth=0.1)
+sort([x0_dict2[i][1] for i in keys(x0_dict2)])
+sort([x0_dict2[i][2] for i in keys(x0_dict2)])
+sort([x0_dict2[i][end] for i in keys(x0_dict2)])
+
+# Plot the starting parameter values for σα² and σμ²
+_x, _y = vcat.([x0_dict2[i][1:2] for i in keys(x0_dict2)]...)
+scatter(_x, _y)
+
+
+
 
 
 """
@@ -499,37 +630,23 @@ Parameter estimates for real data / 1000
     β₁       │   0.0903224     0.035658    0.0204327     0.160212
     β₂       │  8.49059e-5  0.000633762  -0.00115727   0.00132708
     ρ        │    0.929347     0.124367     0.685588      1.17311
+- robust to all checks on the priors
 
-
-Parameter estimates for data
-9-element Named Vector{Float64}
-A     │       est   │  SE (seems wrong)
-──────┼──────────  ─┼───────────
-σα²   │       0.0   │    1.23397
-σμ²   │ 3.99063e5   │    1.52001
-b₀[1] │   1230.16   │    1.10942
-b₀[2] │  -89.1669   │    1.10942
-b₀[3] │   1462.39   │    1.10942
-b₀[4] │   1351.87   │    1.10942
-β₁    │   90.3224   │  0.0884016
-β₂    │ 0.0849059   │ 0.00147306
-ρ     │  0.929347   │  0.0489734
+Parameter estimates for raw data
+    9-element Named Vector{Float64}
+    A     │       est   │  SE (seems wrong)
+    ──────┼──────────  ─┼───────────
+    σα²   │       0.0   │    1.23397
+    σμ²   │ 3.99063e5   │    1.52001
+    b₀[1] │   1230.16   │    1.10942
+    b₀[2] │  -89.1669   │    1.10942
+    b₀[3] │   1462.39   │    1.10942
+    b₀[4] │   1351.87   │    1.10942
+    β₁    │   90.3224   │  0.0884016
+    β₂    │ 0.0849059   │ 0.00147306
+    ρ     │  0.929347   │  0.0489734
 
 """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -559,15 +676,11 @@ end
 coeftable(opt6)
 
 
-
-
-
-
 #######################################
 #  Turing attempt for Karp model, adding time averaging
 #######################################
 #! Add time averaging to this model
-@model function karp_model4(eᵢₜ, eₜ; ρ=nothing)
+@model function karp_model5(eᵢₜ, eₜ; ρ=nothing)
     T = length(eₜ)
     N = length(eᵢₜ) ÷ T
     # Set variance priors
@@ -601,6 +714,7 @@ coeftable(opt6)
 
     return
 end
+#! rename variables below
 # Get the simulated data
 eit = data2.eᵢₜ
 et = combine(groupby(data2, :t), :eᵢₜ => mean => :eₜ).eₜ
@@ -613,25 +727,9 @@ opt6.optim_result
 coefdf = coeftable(opt6)
 stderror(opt6)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+##########################################################################################
+#                                   Examples
+##########################################################################################
 
 #######################################
 #     Example MLE turing model from

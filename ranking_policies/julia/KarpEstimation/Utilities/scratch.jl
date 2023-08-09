@@ -84,11 +84,6 @@ data2 = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
 histogram(data2.eᵢₜ, label="eᵢₜ", title="Simulated data with trends", legend=:topleft)
 
 
-
-
-
-
-
 function model1_many_params()
 
     @model function karp_model(eᵢₜ, eₜ)
@@ -150,3 +145,15 @@ function model1_many_params()
     coefdf = coeftable(opt3)
 
 end
+
+
+
+###############################################  ESIMATE σα², σμ², FIX ρ
+# Estimate the MLE on real data, fix ρ
+θ = (ρ=0.929347, σₐ²=3.6288344, σᵤ²=3.6288344)  # True paramters
+result_fixedρ = estimate_MLE(karp_model3; ρfixed=true, θ=θ, datatype="real", maxiter=50_000, Nseeds=20)
+result_fixedρ.best_run
+coef_df(result_fixedρ)
+
+
+
