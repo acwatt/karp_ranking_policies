@@ -263,7 +263,6 @@ function multistart_MLE(m, Nseeds; maxiter=maxiter)
     dfs = Array{DataFrame}(undef, Nseeds)
     dict = Dict{Int64, Turing.TuringOptimExt.ModeResult}()
     ρfixed = !ismissing(m.defaults.ρ)
-    x0 = 
 
     # run optimize on the model `seeds` times, adding summary results to df
     # storing the full results in a dictionary indexed by UID
@@ -274,7 +273,7 @@ function multistart_MLE(m, Nseeds; maxiter=maxiter)
         # Estimate the model
         #! Handle convergence failure warning
         #! See Optim.converged(M)
-        opt = optimize(m, MLE(), x0, ConjugateGradient(),
+        opt = optimize(m, MLE(), ConjugateGradient(),
                        Optim.Options(iterations=maxiter,
                                      store_trace=true,
                                      extended_trace=true
@@ -575,18 +574,20 @@ gif(anim, "LL_turing_NUTSsampler_points.gif", fps = 10)
 
 
 # Experiment with different priors on σα² and σμ²  (est runtime = 5 min)
+#! increase maxiter: at least 4 don't converge
+#! increase Nseeds: check more of the parameter space
 result_freeρ_uniform1 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20,
     σα²dist=Uniform(0, 1e10)
-)
+)  # 7 min
 result_freeρ_uniform2 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20,
     σα²dist=Uniform(0, 1e10),
     σμ²dist=Uniform(0, 1e10),
-)
+)  # 5 min
 result_freeρ_uniform3 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20,
     σα²dist=Uniform(0, 1e10),
     σμ²dist=Uniform(0, 1e10),
     ρdist=Uniform(-1, 1)
-)
+)  # 4 min
 result_freeρ_uniform4 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=50_000, Nseeds=20,
     σα²dist=Uniform(0, 1e10),
     σμ²dist=Uniform(0, 1e10),
@@ -612,9 +613,6 @@ sort([x0_dict2[i][end] for i in keys(x0_dict2)])
 # Plot the starting parameter values for σα² and σμ²
 _x, _y = vcat.([x0_dict2[i][1:2] for i in keys(x0_dict2)]...)
 scatter(_x, _y)
-
-
-
 
 
 """
@@ -647,6 +645,26 @@ Parameter estimates for raw data
     ρ     │  0.929347   │  0.0489734
 
 """
+
+
+
+
+##########################################################################################
+#                        Test on simulated data over a range of parameters
+##########################################################################################
+# Define range of parameters
+#! should I just generate them from turing model?
+
+# Define number of steps in each parameter space
+
+# Define linear or log steps for each parameter
+
+# Generate full list of all parameter combinations
+
+# Run estimation for each parameter combination
+# Run each parameter combination Nsim times with different seeds for random data generation
+
+
 
 
 
