@@ -20,8 +20,6 @@ include("HelperFunctions.jl")  # HF
 
 
 
-
-
 #######################################################################
 #                            Turing.jl Functions
 #######################################################################
@@ -43,9 +41,6 @@ function model1_no_trends()
 
     end
 end
-
-
-
 
 
 #######################################
@@ -143,6 +138,7 @@ function model2_few_params()
 
 end
 
+
 #######################################
 #  Model with v error vector to hold values
 #######################################
@@ -182,7 +178,6 @@ end
 
     return
 end
-
 
 """Generate outcome emission variables used in MLE from dataframe."""
 function gen_MLE_data(data)
@@ -268,7 +263,6 @@ function multistart_MLE(m, Nseeds; maxiter=maxiter)
     return (; df, dict)
 end
 
-
 """Run MLE on model, returning a dataframe of results.
 
     `estimate_MLE(karp_model3, ρfixed=false, θ=missing, maxiter=10_000, seeds=100)` will 
@@ -319,17 +313,18 @@ function coef_df(res)
     return df
 end
 
-
 """Plot the log likelihood surface over σ's from a chain and model"""
 function plot_sampler(chain, model, param_values; label="", angle=(30, 65))
     # Evaluate log likelihood function at values of σs
-    evaluate(σα², σμ²) = logjoint(model, merge((;
-        # σα²=invlink.(Ref(InverseGamma(2, 3)), σα²), 
-        # σμ²=invlink.(Ref(InverseGamma(2, 3)), σμ²)),
-        σα², 
-        σμ²),
-        param_values
-    ))
+    evaluate(σα², σμ²) = logjoint(model, 
+        merge((;
+            # σα²=invlink.(Ref(InverseGamma(2, 3)), σα²), 
+            # σμ²=invlink.(Ref(InverseGamma(2, 3)), σμ²)),
+            σα², 
+            σμ²),
+            param_values
+        )
+    )
 
     # Extract values from chain.
     val = get(chain, [:σα², :σμ², :lp])
@@ -392,7 +387,7 @@ function plot_LL(est_model, model; label="", angle=(30, 65), lower=missing, uppe
                  b₀=[est_model.best_optim.values[Symbol("b₀[$i]")] for i in 1:4],
                  β₁=est_model.best_run.β1,
                  β₂=est_model.best_run.β2
-)
+    )
     # Evaluate log likelihood function at values of σs
     function evaluate(σα², σμ²)
         logjoint(model, merge((;
@@ -492,7 +487,7 @@ gif(anim, "LL_turing_NUTSsampler_points.gif", fps = 10)
 
 
 """
-Parameter estimates for data / 1000
+Parameter estimates for real data / 1000
     A ╲ hcat │       est         SE          95% LB        95% UB
     ─────────┼───────────────────────────────────────────────────
     σα²      │ 3.59336e-19    0.0246159   -0.0482472    0.0482472
@@ -508,30 +503,18 @@ Parameter estimates for data / 1000
 
 Parameter estimates for data
 9-element Named Vector{Float64}
-A     │
-──────┼──────────
-σα²   │       0.0
-σμ²   │ 3.99063e5
-b₀[1] │   1230.16
-b₀[2] │  -89.1669
-b₀[3] │   1462.39
-b₀[4] │   1351.87
-β₁    │   90.3224
-β₂    │ 0.0849059
-ρ     │  0.929347
+A     │       est   │  SE (seems wrong)
+──────┼──────────  ─┼───────────
+σα²   │       0.0   │    1.23397
+σμ²   │ 3.99063e5   │    1.52001
+b₀[1] │   1230.16   │    1.10942
+b₀[2] │  -89.1669   │    1.10942
+b₀[3] │   1462.39   │    1.10942
+b₀[4] │   1351.87   │    1.10942
+β₁    │   90.3224   │  0.0884016
+β₂    │ 0.0849059   │ 0.00147306
+ρ     │  0.929347   │  0.0489734
 
-9-element Named Vector{Float64}
-A     │
-──────┼───────────
-σα²   │    1.23397
-σμ²   │    1.52001
-b₀[1] │    1.10942
-b₀[2] │    1.10942
-b₀[3] │    1.10942
-b₀[4] │    1.10942
-β₁    │  0.0884016
-β₂    │ 0.00147306
-ρ     │  0.0489734
 """
 
 
