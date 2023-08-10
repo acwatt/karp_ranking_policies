@@ -1,7 +1,7 @@
 
 println(@__DIR__)
 using Pkg; Pkg.activate(joinpath(@__DIR__, "turing_test_env"))
-# ]add Turing DataFrames LinearAlgebra Distributions CategoricalArrays Random Optim StatsBase StatsPlots ProgressMeter DataFramesMeta Dates CSV Statistics
+# ]add Turing DataFrames LinearAlgebra Distributions CategoricalArrays Random Optim StatsBase StatsPlots ProgressMeter DataFramesMeta Dates CSV Statistics FiniteDiff
 using Turing
 using DataFrames, DataFramesMeta
 using LinearAlgebra
@@ -11,6 +11,7 @@ using StatsPlots  # for histogram
 using ProgressMeter
 using Random
 using Parameters
+using FiniteDiff
 
 module Model
     include("../Model/Model.jl")
@@ -24,124 +25,45 @@ include("HelperFunctions.jl")  # HF
 #                            Turing.jl Functions
 #######################################################################
 
-
 #######################################
-#    Turing attempt for Karp model, no trends
+#  Model functions
 #######################################
-#! try estimating a model without trends on simulated data
-function model1_no_trends()
-    N = 4; T = 60  # 1945-2005
-    ρ = 0.8785  # from r-scripts/reproducting_andy.R  -> line 70 result2
-    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
-    θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)  # True paramters
-    seed = 1234
-    data = Model.dgp(θ, N, T, seed)
+# Karp model, AR(1) variances
+@model function karp_model2(eᵢₜ, eₜ; ρ=missing)
+    T = length(eₜ)
+    N = length(eᵢₜ) ÷ T
+    # Set variance priors
+    σα² ~ InverseGamma(1, 1)
+    σμ² ~ InverseGamma(1, 1)
+    σθ² = σα² + σμ²/N
 
-    @model function karp_model_notrend(e,)
+    # Set FE and time trend priors
+    b₀ ~ MvNormal(zeros(N), 2)
+    B₀ = mean(b₀)
+    β₁ ~ truncated(Normal(0, 0.5); lower=0)
+    β₂ ~ Normal(0, 0.1)
 
+    # Set AR(1) coefficient prior
+    if ismissing(ρ)
+        ρ ~ truncated(Normal(0.87, 0.05); lower=0, upper=1)
     end
-end
 
-
-#######################################
-#    Turing attempt for Karp model, without α and μ error terms
-#######################################
-function model2_few_params()
-    @model function karp_model2(eᵢₜ, eₜ; ρ=missing)
-        T = length(eₜ)
-        N = length(eᵢₜ) ÷ T
-        # Set variance priors
-        σα² ~ InverseGamma(1, 1)
-        σμ² ~ InverseGamma(1, 1)
-        σθ² = σα² + σμ²/N
-
-        # Set FE and time trend priors
-        b₀ ~ MvNormal(zeros(N), 2)
-        B₀ = mean(b₀)
-        β₁ ~ truncated(Normal(0, 0.5); lower=0)
-        β₂ ~ Normal(0, 0.1)
-
-        # Set AR(1) coefficient prior
-        if ismissing(ρ)
-            ρ ~ truncated(Normal(0.87, 0.05); lower=0, upper=1)
+    # DGP models
+    for t = 1:T
+        # AR(1) error variances
+        σₜ² = σθ²*sum(ρ^(2*s) for s=0:(t-1))
+        σᵢₜ² = σμ²*(N-1)/N + σθ²*sum(ρ^(2*s) for s=0:(t-1))
+        # Period Avg observation
+        eₜ[t] ~ Normal(B₀ + β₁*t + β₂*t^2, sqrt(σₜ²))
+        for i = 1:N
+            # Period-unit observation
+            eᵢₜ[i + (t-1)*N] ~ Normal(b₀[i] + β₁*t + β₂*t^2, sqrt(σᵢₜ²))
         end
-
-        # DGP models
-        for t = 1:T
-            # AR(1) error variances
-            σₜ² = σθ²*sum(ρ^(2*s) for s=0:(t-1))
-            σᵢₜ² = σμ²*(N-1)/N + σθ²*sum(ρ^(2*s) for s=0:(t-1))
-            # Period Avg observation
-            eₜ[t] ~ Normal(B₀ + β₁*t + β₂*t^2, sqrt(σₜ²))
-            for i = 1:N
-                # Period-unit observation
-                eᵢₜ[i + (t-1)*N] ~ Normal(b₀[i] + β₁*t + β₂*t^2, sqrt(σᵢₜ²))
-            end
-        end
-
-        return
-    end
-    # Get the simulated data
-    # simulate data based on approximate parameters recovered from data
-    b₀ = [3.146, -0.454, 3.78, 3.479]
-    β = [0.265, 0]
-    data = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
-    eit = data.eᵢₜ
-    et = combine(groupby(data, :t), :eᵢₜ => mean => :eₜ).eₜ
-
-    # Estimate the MLE
-    opt4 = optimize(karp_model2(eit, et), MLE())
-    opt4.lp
-    opt4.values
-    opt4.optim_result
-    # Then, get the standard errors
-    coefdf = coeftable(opt4)
-    true_params
-
-    # Try again and fix ρ
-    # Initialize dataframe to store the results
-    df = DataFrame(UID=Int64[], LL=Float64[], iters=Float64[], 
-                    σα²=Float64[], σμ²=Float64[], ρ=Float64[],
-                    b01=Float64[], b02=Float64[], b03=Float64[], b04=Float64[],
-                    β1=Float64[], β2=Float64[],
-                iconverge=Bool[], gconverge=Bool[], fconverge=Bool[],
-                gtol=Float64[], ftol=Float64[],
-                N=Int64[], T=Int64[], ρfixed=Bool[]
-    ); optim_dict = Dict(); UID = 1
-    ftol = 1e-40
-
-    # Estimate the MLE
-    @showprogress for _ in 1:10
-        opt5 = optimize(
-            karp_model2(eit, et; ρ=θ.ρ), MLE(), 
-            ConjugateGradient(),
-            Optim.Options(iterations=50_000, g_tol = 1e-12, f_tol=
-            store_trace = true, show_trace=false)
-        );
-        @show push!(df, (UID, opt5.lp,  # Log likelihood value
-            opt5.optim_result.iterations,  # number of iterations
-            opt5.values[:σα²], opt5.values[:σμ²], ρ,
-            opt5.values[Symbol("b₀[1]")], opt5.values[Symbol("b₀[2]")], opt5.values[Symbol("b₀[3]")], opt5.values[Symbol("b₀[4]")],
-            opt5.values[:β₁], opt5.values[:β₂],
-            opt5.optim_result.iteration_converged,  # did it hit max iterations?
-            opt5.optim_result.g_converged, # did it converge from the gradient?
-            opt5.optim_result.f_converged,  # did it converge from the LL value?
-            opt5.optim_result.g_abstol,  # gradient tolerance setting
-            length(eit) ÷ length(et), length(et), true,  # N, T, ρ is fixed
-        ))
-        optim_dict[UID] = opt5
-        UID += 1
     end
 
-    coeftable(optim_dict[6])
-    true_params
-
+    return
 end
-
-
-#######################################
-#  Model with v error vector to hold values
-#######################################
+# Karp model, AR(1) errors, informative priors
 @model function karp_model3(eᵢₜ, eₜ; ρ=missing)
     T = length(eₜ)
     N = length(eᵢₜ) ÷ T
@@ -178,6 +100,7 @@ end
 
     return
 end
+# Karp model, AR(1) errors, flat priors
 @model function karp_model4(eᵢₜ, eₜ; 
         ρ=missing, 
         σα²dist=InverseGamma(1, 1), 
@@ -221,6 +144,9 @@ end
     return
 end
 
+#######################################
+#  Helper functions
+#######################################
 """Generate outcome emission variables used in MLE from dataframe."""
 function gen_MLE_data(data)
     eit = data.eᵢₜ
@@ -240,101 +166,6 @@ function get_MLE_data(θ; N=4, T=60)
     β = [0.265, 0]
     data = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
     return gen_MLE_data(data)
-end
-
-"""Return model initialized with data.
-    
-    `initialize_model(karp_model3, false, θ)`
-    If datetype is "real", initialize with real data. Otherwise, initialize with simulated data.
-    If ρfixed is true, use θ.ρ as the fixed ρ value in initializing the model. 
-        Otherwise, use `missing`, which estimates ρ.
-"""
-function initialize_model(model, ρfixed, θ, datatype; kwargs...)
-    # Get real or simulated data
-    Y = datatype=="real" ? get_MLE_data() : get_MLE_data(θ)
-    # Initialize the model
-    ρ = ρfixed ? θ.ρ : missing
-    return model(Y.eit, Y.et; ρ=ρ, kwargs...)
-end
-
-"""Run MLE on model, storing results in df and dict."""
-function multistart_MLE(m, Nseeds; maxiter=maxiter)
-    # Initialize list, dictionary, and unique ID to store the results from each estimation
-    dfs = Array{DataFrame}(undef, Nseeds)
-    dict = Dict{Int64, Turing.TuringOptimExt.ModeResult}()
-    ρfixed = !ismissing(m.defaults.ρ)
-
-    # run optimize on the model `seeds` times, adding summary results to df
-    # storing the full results in a dictionary indexed by UID
-    p = Progress(Nseeds)
-    Threads.@threads for seed in 1:Nseeds
-    # for seed in 1:Nseeds
-        Random.seed!(seed)
-        # Estimate the model
-        #! Handle convergence failure warning
-        #! See Optim.converged(M)
-        opt = optimize(m, MLE(), ConjugateGradient(),
-                       Optim.Options(iterations=maxiter,
-                                     store_trace=true,
-                                     extended_trace=true
-                       )
-        )
-        # Store the results
-        df = DataFrame(
-            seed=seed,
-            LL=opt.lp,  # Log likelihood value
-            iters=opt.optim_result.iterations,  # number of iterations
-            σα²=opt.values[:σα²],  # Estimated parameters
-            σμ²=opt.values[:σμ²],
-            ρ= ρfixed ? m.defaults.ρ : opt.values[:ρ],
-            b01=opt.values[Symbol("b₀[1]")],
-            b02=opt.values[Symbol("b₀[2]")],
-            b03=opt.values[Symbol("b₀[3]")],
-            b04=opt.values[Symbol("b₀[4]")],
-            β1=opt.values[:β₁],
-            β2=opt.values[:β₂],
-            iconverge=opt.optim_result.iteration_converged,  # did it hit max iterations?
-            gconverge=opt.optim_result.g_converged, # did it converge from the gradient?
-            fconverge=opt.optim_result.f_converged,  # did it converge from the LL value?
-            gtol=opt.optim_result.g_abstol,  # gradient tolerance setting
-            N=length(m.args.eᵢₜ) ÷ length(m.args.eₜ),
-            T=length(m.args.eₜ),
-            ρfixed=!ismissing(m.defaults.ρ),  # is ρ fixed in the model
-        )
-        dfs[seed] = df
-        dict[seed] = opt
-        next!(p)
-    end
-    df = vcat(dfs...)
-    return (; df, dict)
-end
-
-"""Run MLE on model, returning a dataframe of results.
-
-    `estimate_MLE(karp_model3, ρfixed=false, θ=missing, maxiter=10_000, seeds=100)` will 
-        estimate karp_model3 on real data, 100 times, including estimating ρ.
-    If datetype is "real", estimate with real data. Otherwise, estimate with simulated data.
-    If datetype is "simulated", θ must be a named tuple with attributes: θ.ρ, θ.σₐ², θ.σᵤ²
-
-    - ρ fixed, simulated data, must give θ
-    - ρ fixed, real data, must give θ
-    - ρ free, simulated data, must give θ
-    - ρ free, real data, can leave θ missing
-"""
-function estimate_MLE(model; ρfixed=false, θ=missing, datatype="real", maxiter=10_000, Nseeds=100, kwargs...)
-    # Initialize the model with data
-    println("\nInitializing model with $datatype data and ρfixed=$ρfixed")
-    model_obj = initialize_model(model, ρfixed, θ, datatype; kwargs...)
-
-    # Run MLE with different random seeds to get multiple starting points
-    println("\nRuning Multistart Search for MLE")
-    ms_result = multistart_MLE(model_obj, Nseeds; maxiter=maxiter)
-
-    # Find best run (highest LL), and return that result
-    println("\nFinding best run.")
-    best_run = ms_result.df[findmax(ms_result.df.LL)[2], :]
-    best_optim = ms_result.dict[best_run.seed]
-    return (; best_run, best_optim, ms_result)
 end
 
 """Return a dataframe of coefficients, SEs, and 95% CIs from the best run."""
@@ -529,12 +360,242 @@ function get_iteration_x_dict(opt_dict; iter="start")
 end
 
 
+#######################################
+# Estimation functions
+#######################################
+function model2_few_params()
+
+    # Get the simulated data
+    # simulate data based on approximate parameters recovered from data
+    b₀ = [3.146, -0.454, 3.78, 3.479]
+    β = [0.265, 0]
+    data = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
+    eit = data.eᵢₜ
+    et = combine(groupby(data, :t), :eᵢₜ => mean => :eₜ).eₜ
+
+    # Estimate the MLE
+    opt4 = optimize(karp_model2(eit, et), MLE())
+    opt4.lp
+    opt4.values
+    opt4.optim_result
+    # Then, get the standard errors
+    coefdf = coeftable(opt4)
+    true_params
+
+    # Try again and fix ρ
+    # Initialize dataframe to store the results
+    df = DataFrame(UID=Int64[], LL=Float64[], iters=Float64[], 
+                    σα²=Float64[], σμ²=Float64[], ρ=Float64[],
+                    b01=Float64[], b02=Float64[], b03=Float64[], b04=Float64[],
+                    β1=Float64[], β2=Float64[],
+                iconverge=Bool[], gconverge=Bool[], fconverge=Bool[],
+                gtol=Float64[], ftol=Float64[],
+                N=Int64[], T=Int64[], ρfixed=Bool[]
+    ); optim_dict = Dict(); UID = 1
+    ftol = 1e-40
+
+    # Estimate the MLE
+    @showprogress for _ in 1:10
+        opt5 = optimize(
+            karp_model2(eit, et; ρ=θ.ρ), MLE(), 
+            ConjugateGradient(),
+            Optim.Options(iterations=50_000, g_tol = 1e-12, f_tol=
+            store_trace = true, show_trace=false)
+        );
+        @show push!(df, (UID, opt5.lp,  # Log likelihood value
+            opt5.optim_result.iterations,  # number of iterations
+            opt5.values[:σα²], opt5.values[:σμ²], ρ,
+            opt5.values[Symbol("b₀[1]")], opt5.values[Symbol("b₀[2]")], opt5.values[Symbol("b₀[3]")], opt5.values[Symbol("b₀[4]")],
+            opt5.values[:β₁], opt5.values[:β₂],
+            opt5.optim_result.iteration_converged,  # did it hit max iterations?
+            opt5.optim_result.g_converged, # did it converge from the gradient?
+            opt5.optim_result.f_converged,  # did it converge from the LL value?
+            opt5.optim_result.g_abstol,  # gradient tolerance setting
+            length(eit) ÷ length(et), length(et), true,  # N, T, ρ is fixed
+        ))
+        optim_dict[UID] = opt5
+        UID += 1
+    end
+
+    coeftable(optim_dict[6])
+    true_params
+
+end
+
+"""Return model initialized with data.
+    
+    `initialize_model(karp_model4, false, missing, "real")`
+                      turing model, ρfixed, θ,     datatype
+    If datetype is "real", initialize with real data. Otherwise, initialize with simulated data.
+    If ρfixed is true, use θ.ρ as the fixed ρ value in initializing the model. 
+        In this case, θ requires at least the field θ.ρ.
+    If ρfixed is false, use `missing`, which estimates ρ.
+        In this case, use θ = missing since the true parameters are to be estimated.
+"""
+function initialize_model(model, ρfixed, θ, datatype; kwargs...)
+    # Get real or simulated data
+    Y = datatype=="real" ? get_MLE_data() : get_MLE_data(θ)
+    # Initialize the model
+    ρ = ρfixed ? θ.ρ : missing
+    return model(Y.eit, Y.et; ρ=ρ, kwargs...)
+end
+# Run immediately to precompile
+
+"""Run MLE on model, storing results in df and dict."""
+function multistart_MLE(m, Nseeds; maxiter=maxiter)
+    # Initialize list, dictionary, and unique ID to store the results from each estimation
+    dfs = Array{DataFrame}(undef, Nseeds)
+    dict = Dict{Int64, Turing.TuringOptimExt.ModeResult}()
+    ρfixed = !ismissing(m.defaults.ρ)
+
+    # run optimize on the model `seeds` times, adding summary results to df
+    # storing the full results in a dictionary indexed by UID
+    p = Progress(Nseeds)
+    Threads.@threads for seed in 1:Nseeds
+    # for seed in 1:Nseeds
+        Random.seed!(seed)
+        # Estimate the model
+        #! Handle convergence failure warning
+        #! See Optim.converged(M)
+        opt = optimize(m, MLE(), ConjugateGradient(),
+                       Optim.Options(iterations=maxiter,
+                                     store_trace=true,
+                                     extended_trace=true
+                       )
+        )
+        # Store the results
+        df = DataFrame(
+            seed=seed,
+            LL=opt.lp,  # Log likelihood value
+            iters=opt.optim_result.iterations,  # number of iterations
+            σα²=opt.values[:σα²],  # Estimated parameters
+            σμ²=opt.values[:σμ²],
+            ρ= ρfixed ? m.defaults.ρ : opt.values[:ρ],
+            b01=opt.values[Symbol("b₀[1]")],
+            b02=opt.values[Symbol("b₀[2]")],
+            b03=opt.values[Symbol("b₀[3]")],
+            b04=opt.values[Symbol("b₀[4]")],
+            β1=opt.values[:β₁],
+            β2=opt.values[:β₂],
+            iconverge=opt.optim_result.iteration_converged,  # did it hit max iterations?
+            gconverge=opt.optim_result.g_converged, # did it converge from the gradient?
+            fconverge=opt.optim_result.f_converged,  # did it converge from the LL value?
+            gtol=opt.optim_result.g_abstol,  # gradient tolerance setting
+            N=length(m.args.eᵢₜ) ÷ length(m.args.eₜ),
+            T=length(m.args.eₜ),
+            ρfixed=!ismissing(m.defaults.ρ),  # is ρ fixed in the model
+        )
+        dfs[seed] = df
+        dict[seed] = opt
+        next!(p)
+    end
+    df = vcat(dfs...)
+    return (; df, dict)
+end
+# Run immediately to precompile
+_m = initialize_model(karp_model4, false, missing, "real");
+multistart_MLE(_m, 1; maxiter=2);
+
+"""Run MLE on model, returning a dataframe of results.
+
+    `estimate_MLE(karp_model3, ρfixed=false, θ=missing, maxiter=10_000, seeds=100)` will 
+        estimate karp_model3 on real data, 100 times, including estimating ρ.
+    If datetype is "real", estimate with real data. Otherwise, estimate with simulated data.
+    If datetype is "simulated", θ must be a named tuple with attributes: θ.ρ, θ.σₐ², θ.σᵤ²
+
+    - ρ fixed, simulated data, must give θ
+    - ρ fixed, real data, must give θ
+    - ρ free, simulated data, must give θ
+    - ρ free, real data, can leave θ missing
+"""
+function estimate_MLE(model; ρfixed=false, θ=missing, datatype="real", maxiter=10_000, Nseeds=100, kwargs...)
+    # Initialize the model with data
+    println("\nInitializing model with $datatype data and ρfixed=$ρfixed")
+    model_obj = initialize_model(model, ρfixed, θ, datatype; kwargs...)
+
+    # Run MLE with different random seeds to get multiple starting points
+    println("\nRuning Multistart Search for MLE")
+    ms_result = multistart_MLE(model_obj, Nseeds; maxiter=maxiter)
+
+    # Find best run (highest LL), and return that result
+    println("\nFinding best run.")
+    best_run = ms_result.df[findmax(ms_result.df.LL)[2], :]
+    best_optim = ms_result.dict[best_run.seed]
+    return (; best_run, best_optim, ms_result)
+end
+
+function convert_params_to_namedtuple(nv::NamedVector)
+    # nv is a named vector of parameters
+    nt = (
+        σα² = nv[:σα²],
+        σμ² = nv[:σμ²],
+        b₀ = [nv[Symbol("b₀[$i]")] for i in 1:4],
+        β₁ = nv[:β₁],
+        β₂ = nv[:β₂],
+        ρ = nv[:ρ],
+    )
+end
+function convert_params_to_namedtuple(v::Vector) 
+    # v is a vector of parameters in the following order
+    nt = (
+        σα² = v[1],
+        σμ² = v[2],
+        b₀ = [v[i+2] for i in 1:4],
+        β₁ = v[7],
+        β₂ = v[8],
+        ρ = v[9],
+    )
+end
+
+
 ###############################################
 # Test the optimization function and output
 m1 = initialize_model(karp_model3, false, missing, "real")
-opt = optimize(m1, MLE(), ConjugateGradient(),
-               Optim.Options(iterations=100, store_trace=true, extended_trace=true)
+mle_estimate = optimize(m1, MLE(), ConjugateGradient(),
+               Optim.Options(iterations=10_000, store_trace=true, extended_trace=true)
 )
+coeftable(mle_estimate) #! does not work: 
+mle_estimate.optim_result.iterations
+
+# Standard errors are calculated from the Fisher information matrix (inverse Hessian of the log likelihood or log joint)
+# Calculate the Hessian
+# Need the loglikelihood function as a function of one vector of parameters
+θmle = convert_params_to_namedtuple(mle_estimate.values)
+logjoint(m1, θmle)
+LL(θ) = logjoint(m1, convert_params_to_namedtuple(θ))
+# Calculate the finite difference numerical hessian at the MLE location
+FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array)
+#! domain error here -- probably because of the σa parameter being close to 0.
+#! try again with σa being larger
+θmle2 = mle_estimate.values.array+[0.00013, 0, 0, 0, 0, 0, 0, 0, 0];
+H = FiniteDiff.finite_difference_hessian(LL, θmle2);
+VCOV = inv(-H);
+se = sqrt.(diag(VCOV))
+
+###############################################
+# Test posterior chains
+# Sample with the MAP estimate as the starting point.
+chain = sample(m1, NUTS(), 1_000; discard_initial = 1000, init_params = mle_estimate.values.array)
+plot(chain)
+#! check the convergence on this, check discard amount, plot dists of parameters, get 95% CI
+
+# Multiple chains
+chain = sample(m1, NUTS(), MCMCThreads(), 1_000, 4; init_params = mle_estimate.values.array)
+chain = sample(m1, NUTS(), MCMCThreads(), 1_000, 4; discard_initial = 1000, init_params = mle_estimate.values.array)
+#! Above parallel sampling does not work, strange error.
+# chn = sample(gdemo(1.5, 2), NUTS(), MCMCThreads(), 1000, 4; discard_initial = 1000)
+# Replace num_chains below with however many chains you wish to sample.
+chains = mapreduce(c -> sample(m1, NUTS(), 1_000; discard_initial = 1000, init_params = mle_estimate.values.array), chainscat, 1:4)
+chains.value[Axis{:var}][10]  # lp
+minimum(chains.value[:,10,:])
+#! Don't seem to get a good lp as optim. Even the min doesn't get close
+#! I wonder if this is just the LL or does it include the prior?
+#! how to do this in parallel?
+# https://stackoverflow.com/questions/51228889/how-do-i-do-parallel-mapreduce-in-julia
+# ThreadsX.mapreduce https://github.com/tkf/ThreadsX.jl
+# pmapreduce https://docs.juliahub.com/ParallelUtilities/SO4iL/0.8.6/pmapreduce/
+
+plot(chains)
 
 
 ###############################################  ESIMATE σα², σμ², ρ
@@ -599,6 +660,7 @@ result_freeρ_uniform2.best_run
 result_freeρ_uniform3.best_run
 result_freeρ_uniform4.best_run
 coef_df(result_freeρ_uniform1)
+coeftable(result_freeρ_uniform4.best_optim)
 @chain result_freeρ_uniform1.ms_result.df @orderby(:LL)
 
 # Examine the starting parameter values

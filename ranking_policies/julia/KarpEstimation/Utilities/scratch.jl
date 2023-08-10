@@ -58,6 +58,28 @@ println("Minimum value: ", minimum_value)
 
 
 
+############################################################################################################
+#    Turing MLE code
+############################################################################################################
+
+#######################################
+#    Turing attempt for Karp model, no trends
+#######################################
+#! try estimating a model without trends on simulated data
+function model1_no_trends()
+    N = 4; T = 60  # 1945-2005
+    ρ = 0.8785  # from r-scripts/reproducting_andy.R  -> line 70 result2
+    σ²base = 3.6288344  # σᵤ² from test_starting_real_estimation() after rescaling the data to units of 10,000 tons
+    θ = (ρ=ρ, σₐ²=σ²base, σᵤ²=σ²base)  # True paramters
+    seed = 1234
+    data = Model.dgp(θ, N, T, seed)
+
+    @model function karp_model_notrend(e,)
+
+    end
+end
+
+
 
 
 
