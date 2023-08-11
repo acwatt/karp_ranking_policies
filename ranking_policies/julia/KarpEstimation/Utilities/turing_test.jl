@@ -12,6 +12,7 @@ using ProgressMeter
 using Random
 using Parameters
 using FiniteDiff
+using NamedArrays
 
 module Model
     include("../Model/Model.jl")
@@ -106,7 +107,8 @@ end
         σα²dist=InverseGamma(1, 1), 
         σμ²dist=InverseGamma(1, 1),
         ρdist=truncated(Normal(0.87, 0.05); lower=0, upper=1),
-        b₀sd=2, β₁sd=0.5, β₂sd=0.1
+        b₀sd=2, β₁sd=0.5, β₂sd=0.1,
+        v0 = 0
     )
     T = length(eₜ)
     N = length(eᵢₜ) ÷ T
@@ -127,8 +129,12 @@ end
 
     # Initialize an empty vector to store the model AR(1) errors
     vₜ₋₁ = Vector{Real}(undef, T+1)
-    # This has T+1 elements because we need to store vₜ₋₁[1] = 0
-    vₜ₋₁[1] = 0
+    # This has T+1 elements because we need to store initial value vₜ₋₁[1]
+    if ismissing(v0)
+        vₜ₋₁[1] ~ Normal(0, 10)
+    else
+        vₜ₋₁[1] = v0
+    end
 
     # DGP models
     for t = 1:T
@@ -545,32 +551,138 @@ function convert_params_to_namedtuple(v::Vector)
         β₂ = v[8],
         ρ = v[9],
     )
+    if length(v) == 10
+        nt = (nt..., vₜ₋₁ = v[10])
+    end
+    return nt
 end
 
 
 ###############################################
 # Test the optimization function and output
-m1 = initialize_model(karp_model3, false, missing, "real")
+m1 = initialize_model(karp_model4, false, missing, "real")
+Random.seed!(5)
 mle_estimate = optimize(m1, MLE(), ConjugateGradient(),
-               Optim.Options(iterations=10_000, store_trace=true, extended_trace=true)
+               Optim.Options(iterations=100_000, store_trace=true, extended_trace=true)
 )
-coeftable(mle_estimate) #! does not work: 
-mle_estimate.optim_result.iterations
+coeftable(mle_estimate) #! does not work: DomainError with -0.0006059430277771548:
+
+##############################################
+# coeftable doesn't work -- investigate
+# Manually construct the VCOV matrix from the hessian
+θmle = convert_params_to_namedtuple(mle_estimate.values)
+LL(θ) = loglikelihood(m1, convert_params_to_namedtuple(θ))
+# Calculate the finite difference numerical hessian at the MLE location
+H1 = FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array)
+@show diag(H1)
+# Calculate the standard errors from the inverse of the Hessian
+VCOV1 = inv(-H1)
+se1 = sqrt.(diag(VCOV1))  # DomainError with -0.0006059426285795939, same error as coeftable
+#! there's a problem with the Hessian, it's not positive definite
+#! because it's concave up in σa² at the MLE (LL is increasing in decreasing σa²)
+#! Check what the MAP result would give
+
+##############################################
+# Test the MAP optimization function and output
+Random.seed!(5)
+map_estimate = optimize(m1, MAP(), ConjugateGradient(),
+               Optim.Options(iterations=100_000, store_trace=true, extended_trace=true)
+)
+coeftable(map_estimate) 
+#! MAP gives σa² estimate away from zero, so Hessian is positive definite (works)
+#! But LL is smaller at MAP than MLE above -- is the MLE biased or is this a problem with the model?
+#! Need to check simulation results to know what parameters give rise to MLE with hessian that is not positive definite
+LP(θ) = logjoint(m1, convert_params_to_namedtuple(θ))
+LP(map_estimate.values)
+# Calculate the finite difference numerical hessian at the MLE location
+Hmap = FiniteDiff.finite_difference_hessian(LP, map_estimate.values.array)
+@show diag(Hmap)
+VCOVmap = inv(-Hmap)
+semap = sqrt.(diag(VCOVmap))
 
 # Standard errors are calculated from the Fisher information matrix (inverse Hessian of the log likelihood or log joint)
 # Calculate the Hessian
 # Need the loglikelihood function as a function of one vector of parameters
 θmle = convert_params_to_namedtuple(mle_estimate.values)
 logjoint(m1, θmle)
-LL(θ) = logjoint(m1, convert_params_to_namedtuple(θ))
+loglikelihood(m1, θmle)
+LJ(θ) = logjoint(m1, convert_params_to_namedtuple(θ))
+LL(θ) = loglikelihood(m1, convert_params_to_namedtuple(θ))
 # Calculate the finite difference numerical hessian at the MLE location
-FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array)
+H0 = FiniteDiff.finite_difference_hessian(LJ, mle_estimate.values.array; absstep=1e-10)
+H1 = FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array)
+VCOV0 = inv(-H0)
+VCOV1 = inv(-H1)
+se0 = sqrt.(diag(VCOV0))
+se1 = sqrt.(diag(VCOV1))  # DomainError with -0.0006059426285795939, same error as coeftable
+
+diag(H1)
+
+se = sqrt.(diag(
+    inv(-FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array))
+))
+# Try evaluating at exactly σa = 0
+sqrt.(diag(
+    inv(-FiniteDiff.finite_difference_hessian(
+        LL, 
+        [0; mle_estimate.values.array[2:end]]
+    ))
+))
+diag(FiniteDiff.finite_difference_hessian(LL, [-1e-2; mle_estimate.values.array[2:end]]))
+FiniteDiff.finite_difference_jacobian(LL, [0; mle_estimate.values.array[2:end]])
+FiniteDiff.finite_difference_gradient(LL, [0; mle_estimate.values.array[2:end]])
+
 #! domain error here -- probably because of the σa parameter being close to 0.
 #! try again with σa being larger
 θmle2 = mle_estimate.values.array+[0.00013, 0, 0, 0, 0, 0, 0, 0, 0];
-H = FiniteDiff.finite_difference_hessian(LL, θmle2);
-VCOV = inv(-H);
-se = sqrt.(diag(VCOV))
+H2 = FiniteDiff.finite_difference_hessian(LL, θmle2)
+VCOV2 = inv(-H2);
+se2 = sqrt.(diag(VCOV2))
+
+
+#? Try LL using flat priors
+result_freeρ_uniform4 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=100_000, Nseeds=20,
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+    ρdist=Uniform(-1, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1
+)
+result_freeρ_uniform4.best_optim
+result_freeρ_uniform4.best_optim.values
+result_freeρ_uniform4.best_run.LL
+coeftable(result_freeρ_uniform4.best_optim)
+
+
+#? Try LL using flat priors and estimate v0
+result_freeρ_uniform5 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=100_000, Nseeds=20,
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+    ρdist=Uniform(-1, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1,
+    v0=missing
+)
+result_freeρ_uniform5.best_optim.values
+result_freeρ_uniform5.best_run.LL
+result_freeρ_uniform6.best_run.LL
+#? flatter prior on v0 did not change the result (same down to 1e-7)
+#? Which makes sense because the LL doesn't use the prior. The prior is only used for the MAP estimate.
+result_freeρ_uniform6.best_optim.values - result_freeρ_uniform5.best_optim.values
+
+coeftable(result_freeρ_uniform5.best_optim)
+diag(FiniteDiff.finite_difference_hessian(
+    θ -> loglikelihood(
+        result_freeρ_uniform5.best_optim.f.model, 
+        convert_params_to_namedtuple(θ)
+    ),
+    result_freeρ_uniform5.best_optim.values.array
+))
+
+
+
+
+
+
+
 
 ###############################################
 # Test posterior chains
