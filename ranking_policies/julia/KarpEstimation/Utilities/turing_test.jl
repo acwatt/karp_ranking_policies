@@ -103,24 +103,43 @@ end
 end
 # Karp model, AR(1) errors, flat priors
 @model function karp_model4(eᵢₜ, eₜ; 
-        ρ=missing, 
+        σα²=missing, σμ²=missing, b₀=missing, β₁=missing, β₂=missing, ρ=missing, 
         σα²dist=InverseGamma(1, 1), 
         σμ²dist=InverseGamma(1, 1),
         ρdist=truncated(Normal(0.87, 0.05); lower=0, upper=1),
         b₀sd=2, β₁sd=0.5, β₂sd=0.1,
         v0 = 0
     )
-    T = length(eₜ)
-    N = length(eᵢₜ) ÷ T
-    # Set variance priors
-    σα² ~ σα²dist
-    σμ² ~ σμ²dist
+    karp_model4(missing, missing;
+    σα²=missing, σμ²=missing, b₀=missing, β₁=missing, β₂=missing, ρ=missing, 
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+    ρdist=Uniform(-1, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1,
+    v0=missing
+)
+    # If no data, we are sampling data
+    if ismissing(eᵢₜ)
+        T=60; N=4
+        eₜ = Vector{Real}(undef, T)
+        eᵢₜ = Vector{Real}(undef, T*N)
+    else  # If data is given, estimate the model from data
+        T = length(eₜ)
+        N = length(eᵢₜ) ÷ T
+    end
+    # If no parameters, we are sampling the prior or estimating the model
+    if ismissing(σα²)
+        # Set variance priors
+        σα² ~ σα²dist
+        σμ² ~ σμ²dist
+        # Set FE and time trend priors
+        b₀ ~ MvNormal(zeros(N), b₀sd)
+        β₁ ~ truncated(Normal(0, β₁sd); lower=0)
+        β₂ ~ Normal(0, β₂sd)
+    end
+    # if σα² is given, then we sample data below given parameters as arguments
 
-    # Set FE and time trend priors
-    b₀ ~ MvNormal(zeros(N), b₀sd)
     B₀ = mean(b₀)
-    β₁ ~ truncated(Normal(0, β₁sd); lower=0)
-    β₂ ~ Normal(0, β₂sd)
 
     # Set AR(1) coefficient prior
     if ismissing(ρ)
@@ -130,13 +149,14 @@ end
     # Initialize an empty vector to store the model AR(1) errors
     vₜ₋₁ = Vector{Real}(undef, T+1)
     # This has T+1 elements because we need to store initial value vₜ₋₁[1]
-    if ismissing(v0)
+    if ismissing(v0)  # If no initial value, estimate or sample it
         vₜ₋₁[1] ~ Normal(0, 10)
     else
         vₜ₋₁[1] = v0
     end
 
     # DGP models
+    @show N, T
     for t = 1:T
         # Period Avg observation
         eₜ[t] ~ Normal(B₀ + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²/N))
@@ -146,8 +166,14 @@ end
             eᵢₜ[i + (t-1)*N] ~ Normal(b₀[i] + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²))
         end
     end
-
-    return
+    # If no parameters, we are sampling the parameters from the prior
+    if ismissing(σα²)
+        return (; σα², σμ², b₀, β₁, β₂, ρ, v0=vₜ₋₁[1])
+    elseif ismissing(eᵢₜ)  # If no data, we are sampling data
+        return (; eᵢₜ, eₜ)
+    else  # If data is given, estimate the model from data
+        return
+    end
 end
 
 #######################################
@@ -676,6 +702,58 @@ diag(FiniteDiff.finite_difference_hessian(
     ),
     result_freeρ_uniform5.best_optim.values.array
 ))
+
+
+
+######################################################################################
+#    Test MLE on simulated data over range of parameters and simulated datasets
+######################################################################################
+Nparam = 2  # Number of true parameter samples
+Nsim = 2    # Number of simulated datasets per parameter sample
+Nseed = 2   # Number of multistart seeds per simulated dataset to find MLE
+# Setup parameter sampler from prior distribution
+param_sampler = karp_model4(missing, missing;
+    σα²=missing, σμ²=missing, b₀=missing, β₁=missing, β₂=missing, ρ=missing, 
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+    ρdist=Uniform(-1, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1,
+    v0=missing
+)
+_θ = param_sampler()
+# Setup data sampler given true parameters θ
+data_sampler(θ) = karp_model4(missing, missing; θ...)
+# Generate Nparam random parameter samples from prior dists
+for paramSeed in 1:Nparam
+    Random.seed!(paramSeed)
+    θ = prior_sampler() 
+    # Generate Nsim datasets from each parameter sample
+    for nsim in 1:Nsim
+
+        # Run multistart eval with Nseed for each dataset/parameter combination
+        result_freeρ_uniform5 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=100_000, Nseeds=Nseed,
+            σα²dist=Uniform(0, 1e10),
+            σμ²dist=Uniform(0, 1e10),
+            ρdist=Uniform(-1, 1),
+            b₀sd=20, β₁sd=5, β₂sd=1,
+            v0=missing
+        )
+    end
+end
+
+# Generate Nsim datasets from each parameter sample
+# Run multistart eval with Nseed for each dataset/parameter combination
+# Save best runs
+# Examine any for small simga_a^2 est. Maybe just sort them and see. Perhaps look at smallest sigma_a^2est / sigma_a^2
+
+
+
+
+
+
+
+
+
 
 
 
