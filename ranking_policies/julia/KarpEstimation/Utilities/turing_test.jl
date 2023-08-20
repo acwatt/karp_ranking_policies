@@ -110,17 +110,25 @@ end
         b₀sd=2, β₁sd=0.5, β₂sd=0.1,
         v0 = 0
     )
-    # If no data, we are sampling data
-    if ismissing(eᵢₜ)
+    # Set function usage
+    # If no parameters and data, we are sampling the parameters from the prior
+    usage = if ismissing(σα²) && ismissing(eᵢₜ)
+        "sample_params"
+    elseif ismissing(eᵢₜ)  # If no data, we are sampling data
+        "sample_data"
+    else  # If data is given, estimate the model from data
+        "estimate_model"
+    end
+    if (usage=="sample_data") | (usage=="sample_params")
         T=60; N=4
         eₜ = Vector{Real}(undef, T)
         eᵢₜ = Vector{Real}(undef, T*N)
-    else  # If data is given, estimate the model from data
+    else
         T = length(eₜ)
         N = length(eᵢₜ) ÷ T
     end
     # If no parameters, we are sampling the prior or estimating the model
-    if ismissing(σα²)
+    if usage == "sample_params"
         # Set variance priors
         σα² ~ σα²dist
         σμ² ~ σμ²dist
@@ -157,15 +165,15 @@ end
             eᵢₜ[i + (t-1)*N] ~ Normal(b₀[i] + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²))
         end
     end
-    # If no parameters and data, we are sampling the parameters from the prior
-    if ismissing(σα²) && ismissing(eᵢₜ)
+    #! This is not working -- must separate into different functions
+    #! use multiple dispatch
+    if usage == "sample_params"
         return (; σα², σμ², b₀, β₁, β₂, ρ, v0=vₜ₋₁[1])
-    elseif ismissing(eᵢₜ)  # If no data, we are sampling data
+    elseif usage == "sample_data"
         return (; eᵢₜ, eₜ)
-    else  # If data is given, estimate the model from data
+    else  # estimate the model from data
         return
     end
-    return
 end
 
 #######################################
@@ -520,58 +528,9 @@ _m = initialize_model(karp_model4, false, missing, "real")
 multistart_MLE(_m, 2; maxiter=2)
 
 
-
-"""Run MLE on model, storing results in df and dict."""
-function multistart_MLE_simulations(m, Nseeds, "simulated"; maxiter=maxiter)
-    # Initialize list, dictionary, and unique ID to store the results from each estimation
-    dfs = Array{DataFrame}(undef, Nseeds)
-    dict = Dict{Int64, Turing.TuringOptimExt.ModeResult}()
-    ρfixed = !ismissing(m.defaults.ρ)
-
-    # run optimize on the model `seeds` times, adding summary results to df
-    # storing the full results in a dictionary indexed by UID
-    p = Progress(Nseeds)
-    Threads.@threads for seed in 1:Nseeds
-    # for seed in 1:Nseeds
-        Random.seed!(seed)
-        # Estimate the model
-        #! Handle convergence failure warning
-        #! See Optim.converged(M)
-        opt = optimize(m, MLE(), ConjugateGradient(),
-                       Optim.Options(iterations=maxiter,
-                                     store_trace=true,
-                                     extended_trace=true
-                       )
-        )
-        # Store the results
-        df = DataFrame(
-            seed=seed,
-            LL=opt.lp,  # Log likelihood value
-            iters=opt.optim_result.iterations,  # number of iterations
-            σα²=opt.values[:σα²],  # Estimated parameters
-            σμ²=opt.values[:σμ²],
-            ρ= ρfixed ? m.defaults.ρ : opt.values[:ρ],
-            b01=opt.values[Symbol("b₀[1]")],
-            b02=opt.values[Symbol("b₀[2]")],
-            b03=opt.values[Symbol("b₀[3]")],
-            b04=opt.values[Symbol("b₀[4]")],
-            β1=opt.values[:β₁],
-            β2=opt.values[:β₂],
-            iconverge=opt.optim_result.iteration_converged,  # did it hit max iterations?
-            gconverge=opt.optim_result.g_converged, # did it converge from the gradient?
-            fconverge=opt.optim_result.f_converged,  # did it converge from the LL value?
-            gtol=opt.optim_result.g_abstol,  # gradient tolerance setting
-            N=length(m.args.eᵢₜ) ÷ length(m.args.eₜ),
-            T=length(m.args.eₜ),
-            ρfixed=!ismissing(m.defaults.ρ),  # is ρ fixed in the model
-        )
-        dfs[seed] = df
-        dict[seed] = opt
-        next!(p)
-    end
-    df = vcat(dfs...)
-    return (; df, dict)
+function simulation_grid()
 end
+
 
 """Run MLE on model, returning a dataframe of results.
 
