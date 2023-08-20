@@ -110,14 +110,6 @@ end
         b₀sd=2, β₁sd=0.5, β₂sd=0.1,
         v0 = 0
     )
-    karp_model4(missing, missing;
-    σα²=missing, σμ²=missing, b₀=missing, β₁=missing, β₂=missing, ρ=missing, 
-    σα²dist=Uniform(0, 1e10),
-    σμ²dist=Uniform(0, 1e10),
-    ρdist=Uniform(-1, 1),
-    b₀sd=20, β₁sd=5, β₂sd=1,
-    v0=missing
-)
     # If no data, we are sampling data
     if ismissing(eᵢₜ)
         T=60; N=4
@@ -156,7 +148,6 @@ end
     end
 
     # DGP models
-    @show N, T
     for t = 1:T
         # Period Avg observation
         eₜ[t] ~ Normal(B₀ + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²/N))
@@ -166,14 +157,15 @@ end
             eᵢₜ[i + (t-1)*N] ~ Normal(b₀[i] + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²))
         end
     end
-    # If no parameters, we are sampling the parameters from the prior
-    if ismissing(σα²)
+    # If no parameters and data, we are sampling the parameters from the prior
+    if ismissing(σα²) && ismissing(eᵢₜ)
         return (; σα², σμ², b₀, β₁, β₂, ρ, v0=vₜ₋₁[1])
     elseif ismissing(eᵢₜ)  # If no data, we are sampling data
         return (; eᵢₜ, eₜ)
     else  # If data is given, estimate the model from data
         return
     end
+    return
 end
 
 #######################################
@@ -471,7 +463,6 @@ function initialize_model(model, ρfixed, θ, datatype; kwargs...)
     ρ = ρfixed ? θ.ρ : missing
     return model(Y.eit, Y.et; ρ=ρ, kwargs...)
 end
-# Run immediately to precompile
 
 """Run MLE on model, storing results in df and dict."""
 function multistart_MLE(m, Nseeds; maxiter=maxiter)
@@ -525,8 +516,62 @@ function multistart_MLE(m, Nseeds; maxiter=maxiter)
     return (; df, dict)
 end
 # Run immediately to precompile
-_m = initialize_model(karp_model4, false, missing, "real");
-multistart_MLE(_m, 1; maxiter=2);
+_m = initialize_model(karp_model4, false, missing, "real")
+multistart_MLE(_m, 2; maxiter=2)
+
+
+
+"""Run MLE on model, storing results in df and dict."""
+function multistart_MLE_simulations(m, Nseeds, "simulated"; maxiter=maxiter)
+    # Initialize list, dictionary, and unique ID to store the results from each estimation
+    dfs = Array{DataFrame}(undef, Nseeds)
+    dict = Dict{Int64, Turing.TuringOptimExt.ModeResult}()
+    ρfixed = !ismissing(m.defaults.ρ)
+
+    # run optimize on the model `seeds` times, adding summary results to df
+    # storing the full results in a dictionary indexed by UID
+    p = Progress(Nseeds)
+    Threads.@threads for seed in 1:Nseeds
+    # for seed in 1:Nseeds
+        Random.seed!(seed)
+        # Estimate the model
+        #! Handle convergence failure warning
+        #! See Optim.converged(M)
+        opt = optimize(m, MLE(), ConjugateGradient(),
+                       Optim.Options(iterations=maxiter,
+                                     store_trace=true,
+                                     extended_trace=true
+                       )
+        )
+        # Store the results
+        df = DataFrame(
+            seed=seed,
+            LL=opt.lp,  # Log likelihood value
+            iters=opt.optim_result.iterations,  # number of iterations
+            σα²=opt.values[:σα²],  # Estimated parameters
+            σμ²=opt.values[:σμ²],
+            ρ= ρfixed ? m.defaults.ρ : opt.values[:ρ],
+            b01=opt.values[Symbol("b₀[1]")],
+            b02=opt.values[Symbol("b₀[2]")],
+            b03=opt.values[Symbol("b₀[3]")],
+            b04=opt.values[Symbol("b₀[4]")],
+            β1=opt.values[:β₁],
+            β2=opt.values[:β₂],
+            iconverge=opt.optim_result.iteration_converged,  # did it hit max iterations?
+            gconverge=opt.optim_result.g_converged, # did it converge from the gradient?
+            fconverge=opt.optim_result.f_converged,  # did it converge from the LL value?
+            gtol=opt.optim_result.g_abstol,  # gradient tolerance setting
+            N=length(m.args.eᵢₜ) ÷ length(m.args.eₜ),
+            T=length(m.args.eₜ),
+            ρfixed=!ismissing(m.defaults.ρ),  # is ρ fixed in the model
+        )
+        dfs[seed] = df
+        dict[seed] = opt
+        next!(p)
+    end
+    df = vcat(dfs...)
+    return (; df, dict)
+end
 
 """Run MLE on model, returning a dataframe of results.
 
