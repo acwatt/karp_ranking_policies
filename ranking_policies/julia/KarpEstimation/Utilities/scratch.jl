@@ -79,6 +79,22 @@ function model1_no_trends()
     end
 end
 
+#######################################
+#  Turing tutorials notebooks
+#######################################
+# Install TuringTutorials
+using Pkg
+# pkg"add https://github.com/TuringLang/TuringTutorials"
+# pkg"add IJulia"
+
+# Generate notebooks in subdirectory "notebook"
+using TuringTutorials
+TuringTutorials.weave(; build=(:notebook,))
+
+# Start Jupyter in "notebook" subdirectory
+using IJulia
+IJulia.notebook(; dir="notebook")
+
 
 
 
