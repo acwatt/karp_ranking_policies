@@ -758,6 +758,10 @@ u_mean_bias = zeros(size(θmat))
 #! Add a manual % complete counter (S.Nsigma^2 * S.Nparam)
 # about 7min per estimate_MLE with Nseeds=50
 #! Want to know matrix of % of runs for that param vector that result in small σa^2 est. (e.g. < 0.1)
+#! Check if parallelizing is maxed out (should be if Nseed is large enough)
+#! Run on server for 1 day = 5 for Nsgima and Nparam
+#! Run on server for 1 week = 11 for Nsgima and Nparam
+#! Make distributed and run in Savio
 for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
     @show i,j,k
     θ = θmat[i, j, k]
