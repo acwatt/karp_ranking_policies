@@ -184,6 +184,64 @@ function model1_many_params()
 
 end
 
+function model2_few_params()
+
+    # Get the simulated data
+    # simulate data based on approximate parameters recovered from data
+    b₀ = [3.146, -0.454, 3.78, 3.479]
+    β = [0.265, 0]
+    data = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
+    eit = data.eᵢₜ
+    et = combine(groupby(data, :t), :eᵢₜ => mean => :eₜ).eₜ
+
+    # Estimate the MLE
+    opt4 = optimize(karp_model2(eit, et), MLE())
+    opt4.lp
+    opt4.values
+    opt4.optim_result
+    # Then, get the standard errors
+    coefdf = coeftable(opt4)
+    true_params
+
+    # Try again and fix ρ
+    # Initialize dataframe to store the results
+    df = DataFrame(UID=Int64[], LL=Float64[], iters=Float64[], 
+                    σα²=Float64[], σμ²=Float64[], ρ=Float64[],
+                    b01=Float64[], b02=Float64[], b03=Float64[], b04=Float64[],
+                    β1=Float64[], β2=Float64[],
+                iconverge=Bool[], gconverge=Bool[], fconverge=Bool[],
+                gtol=Float64[], ftol=Float64[],
+                N=Int64[], T=Int64[], ρfixed=Bool[]
+    ); optim_dict = Dict(); UID = 1
+    ftol = 1e-40
+
+    # Estimate the MLE
+    @showprogress for _ in 1:10
+        opt5 = optimize(
+            karp_model2(eit, et; ρ=θ.ρ), MLE(), 
+            ConjugateGradient(),
+            Optim.Options(iterations=50_000, g_tol = 1e-12, f_tol=
+            store_trace = true, show_trace=false)
+        );
+        @show push!(df, (UID, opt5.lp,  # Log likelihood value
+            opt5.optim_result.iterations,  # number of iterations
+            opt5.values[:σα²], opt5.values[:σμ²], ρ,
+            opt5.values[Symbol("b₀[1]")], opt5.values[Symbol("b₀[2]")], opt5.values[Symbol("b₀[3]")], opt5.values[Symbol("b₀[4]")],
+            opt5.values[:β₁], opt5.values[:β₂],
+            opt5.optim_result.iteration_converged,  # did it hit max iterations?
+            opt5.optim_result.g_converged, # did it converge from the gradient?
+            opt5.optim_result.f_converged,  # did it converge from the LL value?
+            opt5.optim_result.g_abstol,  # gradient tolerance setting
+            length(eit) ÷ length(et), length(et), true,  # N, T, ρ is fixed
+        ))
+        optim_dict[UID] = opt5
+        UID += 1
+    end
+
+    coeftable(optim_dict[6])
+    true_params
+
+end
 
 
 ###############################################  ESIMATE σα², σμ², FIX ρ
@@ -193,5 +251,67 @@ result_fixedρ = estimate_MLE(karp_model3; ρfixed=true, θ=θ, datatype="real",
 result_fixedρ.best_run
 coef_df(result_fixedρ)
 
+
+
+######################################################################################
+#    Test MLE on simulated data over range of parameters and simulated datasets
+######################################################################################
+full_sampler = TuringModels.karp_model5(missing, missing)
+_res = full_sampler()
+_Y = _res.Y
+_θ = _res.θ
+_m = TuringModels.karp_model5(_Y, missing)
+_optim = optimize(_m, MLE(), ConjugateGradient(),
+                Optim.Options(iterations=1000, store_trace=true, extended_trace=true)
+)
+_optim.optim_result
+_optim.values
+_θ
+
+
+df = @chain vcat(dfs...) begin
+    @subset($"Is Parameter" .== 1)
+    @aside param_truths = create_param_truth_vector(_θ, _.Parameter)
+    @select(:data_seed, :Parameter, :Truth = param_truths)
+    rightjoin(df, on=[:Parameter, :data_seed])
+end
+
+function create_param_truth_vector(θ, param_names)
+    # if the first element of param_names is a symbol, convert to string
+    if isa(param_names[1], Symbol)
+        param_names = string.(param_names)
+    end
+    param_vector = []
+    for name in param_names
+        # if brackets in name, then it's an element of a vector
+        if occursin("[", name)
+            # get the vector name
+            vector_name = split(name, "[")[1]
+            vector_name = strip(vector_name, ['θ', '.'])
+            # get the vector
+            vector = getfield(θ, Symbol(vector_name))
+            # get the index
+            index = parse(Int, split(name, "[")[2][1])
+            # get the value
+            value = vector[index]
+            push!(param_vector, value)
+        else
+            push!(param_vector, getfield(θ, Symbol(strip(name, ['θ', '.']))))
+        end
+    end
+    return param_vector
+end
+
+#####################################################################
+#  helper functions no longer needed
+#####################################################################
+# from karp_model4
+function initialize_model(model, ρfixed, θ, datatype; kwargs...)
+    # Get real or simulated data
+    Y = datatype=="real" ? get_MLE_data() : get_MLE_data(θ)
+    # Initialize the model
+    ρ = ρfixed ? θ.ρ : missing
+    return model(Y.eit, Y.et; ρ=ρ, kwargs...)
+end
 
 

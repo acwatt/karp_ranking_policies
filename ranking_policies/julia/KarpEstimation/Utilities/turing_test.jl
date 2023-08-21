@@ -13,6 +13,7 @@ using Random
 using Parameters
 using FiniteDiff
 using NamedArrays
+using Printf
 
 module Model
     include("../Model/Model.jl")
@@ -38,18 +39,46 @@ function gen_MLE_data(data)
     return (; eᵢₜ, eₜ)
 end
 
+"""If `field` is not in NamedTuple `nt`, set it to `default_value`."""
+function set_param_field(nt, field, default_value)
+    if !isin(field, nt) || ismissing(getfield(nt, field))
+        nt = merge(nt..., (; field => default_value))
+    end
+    return nt
+end
+
 """Return outcome emission variables used in MLE."""
 function get_MLE_data(; N=4, T=60)
+    println("get_MLE_data observed data")
     # load real data, then transform eit to eit/1000
     data = @chain HF.read_data(N, T) @transform(:eᵢₜ = :eᵢₜ ./ 1000)
     return gen_MLE_data(data)
 end
 function get_MLE_data(θ; N=4, T=60)
+    println("get_MLE_data with θ")
     # simulate data based on approximate parameters recovered from data
-    b₀ = [3.146, -0.454, 3.78, 3.479]
-    β = [0.265, 0]
-    data = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
+    b₀ = isin(:b₀, θ) ? θ.b₀ : [3.146, -0.454, 3.78, 3.479]
+    β1 = isin(:β₁, θ) ? θ.β₁ : 0.265
+    β2 = isin(:β₂, θ) ? θ.β₂ : 0
+    β = [β1; β2]
+    v₀ = isin(:v0, θ) ? θ.v0 : 0.0
+    
+    data = Model.dgp(θ.ρ, θ.σα², θ.σμ², β, N, T; b₀, v₀)
     return gen_MLE_data(data)
+end
+function get_MLE_data(model, θ; N=4, T=60, seed=1234)
+    println("get_MLE_data with model")
+    # if any parameter is missing, use approximate parameters recovered from data
+    θ = set_param_field(θ, :b₀, [3.146, -0.454, 3.78, 3.479])
+    θ = set_param_field(θ, :β₁, 0.265)
+    θ = set_param_field(θ, :β₂, 0)
+    θ = set_param_field(θ, :v0, 0.0)
+    # Initialize DGP model
+    m = model(missing, θ; N, T)
+    # Sample the DGP
+    Random.seed!(seed)
+    data = m().Y
+    return data
 end
 
 """Return a dataframe of coefficients, SEs, and 95% CIs from the best run."""
@@ -60,7 +89,7 @@ function coef_df(res)
     # Create 95% confidence intervals
     LB = mat[:, 1] .- 1.96*mat[:, 2]
     UB = mat[:, 1] .+ 1.96*mat[:, 2]
-    mat = [names(mat)[1] mat LB UB]
+    mat = [names(mat)[1] mat LB UB ]
     # Add seed, LL, and convergence info to the matrix
     convergence = res.best_optim.optim_result.iteration_converged ? "Max Iterations" :
         res.best_optim.optim_result.f_converged ? "Function Convergence" :
@@ -71,6 +100,7 @@ function coef_df(res)
            :Iterations res.best_run.iters nothing nothing nothing
            :Termination convergence nothing nothing nothing ]
     df = DataFrame(mat, Symbol.(["Parameter", "Estimate", "Standard Erorr", "CI Lower 95", "CI Upper 95"]))
+    df[!, "Is Parameter"] = Integer.([ones(length(res.best_optim.values)); zeros(4)])
     return df
 end
 
@@ -243,101 +273,116 @@ function get_iteration_x_dict(opt_dict; iter="start")
     return x0_dict
 end
 
+function convert_params_to_namedtuple(nv::NamedVector)
+    # nv is a named vector of parameters
+    nt = (
+        σα² = nv[Symbol("θ.σα²")],
+        σμ² = nv[Symbol("θ.σμ²")],
+        b₀ = [nv[Symbol("θ.b₀[$i]")] for i in 1:4],
+        β₁ = nv[Symbol("θ.β₁")],
+        β₂ = nv[Symbol("θ.β₂")],
+        ρ = nv[Symbol("θ.ρ")],
+    )
+    if any(occursin.("v0", string.(names(nv)[1])))
+        nt = (nt..., v0 = nv[Symbol("θ.v0")])
+    end
+    return nt
+end
+function convert_params_to_namedtuple(v::Vector) 
+    # v is a vector of parameters in the following order
+    nt = (
+        σα² = v[1],
+        σμ² = v[2],
+        b₀ = [v[i+2] for i in 1:4],
+        β₁ = v[7],
+        β₂ = v[8],
+        ρ = v[9],
+    )
+    if length(v) == 10
+        nt = (nt..., v0 = v[10])
+    end
+    return nt
+end
+function convert_params_to_df(nt::NamedTuple)
+    # return a named tuple
+    # for each value in the named tuple, if it is a vector, break it into floats
+    nt2 = (;)
+    for k in keys(nt)
+        v = nt[k]
+        if typeof(v) <: AbstractArray
+            for i in eachindex(v)
+                nt2 = (nt2..., Symbol("θ.$k[$i]") => v[i])
+            end
+        else
+            nt2 = (nt2..., Symbol("θ.$k") => v)
+        end
+    end
+    df = DataFrame(nt2)
+    rename!(df, :first => :Parameter, :second => :Truth)
+    return df
+end
+
+"""Return true if s occurs in the keys of nt"""
+function isin(s::Symbol, nt::NamedTuple)
+    return any(occursin.(string(s), string.(keys(nt))))
+end
+
+
+
+
 
 #######################################
 # Estimation functions
 #######################################
-function model2_few_params()
 
-    # Get the simulated data
-    # simulate data based on approximate parameters recovered from data
-    b₀ = [3.146, -0.454, 3.78, 3.479]
-    β = [0.265, 0]
-    data = Model.dgp(θ.ρ, θ.σₐ², θ.σᵤ², β, N, T; b₀ = b₀)
-    eit = data.eᵢₜ
-    et = combine(groupby(data, :t), :eᵢₜ => mean => :eₜ).eₜ
-
-    # Estimate the MLE
-    opt4 = optimize(karp_model2(eit, et), MLE())
-    opt4.lp
-    opt4.values
-    opt4.optim_result
-    # Then, get the standard errors
-    coefdf = coeftable(opt4)
-    true_params
-
-    # Try again and fix ρ
-    # Initialize dataframe to store the results
-    df = DataFrame(UID=Int64[], LL=Float64[], iters=Float64[], 
-                    σα²=Float64[], σμ²=Float64[], ρ=Float64[],
-                    b01=Float64[], b02=Float64[], b03=Float64[], b04=Float64[],
-                    β1=Float64[], β2=Float64[],
-                iconverge=Bool[], gconverge=Bool[], fconverge=Bool[],
-                gtol=Float64[], ftol=Float64[],
-                N=Int64[], T=Int64[], ρfixed=Bool[]
-    ); optim_dict = Dict(); UID = 1
-    ftol = 1e-40
-
-    # Estimate the MLE
-    @showprogress for _ in 1:10
-        opt5 = optimize(
-            karp_model2(eit, et; ρ=θ.ρ), MLE(), 
-            ConjugateGradient(),
-            Optim.Options(iterations=50_000, g_tol = 1e-12, f_tol=
-            store_trace = true, show_trace=false)
-        );
-        @show push!(df, (UID, opt5.lp,  # Log likelihood value
-            opt5.optim_result.iterations,  # number of iterations
-            opt5.values[:σα²], opt5.values[:σμ²], ρ,
-            opt5.values[Symbol("b₀[1]")], opt5.values[Symbol("b₀[2]")], opt5.values[Symbol("b₀[3]")], opt5.values[Symbol("b₀[4]")],
-            opt5.values[:β₁], opt5.values[:β₂],
-            opt5.optim_result.iteration_converged,  # did it hit max iterations?
-            opt5.optim_result.g_converged, # did it converge from the gradient?
-            opt5.optim_result.f_converged,  # did it converge from the LL value?
-            opt5.optim_result.g_abstol,  # gradient tolerance setting
-            length(eit) ÷ length(et), length(et), true,  # N, T, ρ is fixed
-        ))
-        optim_dict[UID] = opt5
-        UID += 1
-    end
-
-    coeftable(optim_dict[6])
-    true_params
-
-end
-
-struct Simulated; end
-struct Observerd; end
-
-"""Return model initialized with data.
-    
-    `initialize_model(karp_model4, false, missing, "real")`
-                      turing model, ρfixed, θ,     datatype
-    If datetype is "real", initialize with real data. Otherwise, initialize with simulated data.
-    If ρfixed is true, use θ.ρ as the fixed ρ value in initializing the model. 
-        In this case, θ requires at least the field θ.ρ.
-    If ρfixed is false, use `missing`, which estimates ρ.
-        In this case, use θ = missing since the true parameters are to be estimated.
 """
-function initialize_model(model, ρfixed, θ, datatype; kwargs...)
-    # Get real or simulated data
-    Y = datatype=="real" ? get_MLE_data() : get_MLE_data(θ)
-    # Initialize the model
-    ρ = ρfixed ? θ.ρ : missing
-    return model(Y.eit, Y.et; ρ=ρ, kwargs...)
+    `initialize_model(model; θ=missing, seed=1234, kwargs...)`
+    `initialize_model(model, Prior::Turing.Prior; kwargs...)`
+
+Return model initialized with data, or for prior sampling.
+
+`initialize_model(model; θ=missing, kwargs...)`
+- `model` = Turing model function
+- `θ` = NamedTuple, parameters to generate simulated data with
+  - If `θ = missing`, observed data is used, parameters are to be estimated.
+
+
+# Examples
+## Estimate MLE parameters of karp_model5 using observed data
+```julia
+m = initialize_model(TuringModels.karp_model5)
+opt = optimize(m, MLE(), ConjugateGradient())
+opt.values
+```
+
+## Set "true" parameters to generate data
+```julia
+θ = (; b₀=[0.1, 0.1, 0.1, 0.1], β₁=0.1, β₂=0.1, σα²=0.1, σμ²=0.1, ρ=0.1, v0=0)
+# Generate simulated data and estimate MLE parameters of karp_model5
+m = initialize_model(TuringModels.karp_model5; θ)
+opt = optimize(m, MLE(), ConjugateGradient())
+opt.values
+```
+
+## Sample data and parameters from prior
+```julia
+# Generate simulated data and estimate MLE parameters of karp_model5
+m = initialize_model(TuringModels.karp_model5, Prior())
+data = m()
+```
+"""
+function initialize_model(model; θ=missing, seed=1234, kwargs...)
+    # If θ is missing, Y = observed data, else Y = simulated data from θ
+    Y = ismissing(θ) ? get_MLE_data() : get_MLE_data(model, θ; seed)
+    return model(Y, missing; kwargs...)
 end
-function initialize_model(model; θ=missing, kwargs...)
-    # If θ is missing, Y = real data, else Y = simulated data from θ
-    Y = ismissing(θ) ? get_MLE_data() : get_MLE_data(θ)
-    return model(Y, θ; kwargs...)
-end
-function initialize_model(model, Prior; kwargs...)
+function initialize_model(model, Prior::Turing.Prior; kwargs...)
     Y, θ = missing, missing
     return model(Y, θ; kwargs...)
 end
 
 """Run MLE on model, storing results in df and dict."""
-function multistart_MLE(m, Nseeds; maxiter=maxiter)
+function multistart_MLE(m, Nseeds; maxiter=100_000)
     # Initialize list, dictionary, and unique ID to store the results from each estimation
     dfs = Array{DataFrame}(undef, Nseeds)
     dict = Dict{Int64, Turing.TuringOptimExt.ModeResult}()
@@ -358,7 +403,7 @@ function multistart_MLE(m, Nseeds; maxiter=maxiter)
                                      extended_trace=true
                        )
         )
-        params = convert_params_to_namedtuple(_opt.values)
+        params = convert_params_to_namedtuple(opt.values)
         # Store the results
         df = DataFrame(
             seed=seed,
@@ -389,21 +434,14 @@ function multistart_MLE(m, Nseeds; maxiter=maxiter)
     df = vcat(dfs...)
     return (; df, dict)
 end
-# Run immediately to precompile
-_m = initialize_model(TuringModels.karp_model5)
-_opt = optimize(_m, MLE(), ConjugateGradient(),
-    Optim.Options(iterations=10,
-                store_trace=true,
-                extended_trace=true
-    )
-)
-_df = multistart_MLE(_m, 2; maxiter=2)
 
+"""
+    `estimate_MLE(model; θ=missing, maxiter=100_000, Nseeds=100, kwargs...)`
+    `estimate_MLE(model, Nsim=100; θ=missing, maxiter=100_000, Nseeds=100, kwargs...)`
 
+    Run MLE on model, returning a dataframe of results.
 
-"""Run MLE on model, returning a dataframe of results.
-
-    `estimate_MLE(karp_model3, ρfixed=false, θ=missing, maxiter=10_000, seeds=100)` will 
+    `estimate_MLE(karp_model3, ρfixed=false, θ=missing, maxiter=10_000, Nseeds=100)` will 
         estimate karp_model3 on real data, 100 times, including estimating ρ.
     If datetype is "real", estimate with real data. Otherwise, estimate with simulated data.
     If datetype is "simulated", θ must be a named tuple with attributes: θ.ρ, θ.σₐ², θ.σᵤ²
@@ -412,15 +450,19 @@ _df = multistart_MLE(_m, 2; maxiter=2)
     - ρ fixed, real data, must give θ
     - ρ free, simulated data, must give θ
     - ρ free, real data, can leave θ missing
+    - `Nseeds` : number of optim multistart runs to do from different Random seeds
+
+    If `Nsim` is given, `Nsim` datasets will be generated from θ, and aggregate results will be returned. 
 """
-function estimate_MLE(model; ρfixed=false, θ=missing, datatype="real", maxiter=10_000, Nseeds=100, kwargs...)
+function estimate_MLE(model; θ=missing, maxiter=100_000, Nseeds=100, kwargs...)
     # Initialize the model with data
-    println("\nInitializing model with $datatype data and ρfixed=$ρfixed")
-    model_obj = initialize_model(model, ρfixed, θ, datatype; kwargs...)
+    datatype = ismissing(θ) ? "observed" : "simulated"
+    println("\nInitializing model with $datatype data")
+    model_obj = initialize_model(model; θ, kwargs...)
 
     # Run MLE with different random seeds to get multiple starting points
     println("\nRuning Multistart Search for MLE")
-    ms_result = multistart_MLE(model_obj, Nseeds; maxiter=maxiter)
+    ms_result = multistart_MLE(model_obj, Nseeds; maxiter)
 
     # Find best run (highest LL), and return that result
     println("\nFinding best run.")
@@ -428,42 +470,125 @@ function estimate_MLE(model; ρfixed=false, θ=missing, datatype="real", maxiter
     best_optim = ms_result.dict[best_run.seed]
     return (; best_run, best_optim, ms_result)
 end
+function estimate_MLE(model, Nsim; θ=missing, maxiter=100_000, Nseeds=100, kwargs...)
+    # Generate Nsim datasets from θ
+    dfs = []
+    for seed in 1:Nsim
+        # Initialize the model with simulated data, generated from θ
+        model_obj = initialize_model(model; θ, seed, kwargs...)
+        # Run MLE with different random seeds to get multiple starting points
+        println("\nRuning Multistart Search for MLE")
+        ms_result = multistart_MLE(model_obj, Nseeds; maxiter)
 
-function convert_params_to_namedtuple(nv::NamedVector)
-    # nv is a named vector of parameters
-    nt = (
-        σα² = nv[Symbol("θ.σα²")],
-        σμ² = nv[Symbol("θ.σμ²")],
-        b₀ = [nv[Symbol("θ.b₀[$i]")] for i in 1:4],
-        β₁ = nv[Symbol("θ.β₁")],
-        β₂ = nv[Symbol("θ.β₂")],
-        ρ = nv[Symbol("θ.ρ")],
-    )
-    if any(occursin.("v0", string.(names(nv)[1])))
-        nt = (nt..., v0 = nv[Symbol("θ.v0")])
+        # Find best run (highest LL), and return that result
+        println("\nFinding best run.")
+        best_run = ms_result.df[findmax(ms_result.df.LL)[2], :]
+        best_optim = ms_result.dict[best_run.seed]
+        res = (; best_run, best_optim, ms_result)
+        # Estimates and standard errors
+        df = coef_df(res)
+        # Add a column for the seed
+        df.data_seed .= seed
+        df.optim_Nseeds .= Nseeds
+        push!(dfs, df)
     end
-    return nt
-end
-function convert_params_to_namedtuple(v::Vector) 
-    # v is a vector of parameters in the following order
-    nt = (
-        σα² = v[1],
-        σμ² = v[2],
-        b₀ = [v[i+2] for i in 1:4],
-        β₁ = v[7],
-        β₂ = v[8],
-        ρ = v[9],
-    )
-    if length(v) == 10
-        nt = (nt..., vₜ₋₁ = v[10])
+    # True parameters
+    df_truth = convert_params_to_df(θ)
+    # Aggregate results
+    df = vcat(dfs...)
+    df = @chain df begin
+        @subset($"Is Parameter" .== 1)
+        leftjoin(df_truth, on=:Parameter)
+        @aside @show _
+        @transform(:bias = :Estimate - :Truth)
+        @select(:data_seed, :Parameter, :bias)
+        rightjoin(df, on=[:Parameter, :data_seed])
     end
-    return nt
+    # Summary statistics of simulations
+    df2 = @chain df begin
+        groupby(:Parameter)
+        @combine(
+            :mean_estimate = mymean(:Estimate),
+            :mean_se = mymean($"Standard Erorr"),
+            :mean_bias = mean(:bias), 
+            :mean_abs_bias = mean(abs.(:bias)),
+            :var_bias = var(:bias),
+            :var_abs_bias = var(abs.(:bias)),
+        )
+        leftjoin(df_truth, on=:Parameter)
+        @transform(:data_seeds = Nsim, :optim_Nseeds=Nseeds)
+    end
+
+    return (; df_results=df, df_summary=df2)
 end
+
+function mymean(x)
+    if isa(x[1], Number)
+        return mean(x)
+    elseif isa(x[1], String)
+        m = mean(x .!== "Max Iterations")*100
+        return "$(@sprintf("%.1f", m))% converged"
+    end
+end
+
+function test_MLE_simulation_loop()
+    param_sampler = TuringModels.karp_model5_parameters(missing;
+        σα²dist=Exponential(1),
+        σμ²dist=Exponential(1)
+    )
+    _θ = param_sampler()
+    _r =  estimate_MLE(TuringModels.karp_model5, 2; θ=_θ, maxiter=100_000, Nseeds=50)
+    _r.df_summary
+end
+
+function test_models()
+    println("Running test of simulated data MLE")
+    # Generate parameters from prior
+    param_sampler = TuringModels.karp_model5_parameters(missing)
+    θ = param_sampler()
+    # Generate data from parameters
+    m_sim1 = initialize_model(TuringModels.karp_model5)
+    Y = m_sim1.args.Y
+    # Estimate parameters from data
+    m_sim2 = TuringModels.karp_model5(Y, missing)
+    mle_est_sim = optimize(m_sim2, MLE(), ConjugateGradient(),
+                Optim.Options(iterations=10, store_trace=true, extended_trace=true)
+    )
+    @show mle_est_sim.optim_result
+
+    println("\nRunning test of observed data MLE")
+    # Load observed data and initialize model
+    m_obs = initialize_model(TuringModels.karp_model5)
+    # Estimate parameters from data
+    Random.seed!(5)
+    mle_est_obs = optimize(m_obs, MLE(), ConjugateGradient(),
+                Optim.Options(iterations=10, store_trace=true, extended_trace=true)
+    )
+    @show mle_est_obs.optim_result
+end
+
+function test_functions()
+    println("\nRunning test of initialize_model (setting: estimate model)")
+    m = initialize_model(TuringModels.karp_model5)
+
+    test_models()
+
+    println("\nRunning test of multistart_MLE on initialized karp_model5")
+    df = multistart_MLE(m, 2; maxiter=2)
+    @show df
+
+    println("\nRunning test of multistart_MLE on initialized karp_model5")
+    res = estimate_MLE(TuringModels.karp_model5,  maxiter=3, Nseeds=3)
+    @show res
+    return
+end
+@time test_functions()
 
 
 ###############################################
 # Test the optimization function and output
-m1 = initialize_model(karp_model4, false, missing, "real")
+m_obs = initialize_model(TuringModels.karp_model5)
+m_sim = initialize_model(TuringModels.karp_model5)
 Random.seed!(5)
 mle_estimate = optimize(m1, MLE(), ConjugateGradient(),
                Optim.Options(iterations=100_000, store_trace=true, extended_trace=true)
@@ -585,21 +710,67 @@ diag(FiniteDiff.finite_difference_hessian(
 ######################################################################################
 #    Test MLE on simulated data over range of parameters and simulated datasets
 ######################################################################################
-Nparam = 2  # Number of true parameter samples
-Nsim = 2    # Number of simulated datasets per parameter sample
-Nseed = 2   # Number of multistart seeds per simulated dataset to find MLE
 # Setup parameter sampler from prior distribution
-param_sampler = karp_model4(missing, missing;
-    σα²=missing, σμ²=missing, b₀=missing, β₁=missing, β₂=missing, ρ=missing, 
-    σα²dist=Uniform(0, 1e10),
-    σμ²dist=Uniform(0, 1e10),
-    ρdist=Uniform(-1, 1),
-    b₀sd=20, β₁sd=5, β₂sd=1,
-    v0=missing
+# Sample parameters from prior and simulate data from model
+full_sampler = TuringModels.karp_model5(missing, missing)
+full_sampler()
+
+# Sample parameters from prior
+param_sampler = TuringModels.karp_model5_parameters(missing;
+    σα²dist=Exponential(1),
+    σμ²dist=Exponential(1)
 )
 _θ = param_sampler()
-# Setup data sampler given true parameters θ
-data_sampler(θ) = karp_model4(missing, missing; θ...)
+
+# Sample parameters from prior given σα², σμ²
+param_sampler2(σα², σμ²) = TuringModels.karp_model5_parameters(
+    (; σα², σμ²);
+    σα²dist=Exponential(1),
+    σμ²dist=Exponential(1)
+)
+_θ = param_sampler2(1,1)()
+
+# Simulate data from model given true parameters
+data_sampler(θ) = TuringModels.karp_model5(missing, θ)
+data_sampler(_θ)()
+
+# Simulation loop settings
+S = (;
+    Nsigma = 2,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
+    Nparam = 2,  # Number of true parameter samples, conditional on σα², σμ²
+    Nsim = 2,    # Number of simulated datasets per parameter sample
+    Nseed = 2,   # Number of multistart seeds per simulated dataset to find MLE
+)
+
+# Create 2D grid for σα², σμ² simulations - log scale so many more points near 0
+_x = range(-10, 10, length=S.Nsigma)
+XY = [exp10.((σα², σμ²)) for σα² in _x, σμ² in _x ]
+# For each σα², σμ² grid point, generate Nparam sets of parameters - b₀, β₁, β₂, ρ, v0
+θmat = [param_sampler2(σα²σμ²...)() for σα²σμ² in XY, _ in 1:S.Nparam]
+
+data_sampler(θmat[1])().Y
+@time [data_sampler(θ)() for θ in θmat]
+
+
+a_mean_bias = zeros(size(θmat))
+u_mean_bias = zeros(size(θmat))
+#! Add more matricies to fill in with results
+#! Add a manual % complete counter (S.Nsigma^2 * S.Nparam)
+# about 7min per estimate_MLE with Nseeds=50
+#! Want to know matrix of % of runs for that param vector that result in small σa^2 est. (e.g. < 0.1)
+for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
+    @show i,j,k
+    θ = θmat[i, j, k]
+    # For each parameter vector, generate Nsim datasets
+    res = estimate_MLE(TuringModels.karp_model5, S.Nsim; θ, maxiter=100_000, Nseeds=S.Nseed)
+    @show res.df_summary
+    # 
+end
+# Save best runs
+# Examine any for small simga_a^2 est. Maybe just sort them and see. Perhaps look at smallest sigma_a^2est / sigma_a^2
+
+
+
 # Generate Nparam random parameter samples from prior dists
 for paramSeed in 1:Nparam
     Random.seed!(paramSeed)
@@ -617,13 +788,6 @@ for paramSeed in 1:Nparam
         )
     end
 end
-
-# Generate Nsim datasets from each parameter sample
-# Run multistart eval with Nseed for each dataset/parameter combination
-# Save best runs
-# Examine any for small simga_a^2 est. Maybe just sort them and see. Perhaps look at smallest sigma_a^2est / sigma_a^2
-
-
 
 
 

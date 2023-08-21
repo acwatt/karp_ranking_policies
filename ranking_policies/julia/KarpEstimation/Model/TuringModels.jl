@@ -164,16 +164,49 @@ end
     end
 end
 
+@model function karp_model5_parameters(θ;
+    N=4,
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+    ρdist=Uniform(-1, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1,
+    )
+    # Initialize parameters
+    params = (:σα², :σμ², :b₀, :β₁, :β₂, :ρ, :v0)
+    if ismissing(θ)
+        θ = NamedTuple{(:σα², :σμ², :b₀, :β₁, :β₂, :ρ, :v0)}(repeat([missing],7))
+    else
+        for k in params
+            if !haskey(θ, k)
+                θ = merge(θ, (;k => missing))
+            end
+        end
+    end
+
+    # Set variance priors
+    θ.σα² ~ σα²dist
+    θ.σμ² ~ σμ²dist
+    # Set AR(1) coefficient prior
+    θ.ρ ~ ρdist
+    # Set FE and time trend priors
+    θ.β₁ ~ truncated(Normal(0, β₁sd); lower=0)
+    θ.β₂ ~ Normal(0, β₂sd)
+    θ.b₀ ~ MvNormal(zeros(N), b₀sd)
+    B₀ = mean(θ.b₀)
+    # Set initial AR(1) error prior
+    θ.v0 ~ Normal(0, 10)
+    return θ
+end
 
 """Karp model, AR(1) errors, flat priors, all parameters are estimated"""
 @model function karp_model5(Y, θ;
     N=4, T=60, usage="estimate_model",
-    σα²dist=InverseGamma(1, 1), 
-    σμ²dist=InverseGamma(1, 1),
-    ρdist=truncated(Normal(0.87, 0.05); lower=0, upper=1),
-    b₀sd=2, β₁sd=0.5, β₂sd=0.1
+    σα²dist=Exponential(1),
+    σμ²dist=Exponential(1),
+    ρdist=Uniform(-1, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1,
     )
-    # Initialize data
+    # INITIALIZE DATA
     if ismissing(Y)
         Y = (;
             eₜ = Vector{Real}(undef, T),
@@ -186,9 +219,19 @@ end
         N = length(Y.eᵢₜ) ÷ T
     end
 
-    # Initialize parameters
-    θ = ismissing(θ) ? NamedTuple{(:σα², :σμ², :b₀, :β₁, :β₂, :ρ, :v0)}(repeat([missing],7)) : θ
+    # INITIALIZE PARAMETERS
+    params = (:σα², :σμ², :b₀, :β₁, :β₂, :ρ, :v0)
+    if ismissing(θ)
+        θ = NamedTuple{(:σα², :σμ², :b₀, :β₁, :β₂, :ρ, :v0)}(repeat([missing],7))
+    else
+        for k in params
+            if !haskey(θ, k)
+                θ = merge(θ, (;k => missing))
+            end
+        end
+    end
 
+    # SET PRIORS
     # Set variance priors
     θ.σα² ~ σα²dist
     θ.σμ² ~ σμ²dist
@@ -199,13 +242,14 @@ end
     θ.β₂ ~ Normal(0, β₂sd)
     θ.b₀ ~ MvNormal(zeros(N), b₀sd)
     B₀ = mean(θ.b₀)
+    # Set initial AR(1) error prior
+    θ.v0 ~ Normal(0, 10)
 
     # Initialize AR(1) errors, with T+1 elements because we need to store initial value vₜ₋₁[1]
     vₜ₋₁ = Vector{Real}(undef, T+1)
-    θ.v0 ~ Normal(0, 10)
     vₜ₋₁[1] = θ.v0
 
-    # DGP models
+    # DGP MODEL
     for t = 1:T
         # Period Avg observation
         Y.eₜ[t] ~ Normal(B₀ + θ.β₁*t + θ.β₂*t^2 + θ.ρ*vₜ₋₁[t], sqrt(θ.σα² + θ.σμ²/N))
