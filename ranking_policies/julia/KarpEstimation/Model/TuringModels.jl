@@ -168,7 +168,7 @@ end
     N=4,
     σα²dist=Uniform(0, 1e10),
     σμ²dist=Uniform(0, 1e10),
-    ρdist=Uniform(-1, 1),
+    ρdist=Uniform(0, 1),
     b₀sd=20, β₁sd=5, β₂sd=1,
     )
     # Initialize parameters
@@ -203,7 +203,7 @@ end
     N=4, T=60, usage="estimate_model",
     σα²dist=Exponential(1),
     σμ²dist=Exponential(1),
-    ρdist=Uniform(-1, 1),
+    ρdist=Uniform(0, 1),
     b₀sd=20, β₁sd=5, β₂sd=1,
     )
     # INITIALIZE DATA
