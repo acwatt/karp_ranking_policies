@@ -390,9 +390,9 @@ function multistart_MLE(m, Nseeds; maxiter=100_000)
 
     # run optimize on the model `seeds` times, adding summary results to df
     # storing the full results in a dictionary indexed by UID
-    p = Progress(Nseeds)
-    Threads.@threads for seed in 1:Nseeds
-    # for seed in 1:Nseeds
+    # p = Progress(Nseeds)
+    # Threads.@threads for seed in 1:Nseeds
+    for seed in 1:Nseeds
         Random.seed!(seed)
         # Estimate the model
         #! Handle convergence failure warning
@@ -429,7 +429,7 @@ function multistart_MLE(m, Nseeds; maxiter=100_000)
         )
         dfs[seed] = df
         dict[seed] = opt
-        next!(p)
+        # next!(p)
     end
     df = vcat(dfs...)
     return (; df, dict)
@@ -473,7 +473,8 @@ end
 function estimate_MLE(model, Nsim; θ=missing, maxiter=100_000, Nseeds=100, kwargs...)
     # Generate Nsim datasets from θ
     dfs = []
-    for seed in 1:Nsim
+    p = Progress(Nsim)
+    Threads.@threads for seed in 1:Nsim
         # Initialize the model with simulated data, generated from θ
         model_obj = initialize_model(model; θ, seed, kwargs...)
         # Run MLE with different random seeds to get multiple starting points
@@ -491,6 +492,7 @@ function estimate_MLE(model, Nsim; θ=missing, maxiter=100_000, Nseeds=100, kwar
         df.data_seed .= seed
         df.optim_Nseeds .= Nseeds
         push!(dfs, df)
+        next!(p)
     end
     # True parameters
     df_truth = convert_params_to_df(θ)
@@ -499,7 +501,6 @@ function estimate_MLE(model, Nsim; θ=missing, maxiter=100_000, Nseeds=100, kwar
     df = @chain df begin
         @subset($"Is Parameter" .== 1)
         leftjoin(df_truth, on=:Parameter)
-        @aside @show _
         @transform(:bias = :Estimate - :Truth)
         @select(:data_seed, :Parameter, :bias)
         rightjoin(df, on=[:Parameter, :data_seed])
@@ -516,7 +517,7 @@ function estimate_MLE(model, Nsim; θ=missing, maxiter=100_000, Nseeds=100, kwar
             :var_abs_bias = var(abs.(:bias)),
         )
         leftjoin(df_truth, on=:Parameter)
-        @transform(:data_seeds = Nsim, :optim_Nseeds=Nseeds)
+        @transform(:Ndata_seeds = Nsim, :Noptim_seeds=Nseeds)
     end
 
     return (; df_results=df, df_summary=df2)
@@ -584,126 +585,131 @@ function test_functions()
 end
 @time test_functions()
 
+function test_turing_optimization()
+    ###############################################
+    # Test the optimization function and output
+    m_obs = initialize_model(TuringModels.karp_model5)
+    m_sim = initialize_model(TuringModels.karp_model5)
+    Random.seed!(5)
+    mle_estimate = optimize(m1, MLE(), ConjugateGradient(),
+                Optim.Options(iterations=100_000, store_trace=true, extended_trace=true)
+    )
+    coeftable(mle_estimate) #! does not work: DomainError with -0.0006059430277771548:
 
-###############################################
-# Test the optimization function and output
-m_obs = initialize_model(TuringModels.karp_model5)
-m_sim = initialize_model(TuringModels.karp_model5)
-Random.seed!(5)
-mle_estimate = optimize(m1, MLE(), ConjugateGradient(),
-               Optim.Options(iterations=100_000, store_trace=true, extended_trace=true)
-)
-coeftable(mle_estimate) #! does not work: DomainError with -0.0006059430277771548:
+    ##############################################
+    # coeftable doesn't work -- investigate
+    # Manually construct the VCOV matrix from the hessian
+    θmle = convert_params_to_namedtuple(mle_estimate.values)
+    LL(θ) = loglikelihood(m1, convert_params_to_namedtuple(θ))
+    # Calculate the finite difference numerical hessian at the MLE location
+    H1 = FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array)
+    @show diag(H1)
+    # Calculate the standard errors from the inverse of the Hessian
+    VCOV1 = inv(-H1)
+    se1 = sqrt.(diag(VCOV1))  # DomainError with -0.0006059426285795939, same error as coeftable
+    #! there's a problem with the Hessian, it's not positive definite
+    #! because it's concave up in σa² at the MLE (LL is increasing in decreasing σa²)
+    #! Check what the MAP result would give
 
-##############################################
-# coeftable doesn't work -- investigate
-# Manually construct the VCOV matrix from the hessian
-θmle = convert_params_to_namedtuple(mle_estimate.values)
-LL(θ) = loglikelihood(m1, convert_params_to_namedtuple(θ))
-# Calculate the finite difference numerical hessian at the MLE location
-H1 = FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array)
-@show diag(H1)
-# Calculate the standard errors from the inverse of the Hessian
-VCOV1 = inv(-H1)
-se1 = sqrt.(diag(VCOV1))  # DomainError with -0.0006059426285795939, same error as coeftable
-#! there's a problem with the Hessian, it's not positive definite
-#! because it's concave up in σa² at the MLE (LL is increasing in decreasing σa²)
-#! Check what the MAP result would give
+    ##############################################
+    # Test the MAP optimization function and output
+    Random.seed!(5)
+    map_estimate = optimize(m1, MAP(), ConjugateGradient(),
+                Optim.Options(iterations=100_000, store_trace=true, extended_trace=true)
+    )
+    coeftable(map_estimate) 
+    #! MAP gives σa² estimate away from zero, so Hessian is positive definite (works)
+    #! But LL is smaller at MAP than MLE above -- is the MLE biased or is this a problem with the model?
+    #! Need to check simulation results to know what parameters give rise to MLE with hessian that is not positive definite
+    LP(θ) = logjoint(m1, convert_params_to_namedtuple(θ))
+    LP(map_estimate.values)
+    # Calculate the finite difference numerical hessian at the MLE location
+    Hmap = FiniteDiff.finite_difference_hessian(LP, map_estimate.values.array)
+    @show diag(Hmap)
+    VCOVmap = inv(-Hmap)
+    semap = sqrt.(diag(VCOVmap))
 
-##############################################
-# Test the MAP optimization function and output
-Random.seed!(5)
-map_estimate = optimize(m1, MAP(), ConjugateGradient(),
-               Optim.Options(iterations=100_000, store_trace=true, extended_trace=true)
-)
-coeftable(map_estimate) 
-#! MAP gives σa² estimate away from zero, so Hessian is positive definite (works)
-#! But LL is smaller at MAP than MLE above -- is the MLE biased or is this a problem with the model?
-#! Need to check simulation results to know what parameters give rise to MLE with hessian that is not positive definite
-LP(θ) = logjoint(m1, convert_params_to_namedtuple(θ))
-LP(map_estimate.values)
-# Calculate the finite difference numerical hessian at the MLE location
-Hmap = FiniteDiff.finite_difference_hessian(LP, map_estimate.values.array)
-@show diag(Hmap)
-VCOVmap = inv(-Hmap)
-semap = sqrt.(diag(VCOVmap))
+    # Standard errors are calculated from the Fisher information matrix (inverse Hessian of the log likelihood or log joint)
+    # Calculate the Hessian
+    # Need the loglikelihood function as a function of one vector of parameters
+    θmle = convert_params_to_namedtuple(mle_estimate.values)
+    logjoint(m1, θmle)
+    loglikelihood(m1, θmle)
+    LJ(θ) = logjoint(m1, convert_params_to_namedtuple(θ))
+    LL(θ) = loglikelihood(m1, convert_params_to_namedtuple(θ))
+    # Calculate the finite difference numerical hessian at the MLE location
+    H0 = FiniteDiff.finite_difference_hessian(LJ, mle_estimate.values.array; absstep=1e-10)
+    H1 = FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array)
+    VCOV0 = inv(-H0)
+    VCOV1 = inv(-H1)
+    se0 = sqrt.(diag(VCOV0))
+    se1 = sqrt.(diag(VCOV1))  # DomainError with -0.0006059426285795939, same error as coeftable
 
-# Standard errors are calculated from the Fisher information matrix (inverse Hessian of the log likelihood or log joint)
-# Calculate the Hessian
-# Need the loglikelihood function as a function of one vector of parameters
-θmle = convert_params_to_namedtuple(mle_estimate.values)
-logjoint(m1, θmle)
-loglikelihood(m1, θmle)
-LJ(θ) = logjoint(m1, convert_params_to_namedtuple(θ))
-LL(θ) = loglikelihood(m1, convert_params_to_namedtuple(θ))
-# Calculate the finite difference numerical hessian at the MLE location
-H0 = FiniteDiff.finite_difference_hessian(LJ, mle_estimate.values.array; absstep=1e-10)
-H1 = FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array)
-VCOV0 = inv(-H0)
-VCOV1 = inv(-H1)
-se0 = sqrt.(diag(VCOV0))
-se1 = sqrt.(diag(VCOV1))  # DomainError with -0.0006059426285795939, same error as coeftable
+    diag(H1)
 
-diag(H1)
-
-se = sqrt.(diag(
-    inv(-FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array))
-))
-# Try evaluating at exactly σa = 0
-sqrt.(diag(
-    inv(-FiniteDiff.finite_difference_hessian(
-        LL, 
-        [0; mle_estimate.values.array[2:end]]
+    se = sqrt.(diag(
+        inv(-FiniteDiff.finite_difference_hessian(LL, mle_estimate.values.array))
     ))
-))
-diag(FiniteDiff.finite_difference_hessian(LL, [-1e-2; mle_estimate.values.array[2:end]]))
-FiniteDiff.finite_difference_jacobian(LL, [0; mle_estimate.values.array[2:end]])
-FiniteDiff.finite_difference_gradient(LL, [0; mle_estimate.values.array[2:end]])
+    # Try evaluating at exactly σa = 0
+    sqrt.(diag(
+        inv(-FiniteDiff.finite_difference_hessian(
+            LL, 
+            [0; mle_estimate.values.array[2:end]]
+        ))
+    ))
+    diag(FiniteDiff.finite_difference_hessian(LL, [-1e-2; mle_estimate.values.array[2:end]]))
+    FiniteDiff.finite_difference_jacobian(LL, [0; mle_estimate.values.array[2:end]])
+    FiniteDiff.finite_difference_gradient(LL, [0; mle_estimate.values.array[2:end]])
 
-#! domain error here -- probably because of the σa parameter being close to 0.
-#! try again with σa being larger
-θmle2 = mle_estimate.values.array+[0.00013, 0, 0, 0, 0, 0, 0, 0, 0];
-H2 = FiniteDiff.finite_difference_hessian(LL, θmle2)
-VCOV2 = inv(-H2);
-se2 = sqrt.(diag(VCOV2))
-
-
-#? Try LL using flat priors
-result_freeρ_uniform4 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=100_000, Nseeds=20,
-    σα²dist=Uniform(0, 1e10),
-    σμ²dist=Uniform(0, 1e10),
-    ρdist=Uniform(-1, 1),
-    b₀sd=20, β₁sd=5, β₂sd=1
-)
-result_freeρ_uniform4.best_optim
-result_freeρ_uniform4.best_optim.values
-result_freeρ_uniform4.best_run.LL
-coeftable(result_freeρ_uniform4.best_optim)
+    #! domain error here -- probably because of the σa parameter being close to 0.
+    #! try again with σa being larger
+    θmle2 = mle_estimate.values.array+[0.00013, 0, 0, 0, 0, 0, 0, 0, 0];
+    H2 = FiniteDiff.finite_difference_hessian(LL, θmle2)
+    VCOV2 = inv(-H2);
+    se2 = sqrt.(diag(VCOV2))
 
 
-#? Try LL using flat priors and estimate v0
-result_freeρ_uniform5 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=100_000, Nseeds=20,
-    σα²dist=Uniform(0, 1e10),
-    σμ²dist=Uniform(0, 1e10),
-    ρdist=Uniform(-1, 1),
-    b₀sd=20, β₁sd=5, β₂sd=1,
-    v0=missing
-)
-result_freeρ_uniform5.best_optim.values
-result_freeρ_uniform5.best_run.LL
-result_freeρ_uniform6.best_run.LL
-#? flatter prior on v0 did not change the result (same down to 1e-7)
-#? Which makes sense because the LL doesn't use the prior. The prior is only used for the MAP estimate.
-result_freeρ_uniform6.best_optim.values - result_freeρ_uniform5.best_optim.values
+    #? Try LL using flat priors
+    result_freeρ_uniform4 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=100_000, Nseeds=20,
+        σα²dist=Uniform(0, 1e10),
+        σμ²dist=Uniform(0, 1e10),
+        ρdist=Uniform(-1, 1),
+        b₀sd=20, β₁sd=5, β₂sd=1
+    )
+    result_freeρ_uniform4.best_optim
+    result_freeρ_uniform4.best_optim.values
+    result_freeρ_uniform4.best_run.LL
+    coeftable(result_freeρ_uniform4.best_optim)
 
-coeftable(result_freeρ_uniform5.best_optim)
-diag(FiniteDiff.finite_difference_hessian(
-    θ -> loglikelihood(
-        result_freeρ_uniform5.best_optim.f.model, 
-        convert_params_to_namedtuple(θ)
-    ),
-    result_freeρ_uniform5.best_optim.values.array
-))
+
+    #? Try LL using flat priors and estimate v0
+    result_freeρ_uniform5 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=100_000, Nseeds=20,
+        σα²dist=Uniform(0, 1e10),
+        σμ²dist=Uniform(0, 1e10),
+        ρdist=Uniform(-1, 1),
+        b₀sd=20, β₁sd=5, β₂sd=1,
+        v0=missing
+    )
+    result_freeρ_uniform5.best_optim.values
+    result_freeρ_uniform5.best_run.LL
+    result_freeρ_uniform6.best_run.LL
+    #? flatter prior on v0 did not change the result (same down to 1e-7)
+    #? Which makes sense because the LL doesn't use the prior. The prior is only used for the MAP estimate.
+    result_freeρ_uniform6.best_optim.values - result_freeρ_uniform5.best_optim.values
+
+    coeftable(result_freeρ_uniform5.best_optim)
+    diag(FiniteDiff.finite_difference_hessian(
+        θ -> loglikelihood(
+            result_freeρ_uniform5.best_optim.f.model, 
+            convert_params_to_namedtuple(θ)
+        ),
+        result_freeρ_uniform5.best_optim.values.array
+    ))
+
+
+end # test_turing_optimization
+
+
 
 
 
@@ -739,37 +745,57 @@ S = (;
     Nsigma = 2,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
     Nparam = 2,  # Number of true parameter samples, conditional on σα², σμ²
     Nsim = 2,    # Number of simulated datasets per parameter sample
-    Nseed = 2,   # Number of multistart seeds per simulated dataset to find MLE
+    Nseed = 20,   # Number of multistart seeds per simulated dataset to find MLE
 )
 
 # Create 2D grid for σα², σμ² simulations - log scale so many more points near 0
 _x = range(-10, 10, length=S.Nsigma)
+xx = exp10.(_x)
 XY = [exp10.((σα², σμ²)) for σα² in _x, σμ² in _x ]
 # For each σα², σμ² grid point, generate Nparam sets of parameters - b₀, β₁, β₂, ρ, v0
 θmat = [param_sampler2(σα²σμ²...)() for σα²σμ² in XY, _ in 1:S.Nparam]
 
-data_sampler(θmat[1])().Y
-@time [data_sampler(θ)() for θ in θmat]
+# Test MLE Estimate
+_res = estimate_MLE(TuringModels.karp_model5, S.Nsim; θ = θmat[1,1,1], maxiter=1_000, Nseeds=S.Nseed)
+@show _res.df_summary
 
+# Define NamedTuple of matricies to fill in with results
+results_names = [:mean_se, :mean_bias, :mean_abs_bias, :var_bias, :var_abs_bias, :Truth]
+_mat() = deepcopy(zeros(size(θmat)))
+_nt() = NamedTuple(n => _mat() for n in results_names)
+results_nt = (; σα² = _nt(), σμ² = _nt())
 
-a_mean_bias = zeros(size(θmat))
-u_mean_bias = zeros(size(θmat))
-#! Add more matricies to fill in with results
-#! Add a manual % complete counter (S.Nsigma^2 * S.Nparam)
+#! Save intermittent results to file, load/update/save file - can I pickle the 3d array?
 # about 7min per estimate_MLE with Nseeds=50
 #! Want to know matrix of % of runs for that param vector that result in small σa^2 est. (e.g. < 0.1)
+#? Can I just calc this after?
+
+
 #! Check if parallelizing is maxed out (should be if Nseed is large enough)
 #! Run on server for 1 day = 5 for Nsgima and Nparam
 #! Run on server for 1 week = 11 for Nsgima and Nparam
 #! Make distributed and run in Savio
+total = S.Nsigma^2 * S.Nparam
+counter = 1
 for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
-    @show i,j,k
+    perc_complete = round(counter/total*100, digits=2)
+    @show i,j,k, perc_complete
     θ = θmat[i, j, k]
     # For each parameter vector, generate Nsim datasets
     res = estimate_MLE(TuringModels.karp_model5, S.Nsim; θ, maxiter=100_000, Nseeds=S.Nseed)
     @show res.df_summary
-    # 
+    # Store results in matrix
+    for p in [:σα², :σμ²], n in results_names
+        results_nt[p][n][i,j,k] = @subset(res.df_summary, res.df_summary.Parameter .== Symbol("θ.$p"))[1, n]
+    end
 end
+@show results_nt
+m_ = mean(results_nt.σα².mean_se, dims=3)[:,:,1]
+heatmap(xx, xx, mean(results_nt.σα².mean_se, dims=3)[:,:,1]; xscale=:log10, yscale=:log10, title="Mean σα² Standard Error")
+heatmap(xx, xx, mean(results_nt.σα².mean_bias, dims=3)[:,:,1]; xscale=:log10, yscale=:log10, title="Mean σα² Bias")
+heatmap(xx, xx, mean(results_nt.σα².mean_abs_bias, dims=3)[:,:,1]; xscale=:log10, yscale=:log10, title="Mean σα² Absolute Bias")
+
+heatmap(1:2, 1:2, [1 2; 3 4])
 # Save best runs
 # Examine any for small simga_a^2 est. Maybe just sort them and see. Perhaps look at smallest sigma_a^2est / sigma_a^2
 
