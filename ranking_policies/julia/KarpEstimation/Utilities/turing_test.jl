@@ -778,6 +778,7 @@ results_nt = (; σα² = _nt(), σμ² = _nt())
 #! Make distributed and run in Savio
 total = S.Nsigma^2 * S.Nparam
 counter = 0
+savedir = "data/temp/turing_simulation_output"
 for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
     perc_complete = round(counter/total*100, digits=2)
     @show i,j,k, perc_complete
@@ -789,10 +790,10 @@ for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
     for p in [:σα², :σμ²], n in results_names
         results_nt[p][n][i,j,k] = @subset(res.df_summary, res.df_summary.Parameter .== Symbol("θ.$p"))[1, n]
     end
+    # Save results to file
+    save("$savedir/tmp-results_nt.jld", "results_nt", results_nt)
     counter += 1
 end
-# Save results to file
-save("tmp-results_nt.jld", "results_nt", results_nt)
 # Load results from file
 results_nt2 = load("tmp-results_nt.jld", "results_nt")
 
