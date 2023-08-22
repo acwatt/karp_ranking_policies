@@ -1,7 +1,7 @@
 
 println(@__DIR__)
 using Pkg; Pkg.activate(joinpath(@__DIR__, "turing_test_env"))
-# ]add Turing DataFrames LinearAlgebra Distributions CategoricalArrays Random Optim StatsBase StatsPlots ProgressMeter DataFramesMeta Dates CSV Statistics FiniteDiff
+# ]add Turing DataFrames LinearAlgebra Distributions CategoricalArrays Random Optim StatsBase StatsPlots ProgressMeter DataFramesMeta Dates CSV Statistics FiniteDiff JLD
 using Turing
 using DataFrames, DataFramesMeta
 using LinearAlgebra
@@ -14,6 +14,7 @@ using Parameters
 using FiniteDiff
 using NamedArrays
 using Printf
+using JLD  # for saving objects as .jld files
 
 module Model
     include("../Model/Model.jl")
@@ -745,7 +746,7 @@ S = (;
     Nsigma = 2,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
     Nparam = 2,  # Number of true parameter samples, conditional on σα², σμ²
     Nsim = 2,    # Number of simulated datasets per parameter sample
-    Nseed = 20,   # Number of multistart seeds per simulated dataset to find MLE
+    Nseed = 2,   # Number of multistart seeds per simulated dataset to find MLE
 )
 
 # Create 2D grid for σα², σμ² simulations - log scale so many more points near 0
@@ -756,8 +757,8 @@ XY = [exp10.((σα², σμ²)) for σα² in _x, σμ² in _x ]
 θmat = [param_sampler2(σα²σμ²...)() for σα²σμ² in XY, _ in 1:S.Nparam]
 
 # Test MLE Estimate
-_res = estimate_MLE(TuringModels.karp_model5, S.Nsim; θ = θmat[1,1,1], maxiter=1_000, Nseeds=S.Nseed)
-@show _res.df_summary
+# _res = estimate_MLE(TuringModels.karp_model5, S.Nsim; θ = θmat[1,1,1], maxiter=1_000, Nseeds=S.Nseed)
+# @show _res.df_summary
 
 # Define NamedTuple of matricies to fill in with results
 results_names = [:mean_se, :mean_bias, :mean_abs_bias, :var_bias, :var_abs_bias, :Truth]
@@ -776,7 +777,7 @@ results_nt = (; σα² = _nt(), σμ² = _nt())
 #! Run on server for 1 week = 11 for Nsgima and Nparam
 #! Make distributed and run in Savio
 total = S.Nsigma^2 * S.Nparam
-counter = 1
+counter = 0
 for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
     perc_complete = round(counter/total*100, digits=2)
     @show i,j,k, perc_complete
@@ -788,7 +789,13 @@ for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
     for p in [:σα², :σμ²], n in results_names
         results_nt[p][n][i,j,k] = @subset(res.df_summary, res.df_summary.Parameter .== Symbol("θ.$p"))[1, n]
     end
+    counter += 1
 end
+# Save results to file
+save("tmp-results_nt.jld", "results_nt", results_nt)
+# Load results from file
+results_nt2 = load("tmp-results_nt.jld", "results_nt")
+
 @show results_nt
 m_ = mean(results_nt.σα².mean_se, dims=3)[:,:,1]
 heatmap(xx, xx, mean(results_nt.σα².mean_se, dims=3)[:,:,1]; xscale=:log10, yscale=:log10, title="Mean σα² Standard Error")
@@ -798,29 +805,6 @@ heatmap(xx, xx, mean(results_nt.σα².mean_abs_bias, dims=3)[:,:,1]; xscale=:lo
 heatmap(1:2, 1:2, [1 2; 3 4])
 # Save best runs
 # Examine any for small simga_a^2 est. Maybe just sort them and see. Perhaps look at smallest sigma_a^2est / sigma_a^2
-
-
-
-# Generate Nparam random parameter samples from prior dists
-for paramSeed in 1:Nparam
-    Random.seed!(paramSeed)
-    θ = prior_sampler() 
-    # Generate Nsim datasets from each parameter sample
-    for nsim in 1:Nsim
-
-        # Run multistart eval with Nseed for each dataset/parameter combination
-        result_freeρ_uniform5 = estimate_MLE(karp_model4; ρfixed=false, datatype="real", maxiter=100_000, Nseeds=Nseed,
-            σα²dist=Uniform(0, 1e10),
-            σμ²dist=Uniform(0, 1e10),
-            ρdist=Uniform(-1, 1),
-            b₀sd=20, β₁sd=5, β₂sd=1,
-            v0=missing
-        )
-    end
-end
-
-
-
 
 
 
