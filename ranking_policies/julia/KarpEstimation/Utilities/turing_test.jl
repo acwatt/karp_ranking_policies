@@ -37,7 +37,9 @@ include("../Model/TuringModels.jl")  # TuringModels
 function gen_MLE_data(data)
     eᵢₜ = data.eᵢₜ
     eₜ = combine(groupby(data, :t), :eᵢₜ => mean => :eₜ).eₜ
-    return (; eᵢₜ, eₜ)
+    eᵢ = combine(groupby(data, :i), :eᵢₜ => mean => :eᵢ).eᵢ
+    e = mean(Y.eᵢₜ)
+    return (; eᵢₜ, eₜ, eᵢ, e)
 end
 
 """If `field` is not in NamedTuple `nt`, set it to `default_value`."""
@@ -398,6 +400,7 @@ function multistart_MLE(m, Nseeds; maxiter=100_000)
         # Estimate the model
         #! Handle convergence failure warning
         #! See Optim.converged(M)
+        #! Add try-catch from AREBARE
         opt = optimize(m, MLE(), ConjugateGradient(),
                        Optim.Options(iterations=maxiter,
                                      store_trace=true,
@@ -454,6 +457,22 @@ end
     - `Nseeds` : number of optim multistart runs to do from different Random seeds
 
     If `Nsim` is given, `Nsim` datasets will be generated from θ, and aggregate results will be returned. 
+    
+    ```julia
+    estimate_MLE(karp_model5; maxiter=50_000, Nseeds=20,
+        σα²dist=Uniform(0, 1e10),
+        σμ²dist=Uniform(0, 1e10),
+        ρdist=Uniform(-1, 1),
+        b₀sd=20, β₁sd=5, β₂sd=1
+    )
+    karp_model5(Y, θ;
+        N=4, T=60, usage="estimate_model",
+        σα²dist=Exponential(1),
+        σμ²dist=Exponential(1),
+        ρdist=Uniform(0, 1),
+        b₀sd=20, β₁sd=5, β₂sd=1,
+    )
+    ```
 """
 function estimate_MLE(model; θ=missing, maxiter=100_000, Nseeds=100, kwargs...)
     # Initialize the model with data
@@ -901,6 +920,7 @@ result_freeρ_uniform4 = estimate_MLE(karp_model4; ρfixed=false, datatype="real
     ρdist=Uniform(-1, 1),
     b₀sd=20, β₁sd=5, β₂sd=1
 )
+
 result_freeρ_uniform1.best_run
 result_freeρ_uniform2.best_run
 result_freeρ_uniform3.best_run
@@ -953,6 +973,107 @@ Parameter estimates for raw data
     ρ     │  0.929347   │  0.0489734
 
 """
+
+
+
+
+###############################################  ESIMATE σα², σμ², ρ, v0
+result_freeρ_uniform5 = estimate_MLE(
+    TuringModels.karp_model5; 
+    maxiter=50_000, Nseeds=20,
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+    ρdist=Uniform(-1, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1
+)
+result_freeρ_uniform5.best_run
+df = coef_df(result_freeρ_uniform5)
+
+@chain result_freeρ_uniform5.ms_result.df @orderby(-:LL)
+
+""" ESIMATE σα², σμ², ρ, v0 on observed data 2023-08-24
+    Row│ Parameter    Estimate              Standard Erorr  CI Lower 95  CI Upper 95  Is Parameter 
+    ───┼───────────────────────────────────────────────────────────────────────────────────────────
+    1  │ σα²        1.24806e-45           0.0245828       -0.0481824   0.0481824               1
+    2  │ σμ²        0.398938              0.0301794       0.339787     0.45809                 1
+    3  │ ρ          0.905657              0.143591        0.624218     1.1871                  1
+    4  │ β₁         0.125791              0.0982056       -0.0666925   0.318274                1
+    5  │ β₂         -0.000333779          0.0012026       -0.00269087  0.00202331              1
+    6  │ b₀[1]      0.541623              1.98913         -3.35708     4.44033                 1
+    7  │ b₀[2]      -0.777707             1.98913         -4.67641     3.121                   1
+    8  │ b₀[3]      0.773853              1.98913         -3.12485     4.67255                 1
+    9  │ b₀[4]      0.663326              1.98913         -3.23538     4.56203                 1
+    10 │ v0         0.726269              2.07966         -3.34987     4.80241                 1
+    11 │ LL           -246.25                                                                  0
+    12 │ seed         18                                                                       0
+    13 │ Iterations   23200                                                                    0
+    14 │ Termination  Function Convergence                                                     0
+
+    B0 = 0.3002738107794108
+    - second local min: LL=-285.98  σα²=0.394023  σμ²=2.49689e-46   ρ=0.905608
+"""
+
+
+###############################################  ESIMATE σα², σμ², ρ, v0 with TOTAL MEAN RHS (contraint: longrun avg μᵢ = 0)
+# Load observed data, initialize model
+m_obs = initialize_model(TuringModels.karp_model6)
+Y = get_MLE_data()
+m_obs2 = TuringModels.karp_model6(Y, missing)
+# Estimate parameters from observed data
+function _m(i)
+    print(i)
+    opt = optimize(m_obs2, MLE(), ConjugateGradient(),
+            Optim.Options(iterations=100_000, store_trace=true, extended_trace=true)
+    )
+
+    return DataFrame(
+        merge(Dict("$n" => opt.values[n] for n in names(opt.values)[1]), 
+        Dict( "LL"=>opt.lp, "opt"=>opt, "iterations"=>opt.optim_result.iterations))
+    )
+end
+df = vcat([_m(i) for i in 1:2]...)
+opt = df[1,:opt]
+df
+
+
+result_freeρ_uniform6 = estimate_MLE(
+    TuringModels.karp_model6; 
+    maxiter=50_000, Nseeds=20,
+    σα²dist=Uniform(0, 1e10),
+    σμ²dist=Uniform(0, 1e10),
+)
+result_freeρ_uniform6.best_run
+df_coef = coef_df(result_freeρ_uniform6)
+@chain result_freeρ_uniform6.ms_result.df @orderby(-:LL)
+
+LL(θ) = loglikelihood(m_obs2, convert_params_to_namedtuple(θ))
+LL(mle_estimate.values.array)
+
+
+""" ESIMATE σα², σμ², ρ, v0 on observed data 2023-08-24, contraint: longrun avg μᵢ = 0
+   │ Parameter    Estimate     Standard Erorr  CI Lower 95   CI Upper 95  Is Parameter 
+    ───┼───────────────────────────────────────────────────────────────────────────────────
+    1  │ θ.σα²        5.40724e-10  3.8235e-10      -2.08681e-10  1.29013e-9              1
+    2  │ θ.σμ²        0.387664     0.0307593       0.327376      0.447953                1
+    3  │ θ.ρ          1.0          0.110059        0.784285      1.21572                 1
+    4  │ θ.β₁         0.0853332    1.38686         -2.6329       2.80357                 1
+    5  │ θ.β₂         0.000180687  0.000841449     -0.00146855   0.00182993              1
+    6  │ θ.b₀[1]      13.8316      154.23          -288.459      316.123                 1
+    7  │ θ.b₀[2]      12.5123      154.23          -289.779      314.803                 1
+    8  │ θ.b₀[3]      14.0639      154.23          -288.227      316.355                 1
+    9  │ θ.b₀[4]      13.9533      154.23          -288.338      316.244                 1
+    10 │ θ.v0         -12.5923     154.23          -314.883      289.698                 1
+    11 │ LL           -199.351                                                           0
+    12 │ seed         10                                                                 0
+    13 │ Iterations   38928                                                              0
+    14 │ Termination  Unknown                                                            0
+
+    - Seems to force ρ = 0 (or very close to 0) and σα²=0 in most cases
+    - second local min: σα²=0.388839 σμ²=1.62686e-37  ρ=0.905657 LL=-279.591
+"""
+
+
+
 
 
 
