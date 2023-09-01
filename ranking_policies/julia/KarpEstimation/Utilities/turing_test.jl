@@ -21,6 +21,7 @@ module Model
 end
 include("HelperFunctions.jl")  # HF
 include("../Model/TuringModels.jl")  # TuringModels
+include("Communications.jl")  # send_txt
 
 
 

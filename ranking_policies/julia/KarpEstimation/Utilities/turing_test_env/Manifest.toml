@@ -2,7 +2,7 @@
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "4bf83824cc0543cbce1787b67f7e08b605fdf122"
+project_hash = "90180d0182a09d37a194b910044839d38b62d3bb"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "f5c25e8a5b29b5e941b7408bc8cc79fea4d9ef9a"
@@ -1343,6 +1343,12 @@ version = "0.5.11"
 [[deps.SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 version = "0.7.0"
+
+[[deps.SMTPClient]]
+deps = ["Base64", "Dates", "Distributed", "LibCURL", "Markdown", "Sockets"]
+git-tree-sha1 = "fc2e0dbf5df044c8790fb2d89f5c8684922b93b3"
+uuid = "c35d69d1-b747-5018-a192-25bc5e63c83d"
+version = "0.6.4"
 
 [[deps.SciMLBase]]
 deps = ["ADTypes", "ArrayInterface", "CommonSolve", "ConstructionBase", "Distributed", "DocStringExtensions", "EnumX", "FunctionWrappersWrappers", "IteratorInterfaceExtensions", "LinearAlgebra", "Logging", "Markdown", "PrecompileTools", "Preferences", "RecipesBase", "RecursiveArrayTools", "Reexport", "RuntimeGeneratedFunctions", "SciMLOperators", "StaticArraysCore", "Statistics", "SymbolicIndexingInterface", "Tables", "TruncatedStacktraces"]
