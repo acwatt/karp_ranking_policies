@@ -7,7 +7,7 @@ using DataFrames, DataFramesMeta
 using LinearAlgebra
 using Optim
 using StatsBase  # for coeftable and stderror
-using StatsPlots  # for histogram
+# using StatsPlots  # for histogram
 using ProgressMeter
 using Random
 using Parameters
@@ -331,6 +331,16 @@ function isin(s::Symbol, nt::NamedTuple)
     return any(occursin.(string(s), string.(keys(nt))))
 end
 
+"""Return string of variable names and values from named tuple"""
+function list_to_showstring(nt::NamedTuple)
+# Maybe use something like @show to print name and value of each variable
+    s = ""
+    for k in keys(nt)
+        s = s * "$k = $(nt[k]), "
+    end
+    return s
+end
+
 
 
 
@@ -343,37 +353,37 @@ end
     `initialize_model(model; θ=missing, seed=1234, kwargs...)`
     `initialize_model(model, Prior::Turing.Prior; kwargs...)`
 
-Return model initialized with data, or for prior sampling.
+    Return model initialized with data, or for prior sampling.
 
-`initialize_model(model; θ=missing, kwargs...)`
-- `model` = Turing model function
-- `θ` = NamedTuple, parameters to generate simulated data with
-  - If `θ = missing`, observed data is used, parameters are to be estimated.
+    `initialize_model(model; θ=missing, kwargs...)`
+    - `model` = Turing model function
+    - `θ` = NamedTuple, parameters to generate simulated data with
+    - If `θ = missing`, observed data is used, parameters are to be estimated.
 
 
-# Examples
-## Estimate MLE parameters of karp_model5 using observed data
-```julia
-m = initialize_model(TuringModels.karp_model5)
-opt = optimize(m, MLE(), ConjugateGradient())
-opt.values
-```
+    # Examples
+    ## Estimate MLE parameters of karp_model5 using observed data
+    ```julia
+    m = initialize_model(TuringModels.karp_model5)
+    opt = optimize(m, MLE(), ConjugateGradient())
+    opt.values
+    ```
 
-## Set "true" parameters to generate data
-```julia
-θ = (; b₀=[0.1, 0.1, 0.1, 0.1], β₁=0.1, β₂=0.1, σα²=0.1, σμ²=0.1, ρ=0.1, v0=0)
-# Generate simulated data and estimate MLE parameters of karp_model5
-m = initialize_model(TuringModels.karp_model5; θ)
-opt = optimize(m, MLE(), ConjugateGradient())
-opt.values
-```
+    ## Set "true" parameters to generate data
+    ```julia
+    θ = (; b₀=[0.1, 0.1, 0.1, 0.1], β₁=0.1, β₂=0.1, σα²=0.1, σμ²=0.1, ρ=0.1, v0=0)
+    # Generate simulated data and estimate MLE parameters of karp_model5
+    m = initialize_model(TuringModels.karp_model5; θ)
+    opt = optimize(m, MLE(), ConjugateGradient())
+    opt.values
+    ```
 
-## Sample data and parameters from prior
-```julia
-# Generate simulated data and estimate MLE parameters of karp_model5
-m = initialize_model(TuringModels.karp_model5, Prior())
-data = m()
-```
+    ## Sample data and parameters from prior
+    ```julia
+    # Generate simulated data and estimate MLE parameters of karp_model5
+    m = initialize_model(TuringModels.karp_model5, Prior())
+    data = m()
+    ```
 """
 function initialize_model(model; θ=missing, seed=1234, kwargs...)
     # If θ is missing, Y = observed data, else Y = simulated data from θ
@@ -383,6 +393,28 @@ end
 function initialize_model(model, Prior::Turing.Prior; kwargs...)
     Y, θ = missing, missing
     return model(Y, θ; kwargs...)
+end
+
+function try_catch_optim(m, maxiter; i=0, maxtries=10)
+    store = []
+    try
+        push!(store, 
+            optimize(m, MLE(), ConjugateGradient(),
+                    Optim.Options(iterations=maxiter, store_trace=true, extended_trace=true)
+        ))
+    catch e
+        println("Error: ", e)
+        println("Terminating optimization after try $i")
+        if i < maxtries
+            println("Restartng optimization")
+            push!(store, try_catch_optim(m, maxiter; i = i+1))
+        else
+            println("Max tries reached, returning nothing")
+            send_txt("Error: MLE optimization failed", "Max tries reached, returning nothing. Iteration likely stopped.")
+            push!(store, nothing)
+        end
+    end
+    return store[end]
 end
 
 """Run MLE on model, storing results in df and dict."""
@@ -401,13 +433,7 @@ function multistart_MLE(m, Nseeds; maxiter=100_000)
         # Estimate the model
         #! Handle convergence failure warning
         #! See Optim.converged(M)
-        #! Add try-catch from AREBARE
-        opt = optimize(m, MLE(), ConjugateGradient(),
-                       Optim.Options(iterations=maxiter,
-                                     store_trace=true,
-                                     extended_trace=true
-                       )
-        )
+        opt = try_catch_optim(m, maxiter)
         params = convert_params_to_namedtuple(opt.values)
         # Store the results
         df = DataFrame(
@@ -531,6 +557,7 @@ function estimate_MLE(model, Nsim; θ=missing, maxiter=100_000, Nseeds=100, kwar
         groupby(:Parameter)
         @combine(
             :mean_estimate = mymean(:Estimate),
+            :min_estimate = mymin(:Estimate),
             :mean_se = mymean($"Standard Erorr"),
             :mean_bias = mean(:bias), 
             :mean_abs_bias = mean(abs.(:bias)),
@@ -547,6 +574,15 @@ end
 function mymean(x)
     if isa(x[1], Number)
         return mean(x)
+    elseif isa(x[1], String)
+        m = mean(x .!== "Max Iterations")*100
+        return "$(@sprintf("%.1f", m))% converged"
+    end
+end
+
+function mymin(x)
+    if isa(x[1], Number)
+        return minimum(x)
     elseif isa(x[1], String)
         m = mean(x .!== "Max Iterations")*100
         return "$(@sprintf("%.1f", m))% converged"
@@ -763,10 +799,10 @@ data_sampler(_θ)()
 
 # Simulation loop settings
 S = (;
-    Nsigma = 2,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
-    Nparam = 2,  # Number of true parameter samples, conditional on σα², σμ²
-    Nsim = 2,    # Number of simulated datasets per parameter sample
-    Nseed = 2,   # Number of multistart seeds per simulated dataset to find MLE
+    Nsigma = 5,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
+    Nparam = 5,  # Number of true parameter samples, conditional on σα², σμ²
+    Nsim = 20,    # Number of simulated datasets per parameter sample
+    Nseed = 20,   # Number of multistart seeds per simulated dataset to find MLE
 )
 
 # Create 2D grid for σα², σμ² simulations - log scale so many more points near 0
@@ -781,8 +817,8 @@ XY = [exp10.((σα², σμ²)) for σα² in _x, σμ² in _x ]
 # @show _res.df_summary
 
 # Define NamedTuple of matricies to fill in with results
-results_names = [:mean_se, :mean_bias, :mean_abs_bias, :var_bias, :var_abs_bias, :Truth]
-_mat() = deepcopy(zeros(size(θmat)))
+results_names = [:mean_estimate, :min_estimate, :mean_se, :mean_bias, :mean_abs_bias, :var_bias, :var_abs_bias, :Truth]
+_mat() = deepcopy(repeat([NaN], size(θmat)...))
 _nt() = NamedTuple(n => _mat() for n in results_names)
 results_nt = (; σα² = _nt(), σμ² = _nt())
 
@@ -798,10 +834,19 @@ results_nt = (; σα² = _nt(), σμ² = _nt())
 #! Make distributed and run in Savio
 total = S.Nsigma^2 * S.Nparam
 counter = 0
-savedir = "data/temp/turing_simulation_output"
+savedir = "data/temp/turing_simulation_output/"
+savefile = "$savedir/tmp-results_nt-Nsigma-$(S.Nsigma)-Nparam-$(S.Nparam)-Nsim-$(S.Nsim)-Nseed-$(S.Nseed).jld"
+if isfile(savefile)
+    results_nt = load(savefile, "results_nt")
+end
 for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
     perc_complete = round(counter/total*100, digits=2)
-    @show i,j,k, perc_complete
+    send_txt("Progress", list_to_showstring((; i, j, k, perc_complete)))
+    if !isnan(results_nt.σα².Truth[i,j,k])
+        # if value is not NaN, then that element has already been estimated
+        println("Skipping $i, $j, $k")
+        continue
+    end
     θ = θmat[i, j, k]
     # For each parameter vector, generate Nsim datasets
     res = estimate_MLE(TuringModels.karp_model5, S.Nsim; θ, maxiter=100_000, Nseeds=S.Nseed)
@@ -811,11 +856,11 @@ for i in 1:S.Nsigma, j in 1:S.Nsigma, k in 1:S.Nparam
         results_nt[p][n][i,j,k] = @subset(res.df_summary, res.df_summary.Parameter .== Symbol("θ.$p"))[1, n]
     end
     # Save results to file
-    save("$savedir/tmp-results_nt.jld", "results_nt", results_nt)
+    save(savefile, "results_nt", results_nt)
     counter += 1
 end
 # Load results from file
-results_nt2 = load("tmp-results_nt.jld", "results_nt")
+results_nt2 = load(savefile, "results_nt")
 
 @show results_nt
 m_ = mean(results_nt.σα².mean_se, dims=3)[:,:,1]

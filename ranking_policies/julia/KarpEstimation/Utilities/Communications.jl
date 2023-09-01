@@ -11,6 +11,7 @@ function send_txt(subject, message; cc_email=true, verbose=false)
     passwd = google_app_pwd,
     verbose=verbose
     )
+    println(subject, " - ", message)
 
     url = "smtp://smtp.gmail.com:587"
 
