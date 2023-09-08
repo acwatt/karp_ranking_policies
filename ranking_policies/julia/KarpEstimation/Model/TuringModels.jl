@@ -263,4 +263,95 @@ end
     return (; Y, θ)
 end
 
+"""Karp model, AR(1) errors, flat priors, all parameters are estimated"""
+@model function karp_model6(Y, θ;
+    N=4, T=60, usage="estimate_model",
+    σα²dist=Exponential(1),
+    σμ²dist=Exponential(1),
+    ρdist=Uniform(0, 1),
+    b₀sd=20, β₁sd=5, β₂sd=1,
+    )
+    # INITIALIZE DATA
+    if ismissing(Y)
+        Y = (;
+            eₜ = Vector{Real}(undef, T),
+            eᵢₜ = Vector{Real}(undef, T*N)
+        )
+        # if data and θ are both missing, we must be sampling parameters from the prior
+        usage = ismissing(θ) ? "sample_params" : usage
+    else
+        T = length(Y.eₜ)
+        N = length(Y.eᵢₜ) ÷ T
+    end
+
+    # INITIALIZE PARAMETERS
+    params = (:σα², :σμ², :b₀, :β₁, :β₂, :ρ, :v0)
+    if ismissing(θ)
+        θ = NamedTuple{(:σα², :σμ², :b₀, :β₁, :β₂, :ρ, :v0)}(repeat([missing],7))
+    else
+        for k in params
+            if !haskey(θ, k)
+                θ = merge(θ, (;k => missing))
+            end
+        end
+    end
+
+    # SET PRIORS
+    # Set variance priors
+    θ.σα² ~ σα²dist
+    θ.σμ² ~ σμ²dist
+    # Set AR(1) coefficient prior
+    θ.ρ ~ ρdist
+    # Set FE and time trend priors
+    θ.β₁ ~ truncated(Normal(0, β₁sd); lower=0)
+    θ.β₂ ~ Normal(0, β₂sd)
+    θ.b₀ ~ MvNormal(zeros(N), b₀sd)
+    B₀ = mean(θ.b₀)
+    # Set initial AR(1) error prior
+    θ.v0 ~ Normal(0, 10)
+
+    # Initialize AR(1) errors, with T+1 elements because we need to store initial value vₜ₋₁[1]
+    vₜ₋₁ = Vector{Real}(undef, T+1)
+    vₜ₋₁[1] = θ.v0
+
+    # DGP MODEL
+    for t = 1:T
+        # Period Avg observation
+        Y.eₜ[t] ~ Normal(B₀ + θ.β₁*t + θ.β₂*t^2 + θ.ρ*vₜ₋₁[t], sqrt(θ.σα² + θ.σμ²/N))
+        vₜ₋₁[t+1] = Y.eₜ[t] - B₀ - θ.β₁*t - θ.β₂*t^2
+        for i = 1:N
+            # Period-unit observation
+            Y.eᵢₜ[(t-1)*N + i] ~ Normal(θ.b₀[i] + θ.β₁*t + θ.β₂*t^2 + θ.ρ*vₜ₋₁[t], sqrt(θ.σα² + θ.σμ²))
+        end
+    end
+    for i = 1:N
+        RHSmean_i = mean([θ.b₀[i] + θ.β₁*t + θ.β₂*t^2 + θ.ρ*vₜ₋₁[t] for t=1:T])
+        Y.eᵢ[i] ~ Normal(RHSmean_i, sqrt(θ.σα²/T))
+    end
+    # Impose restriction: mean(μᵢₜ)= 0 over all i,t
+    # RHSmean = mean([θ.b₀[i] + θ.β₁*t + θ.β₂*t^2 + θ.ρ*vₜ₋₁[t] for t=1:T, i=1:N])
+    # Y.e ~ Normal(RHSmean, sqrt(θ.σα²/T))
+
+    return (; Y, θ)
 end
+
+end
+#=
+"""
+# Initialize AR(1) errors, with T+1 elements because we need to store initial value vₜ₋₁[1]
+vₜ₋₁ = Vector{Real}(undef, T+1)
+vₜ₋₁[1] = v0
+B₀ = mean(b₀)
+
+# DGP MODEL
+for t = 1:T
+    # Period Avg observation
+    eₜ[t] ~ Normal(B₀ + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²/N))
+    vₜ₋₁[t+1] = eₜ[t] - B₀ - β₁*t - β₂*t^2
+    for i = 1:N
+        # Period-unit observation
+        eᵢₜ[(t-1)*N + i] ~ Normal(b₀[i] + β₁*t + β₂*t^2 + ρ*vₜ₋₁[t], sqrt(σα² + σμ²))
+    end
+end
+"""
+=#
