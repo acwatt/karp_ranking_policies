@@ -504,9 +504,9 @@ function estimate_MLE(model, Nsim; θ=missing, maxiter=100_000, Nseeds=100, kwar
     dfs = []
     p = Progress(Nsim)
     Threads.@threads for seed in 1:Nsim
-        # Initialize the model with simulated data, generated from θ
+        # Initialize the model with simulated data, generated from θ and random seed
         model_obj = initialize_model(model; θ, seed, kwargs...)
-        # Run MLE with different random seeds to get multiple starting points
+        # Run MLE with `Nseeds` different random seeds to get multiple starting points
         println("\nRuning Multistart Search for MLE")
         ms_result = multistart_MLE(model_obj, Nseeds; maxiter)
 
