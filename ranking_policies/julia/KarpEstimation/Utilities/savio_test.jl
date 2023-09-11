@@ -87,9 +87,13 @@ function distributed_test()
         catch e
             false # failure
         end
+        if i % 10 == 0
+            send_txt("savio_test update", "i = $i")
+        end
     end
     return nothing
 end
 # t = @benchmark distributed_test(); display(t)
+distributed_test()
 send_txt("savio_test end", "")
 
