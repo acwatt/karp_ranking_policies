@@ -70,13 +70,13 @@
 using Distributed, SlurmClusterManager
 using BenchmarkTools
 addprocs(SlurmManager())
-using Pkg; Pkg.activate(@__DIR__)
-Pkg.instantiate(); Pkg.precompile()
-using SMTPClient
+using Pkg
+Pkg.add("SMTPClient")
+# using Pkg; Pkg.activate(@__DIR__)
+# Pkg.instantiate(); Pkg.precompile()
 # instantiate and precompile environment in all processes
 @everywhere begin
     using Pkg; Pkg.activate(@__DIR__)
-    using SMTPClient
     # Pkg.instantiate()
 end
 
