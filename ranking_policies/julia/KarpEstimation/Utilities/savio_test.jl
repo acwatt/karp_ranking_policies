@@ -75,7 +75,7 @@ Pkg.instantiate(); Pkg.precompile()
 # instantiate and precompile environment in all processes
 @everywhere begin
     using Pkg; Pkg.activate(@__DIR__)
-    Pkg.instantiate(); Pkg.precompile()
+    Pkg.instantiate()
 end
 
 include("Communications.jl")  # send_txt
