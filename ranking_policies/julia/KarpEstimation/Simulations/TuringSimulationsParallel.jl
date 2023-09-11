@@ -1,43 +1,53 @@
 # This file is designed to create highly parallel simuluations and estimation of the model using Turing.
 
+using Distributed, SlurmClusterManager
+# addprocs(SlurmManager())
 println(@__DIR__)
 using Pkg; Pkg.activate(joinpath(@__DIR__, "turingSimulations"))
-# ]add Turing DataFrames LinearAlgebra Distributions CategoricalArrays Random Optim StatsBase StatsPlots ProgressMeter DataFramesMeta Dates CSV Statistics FiniteDiff JLD Parameters NamedArrays Suppressor LoggingExtras SMTPClient
+# ]add Turing DataFrames LinearAlgebra Distributions CategoricalArrays Random Optim StatsBase StatsPlots ProgressMeter DataFramesMeta Dates CSV Statistics FiniteDiff JLD Parameters NamedArrays Suppressor LoggingExtras SMTPClient SlurmClusterManager
 using Turing
-using DataFrames, DataFramesMeta
+using DataFrames
+using Dates
 using LinearAlgebra
 using Optim
 using StatsBase  # for coeftable and stderror
 # using StatsPlots  # for histogram
 using ProgressMeter
 using Random
-using Parameters
-using FiniteDiff
-using NamedArrays
-using Printf
-using JLD  # for saving objects as .jld files
-using Suppressor
 using Logging, LoggingExtras
 using CSV
-
-isdir("output/logs") || mkdir("output/logs")
-logger = FileLogger("output/logs/logfile.txt"; append = true)
-# debuglogger = ConsoleLogger(stderr, Logging.Debug)
 
 include("../Model/TuringModels.jl")  # TuringModels
 include("../Utilities/Communications.jl")  # send_txt
 
 
+################################ logging ################################
+isdir("output/logs") || mkpath("output/logs")
+LOGFILE = "output/logs/logfile.txt"
+if isa(global_logger(), ConsoleLogger)
+    OLDLOGGER = global_logger()
+end
+FILELOGGER = FormatLogger(LOGFILE; append = true) do io, args
+    println(io, "[", args.level, " ", Dates.now(), "] ", args.message)
+end
+global_logger(FILELOGGER)
+@info "*"^60
+@info "Starting TuringSimulationsParallel.jl"
+
+
 ################################ Helper Functions ################################
+"""Convert a NamedTuple or NamedVector to a list of key-value pairs."""
 itemize(nt) = [(k, v) for (k, v) in zip(keys(nt), values(nt))]
 
-# Sample parameters from prior given σα², σμ²
+"""Sample parameters from prior given σα², σμ²"""
 param_sampler(σα², σμ²) = TuringModels.karp_model5_parameters((; σα², σμ²))
+"""Convert θ with b₀ vector to θ with b₀₁, b₀₂, b₀₃, b₀₄"""
 function param_flatten(θ)
     θ2 = NamedTuple(p for p in itemize(θ) if p[1] != :b₀)
     θ3 = (; b₀₁ = θ.b₀[1], b₀₂ = θ.b₀[2], b₀₃ = θ.b₀[3], b₀₄ = θ.b₀[4], θ2...)
     return θ3
 end
+"""Convert θ with b₀₁, b₀₂, b₀₃, b₀₄ to θ with b₀ vector"""
 function param_vectorize(θin)
     θ = isa(θin, DataFrame) ? first(θin) : θin
     b₀ = [θ.b₀₁, θ.b₀₂, θ.b₀₃, θ.b₀₄]
@@ -45,13 +55,9 @@ function param_vectorize(θin)
     θ3 = (; b₀, θ2...)
     return θ3
 end
-_θ = param_sampler(1,1)()
-_θ2 = param_flatten(_θ)
-_θ3 = param_vectorize(_θ2)
 
-# Simulate data from model given true parameters
+"""Sample data from model given true parameters"""
 data_sampler(θ) = TuringModels.karp_model5(missing, θ)
-a=data_sampler(_θ)()
 
 
 """
@@ -113,6 +119,8 @@ function try_catch_optim(m; maxiter=100, maxtime=60*60*24)
     catch e
         println("Error: ", e)
         println("Terminating optimization")
+        @error "Optimization Error caused optim termination"
+        @info "$e"
         return missing
     end
 end
@@ -174,12 +182,6 @@ end
 ################################ Simulation Settings ################################
 # Simulation loop settings
 S = (;
-    Nsigma = 5,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
-    Nparam = 5,  # Number of true parameter samples, conditional on σα², σμ²
-    Nsim = 20,    # Number of simulated datasets per parameter sample
-    Nsearch = 20,   # Number of multistart seeds per simulated dataset to find MLE
-)
-S = (;
     Nsigma = 2,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
     Nparam = 2,  # Number of true parameter samples, conditional on σα², σμ²
     Nsim = 2,    # Number of simulated datasets per parameter sample
@@ -221,14 +223,14 @@ df[!, :runtime_sec] = Array{Union{Missing, Float64}}(undef, nrow)
 df
 
 # Optimization settings
-maxiter = 1_000
+maxiter = 100_000
 maxtime = 60*60*24  # 24 hours
 
 
 ################################ Simulation Loop ################################
 # Define the directory to save temporary files, and create it if it doesn't exist
 savedir = "data/temp/turing_simulation_output/Nsigma-param-sim-seed_$(S.Nsigma)-$(S.Nparam)-$(S.Nsim)-$(S.Nsearch)"
-isdir(savedir) || mkdir(savedir)
+isdir(savedir) || mkpath(savedir)
 
 #! Make distributed
 
@@ -245,15 +247,17 @@ Threads.@threads for i in 1:size(df, 1)
     # Get the ith row of the dataframe
     θ = param_vectorize(df1)
     savefile = "$savedir/simulation_df-$(θ.nparam)-$(θ.nsim)-$(θ.nsearch).csv"
-    # Check if this dataframe already exists and LL is not missing
+    # Check if this dataframe already exists
     if isfile(savefile)
         df2 = DataFrame(CSV.File(savefile))
-        if !ismissing(first(df2).LL)
+        # Check if optimization has been run and converged
+        if !ismissing(first(df2).converged) && first(df2).converged
             # If so, skip this row
+            @info "Skipping row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)"
             next!(p)
             continue
         end
-    end
+    end  # If not, run the optimization
     # Simulate the data
     Random.seed!(θ.nsim)
     Y = data_sampler(θ)().Y
@@ -266,6 +270,7 @@ Threads.@threads for i in 1:size(df, 1)
     update_df!(df1, 1, opt)
     CSV.write(savefile, df1)
     # Update the progress bar
+    @info "Finished row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)"
     next!(p)
     # Send text every 10 iterations
     p.counter%10 == 0 ? send_txt("Progress: $(p.counter)/$(p.n) = $(round(p.counter/p.n*100, digits=1))%", "") : nothing
@@ -283,10 +288,12 @@ for i in 1:size(df, 1)
 end
 
 # Sort by nparam, nsim, nsearch, converged
-sort!(df, [:nparam, :nsim, :nsearch, :converged])
+sort!(df, [:nparam, :nsim, :nsearch, :converged, :LL])
 # Keep uniuqe rows by nparam, nsim, nsearch
-df2 = unique(df, [:nparam, :nsim, :nsearch])
+df2 = unique(df, [:nparam, :nsim, :nsearch, :LL])
 
 # Save to file
 savefile = "$savedir/simulation_df.csv"
 CSV.write(savefile, df2)
+
+global_logger(OLDLOGGER)
