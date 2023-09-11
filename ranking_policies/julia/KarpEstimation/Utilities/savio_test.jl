@@ -1,24 +1,26 @@
 #!/usr/bin/env julia --threads=auto
 using Pkg
-@show Pkg.status()
+Pkg.status()
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 
-using Pkg; 
 # Remote environment
 rm(string(@__DIR__, "/Manifest.toml"))
 rm(string(@__DIR__, "/Project.toml"))
 @info "Done removing environment files."
 # Resetup the environment
 Pkg.activate(@__DIR__)
-Pkg.add(["SMTPClient", "CSV", "Turing", "Optim"])
+Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC"])
 Pkg.resolve()
 Pkg.precompile()
+@info "Done creating new environment."
 
 # instantiate and precompile environment in all processes
 @everywhere begin
     using Pkg
-    Pkg.activate(@__DIR__); Pkg.instantiate()
+    Pkg.activate(@__DIR__)
+    Pkg.status()
+    Pkg.instantiate()
     # Pkg.add(["SMTPClient", "CSV", "Turing"])
     # Pkg.instantiate()
     # include("Communications.jl")  # send_txt
