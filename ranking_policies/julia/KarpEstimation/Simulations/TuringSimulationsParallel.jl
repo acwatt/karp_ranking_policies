@@ -238,7 +238,7 @@ isdir(savedir) || mkpath(savedir)
 # Iterate through each row of the dataframe, simulating the data and estimating the results
 Nparams = size(df, 1); n10perc = Nparams//20
 println("Staring simulation loop. Will text every 5% of progress ($(round(Float64(n10perc))) iterations).")
-send_txt("Starting Simulation Loop on UCBARE")
+send_txt("Starting Simulation Loop on UCBARE", "")
 p = Progress(Nparams)
 Threads.@threads for i in 1:size(df, 1)
     df1 = df[i:i, :]
