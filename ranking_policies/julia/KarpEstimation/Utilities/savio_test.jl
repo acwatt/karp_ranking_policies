@@ -72,6 +72,7 @@ using BenchmarkTools
 addprocs(SlurmManager())
 using Pkg; Pkg.activate(@__DIR__)
 Pkg.instantiate(); Pkg.precompile()
+using SMTPClient
 # instantiate and precompile environment in all processes
 @everywhere begin
     using Pkg; Pkg.activate(@__DIR__)
