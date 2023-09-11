@@ -78,9 +78,10 @@ Pkg.add("SMTPClient")
 @everywhere begin
     using Pkg; Pkg.activate(@__DIR__)
     # Pkg.instantiate()
+    include("Communications.jl")  # send_txt
 end
 
-include("Communications.jl")  # send_txt
+@info "Done with package setup"
 send_txt("savio_test start", "")
 
 function distributed_test() 
@@ -97,5 +98,6 @@ function distributed_test()
 end
 # t = @benchmark distributed_test(); display(t)
 distributed_test()
+@info "Done with distributed_test"
 send_txt("savio_test end", "")
 
