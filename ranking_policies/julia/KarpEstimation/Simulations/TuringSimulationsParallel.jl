@@ -180,10 +180,10 @@ end
 ################################ Simulation Settings ################################
 # Simulation loop settings
 S = (;
-    Nsigma = 2,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
-    Nparam = 2,  # Number of true parameter samples, conditional on σα², σμ²
-    Nsim = 2,    # Number of simulated datasets per parameter sample
-    Nsearch = 2,   # Number of multistart seeds per simulated dataset to find MLE
+    Nsigma = 5,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
+    Nparam = 5,  # Number of true parameter samples, conditional on σα², σμ²
+    Nsim = 5,    # Number of simulated datasets per parameter sample
+    Nsearch = 5,   # Number of multistart seeds per simulated dataset to find MLE
 )
 
 # Create 2D grid for σα², σμ² simulations - log scale so many more points near 0
@@ -236,7 +236,9 @@ isdir(savedir) || mkpath(savedir)
 
 
 # Iterate through each row of the dataframe, simulating the data and estimating the results
-Nparams = size(df, 1)
+Nparams = size(df, 1); n10perc = Nparams//20
+println("Staring simulation loop. Will text every 5% of progress ($(round(Float64(n10perc))) iterations).")
+send_txt("Starting Simulation Loop on UCBARE")
 p = Progress(Nparams)
 Threads.@threads for i in 1:size(df, 1)
     df1 = df[i:i, :]
@@ -268,8 +270,8 @@ Threads.@threads for i in 1:size(df, 1)
     # Update the progress bar
     @info "Finished row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)"
     next!(p)
-    # Send text every 10 iterations
-    p.counter%10 == 0 ? send_txt("Progress: $(p.counter)/$(p.n) = $(round(p.counter/p.n*100, digits=1))%", "") : nothing
+    # Send text every 5% of iterations
+    (p.counter-1) % n10perc == 0 ? send_txt("Progress: $(p.counter)/$(p.n) = $(round(p.counter/p.n*100, digits=1))%", "") : nothing
 end
 df
 
@@ -285,11 +287,13 @@ end
 
 # Sort by nparam, nsim, nsearch, converged
 sort!(df, [:nparam, :nsim, :nsearch, :converged, :LL])
-# Keep uniuqe rows by nparam, nsim, nsearch
-df2 = unique(df, [:nparam, :nsim, :nsearch, :LL])
+# Drop rows with empty LL (no optimization)
+df2 = df[.!ismissing.(df.LL), :]
+# Keep uniuqe rows by nparam, nsim, nsearch, LL (in case there are multiple optim results)
+df2 = unique(df2, [:nparam, :nsim, :nsearch, :LL])
 
 # Save to file
 savefile = "$savedir/simulation_df.csv"
 CSV.write(savefile, df2)
 
-global_logger(OLDLOGGER)
+global_logger(OLDLOGGER);
