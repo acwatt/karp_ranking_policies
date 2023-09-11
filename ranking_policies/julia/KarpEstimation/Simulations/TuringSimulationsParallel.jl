@@ -1,7 +1,5 @@
 # This file is designed to create highly parallel simuluations and estimation of the model using Turing.
 
-using Distributed, SlurmClusterManager
-# addprocs(SlurmManager())
 println(@__DIR__)
 using Pkg; Pkg.activate(joinpath(@__DIR__, "turingSimulations"))
 # ]add Turing DataFrames Optim ProgressMeter Dates CSV NamedArrays LoggingExtras SMTPClient using Turing
