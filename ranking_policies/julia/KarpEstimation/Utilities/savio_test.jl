@@ -10,7 +10,7 @@ rm(string(@__DIR__, "/Project.toml"))
 @info "Done removing environment files."
 # Resetup the environment
 Pkg.activate(@__DIR__)
-Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC"])
+Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
 Pkg.resolve()
 Pkg.precompile()
 @info "Done creating new environment."
