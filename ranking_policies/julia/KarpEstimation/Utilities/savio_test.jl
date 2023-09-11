@@ -4,8 +4,8 @@ addprocs(SlurmManager())
 
 using Pkg; 
 # Remote environment
-rm(String(@__DIR__, "/Manifest.toml"))
-rm(String(@__DIR__, "/Project.toml"))
+rm(string(@__DIR__, "/Manifest.toml"))
+rm(string(@__DIR__, "/Project.toml"))
 @info "Done removing environment files."
 # Resetup the environment
 Pkg.activate(@__DIR__)
