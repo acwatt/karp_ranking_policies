@@ -4,13 +4,6 @@ This module contains the Turing models used in the Karp estimation project.
 """
 module TuringModels
 using Turing
-using DataFrames, DataFramesMeta
-using LinearAlgebra
-using Optim
-using Random
-using Parameters
-using FiniteDiff
-using NamedArrays
 
 
 """Karp model, AR(1) variances"""
