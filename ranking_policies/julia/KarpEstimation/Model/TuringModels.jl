@@ -243,7 +243,7 @@ end
     θ.b₀ ~ MvNormal(zeros(N), b₀sd)
     B₀ = mean(θ.b₀)
     # Set initial AR(1) error prior
-    θ.v0 ~ Normal(0, 10)
+    θ.v0 ~ Normal(0, 5)
 
     # Initialize AR(1) errors, with T+1 elements because we need to store initial value vₜ₋₁[1]
     vₜ₋₁ = Vector{Real}(undef, T+1)
