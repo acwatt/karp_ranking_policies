@@ -12,7 +12,7 @@ rm(string(@__DIR__, "/Project.toml"))
 Pkg.activate(@__DIR__)
 Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
 Pkg.resolve()
-Pkg.precompile()
+# Pkg.precompile()
 @info "Done creating new environment."
 
 # instantiate and precompile environment in all processes
