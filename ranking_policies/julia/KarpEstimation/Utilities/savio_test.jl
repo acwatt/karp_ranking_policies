@@ -76,13 +76,15 @@ addprocs(SlurmManager())
 # instantiate and precompile environment in all processes
 @everywhere begin
     using Pkg
-    Pkg.activate(@__DIR__)
+    Pkg.activate(@__DIR__);
     Pkg.add(["SMTPClient", "CSV"])
     # Pkg.instantiate()
     include("Communications.jl")  # send_txt
 end
+include("Communications.jl")  # send_txt
 
 @info "Done with package setup"
+#! do I need to use SMTPClient in global scope?
 send_txt("savio_test start", "")
 
 function distributed_test() 
