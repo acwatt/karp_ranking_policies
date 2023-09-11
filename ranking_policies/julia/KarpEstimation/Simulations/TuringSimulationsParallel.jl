@@ -4,8 +4,7 @@ using Distributed, SlurmClusterManager
 # addprocs(SlurmManager())
 println(@__DIR__)
 using Pkg; Pkg.activate(joinpath(@__DIR__, "turingSimulations"))
-# ]add Turing DataFrames LinearAlgebra Distributions CategoricalArrays Random Optim StatsBase StatsPlots ProgressMeter DataFramesMeta Dates CSV Statistics FiniteDiff JLD Parameters NamedArrays Suppressor LoggingExtras SMTPClient SlurmClusterManager
-using Turing
+# ]add Turing DataFrames Optim ProgressMeter Dates CSV NamedArrays LoggingExtras SMTPClient using Turing
 using DataFrames
 using Dates
 # using LinearAlgebra
