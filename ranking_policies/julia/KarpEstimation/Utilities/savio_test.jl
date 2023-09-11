@@ -70,6 +70,8 @@
 using Distributed, SlurmClusterManager
 using BenchmarkTools
 addprocs(SlurmManager())
+using Pkg; Pkg.activate(@__DIR__)
+Pkg.instantiate(); Pkg.precompile()
 # instantiate and precompile environment in all processes
 @everywhere begin
     using Pkg; Pkg.activate(@__DIR__)
@@ -87,9 +89,7 @@ function distributed_test()
         catch e
             false # failure
         end
-        if i % 10 == 0
-            send_txt("savio_test update", "i = $i")
-        end
+        i%10 == 0 ? send_txt("savio_test update", "i = $i") : nothing
     end
     return nothing
 end
