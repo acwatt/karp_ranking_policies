@@ -59,6 +59,8 @@ end
 
 println("# of Threads:$(Threads.nthreads())")
 println("# of workers:$(nprocs())")
+@info "# of Threads:$(Threads.nthreads())"
+@info "# of workers:$(nprocs())"
 # t = @benchmark distributed_test(); display(t)
 # @everywhere println("hello from $(myid()):$(gethostname()) with $(Threads.nthreads()) threads")
 
