@@ -75,6 +75,7 @@ Pkg.instantiate(); Pkg.precompile()
 # instantiate and precompile environment in all processes
 @everywhere begin
     using Pkg; Pkg.activate(@__DIR__)
+    using SMTPClient
     # Pkg.instantiate()
 end
 
