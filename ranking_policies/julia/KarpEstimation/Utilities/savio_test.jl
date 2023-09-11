@@ -72,11 +72,12 @@ using BenchmarkTools
 addprocs(SlurmManager())
 # instantiate and precompile environment in all processes
 @everywhere begin
-    println(@__DIR__)
-    println(Threads.nthreads())
     using Pkg; Pkg.activate(@__DIR__)
     Pkg.instantiate(); Pkg.precompile()
 end
+
+include("Communications.jl")  # send_txt
+send_txt("savio_test start", "")
 
 function distributed_test() 
     pmap(1:100) do i
@@ -89,5 +90,6 @@ function distributed_test()
     end
     return nothing
 end
-t = @benchmark distributed_test(); display(t)
+# t = @benchmark distributed_test(); display(t)
+send_txt("savio_test end", "")
 
