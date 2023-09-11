@@ -76,3 +76,16 @@ addprocs(SlurmManager())
     using Pkg; Pkg.activate(@__DIR__)
     Pkg.instantiate(); Pkg.precompile()
 end
+
+function distributed_test() 
+    pmap(1:100) do i
+        try
+            sleep(1/100)
+            true # success
+        catch e
+            false # failure
+        end
+    end
+    return nothing
+end
+t = @benchmark distributed_test(); display(t)
