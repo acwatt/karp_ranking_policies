@@ -69,4 +69,9 @@
 #!/usr/bin/env julia
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
-@everywhere println("hello from $(myid()):$(gethostname())")
+# instantiate and precompile environment in all processes
+@everywhere begin
+    println(@__DIR__)
+    using Pkg; Pkg.activate(@__DIR__)
+    Pkg.instantiate(); Pkg.precompile()
+end
