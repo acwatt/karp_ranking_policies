@@ -2,10 +2,15 @@
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 
+using Pkg; Pkg.activate(@__DIR__)
+Pkg.add(["SMTPClient", "CSV", "Turing", "Optim"])
+Pkg.resolve()
+Pkg.precompile()
+
 # instantiate and precompile environment in all processes
 @everywhere begin
     using Pkg
-    Pkg.activate(@__DIR__);
+    Pkg.activate(@__DIR__); Pkg.instantiate()
     # Pkg.add(["SMTPClient", "CSV", "Turing"])
     # Pkg.instantiate()
     # include("Communications.jl")  # send_txt
