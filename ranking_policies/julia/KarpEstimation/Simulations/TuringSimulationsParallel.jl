@@ -2,7 +2,8 @@
 
 println(@__DIR__)
 using Pkg; Pkg.activate(joinpath(@__DIR__, "turingSimulations"))
-# ]add Turing DataFrames Optim ProgressMeter Dates CSV NamedArrays LoggingExtras SMTPClient using Turing
+# ]add Turing DataFrames Optim ProgressMeter Dates CSV NamedArrays LoggingExtras SMTPClient
+using Turing
 using DataFrames
 using Dates
 # using LinearAlgebra
@@ -226,7 +227,7 @@ maxtime = 60*60*24  # 24 hours
 
 ################################ Simulation Loop ################################
 # Define the directory to save temporary files, and create it if it doesn't exist
-savedir = "data/temp/turing_simulation_output/Nsigma-param-sim-seed_$(S.Nsigma)-$(S.Nparam)-$(S.Nsim)-$(S.Nsearch)"
+savedir = "../../data/temp/turing_simulation_output/Nsigma-param-sim-seed_$(S.Nsigma)-$(S.Nparam)-$(S.Nsim)-$(S.Nsearch)"
 isdir(savedir) || mkpath(savedir)
 
 # # Print dataframe row in ereadable format
