@@ -10,19 +10,21 @@ addprocs(SlurmManager())
     # Pkg.instantiate()
     # include("Communications.jl")  # send_txt
 end
+@info "Done with project activation."
 
 # Wait until all processes have activated their projects, then add packages
 @everywhere begin
-    Pkg.add(["SMTPClient", "CSV", "Turing"])
+    Pkg.add(["SMTPClient", "CSV", "Turing", "Optim"])
 end
+@info "Done with package installs."
 
 # Wait until all packages have been added, then load needed packages
 @everywhere begin
     include("Communications.jl")  # send_txt
 end
 include("Communications.jl")  # send_txt
+@info "Done with package loads."
 
-@info "Done with package setup"
 #! do I need to use SMTPClient in global scope?
 send_txt("savio_test start", "")
 
@@ -40,6 +42,6 @@ function distributed_test()
 end
 # t = @benchmark distributed_test(); display(t)
 distributed_test()
-@info "Done with distributed_test"
+@info "Done with distributed_test."
 send_txt("savio_test end", "")
 
