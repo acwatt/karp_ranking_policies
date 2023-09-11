@@ -77,7 +77,7 @@ addprocs(SlurmManager())
 @everywhere begin
     using Pkg
     Pkg.activate(@__DIR__);
-    Pkg.add(["SMTPClient", "CSV"])
+    Pkg.add(["SMTPClient", "CSV", "Turing"])
     # Pkg.instantiate()
     include("Communications.jl")  # send_txt
 end
