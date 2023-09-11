@@ -8,9 +8,9 @@ using Pkg; Pkg.activate(joinpath(@__DIR__, "turingSimulations"))
 using Turing
 using DataFrames
 using Dates
-using LinearAlgebra
+# using LinearAlgebra
 using Optim
-using StatsBase  # for coeftable and stderror
+# using StatsBase  # for coeftable and stderror
 # using StatsPlots  # for histogram
 using ProgressMeter
 using Random
@@ -231,8 +231,6 @@ maxtime = 60*60*24  # 24 hours
 # Define the directory to save temporary files, and create it if it doesn't exist
 savedir = "data/temp/turing_simulation_output/Nsigma-param-sim-seed_$(S.Nsigma)-$(S.Nparam)-$(S.Nsim)-$(S.Nsearch)"
 isdir(savedir) || mkpath(savedir)
-
-#! Make distributed
 
 # # Print dataframe row in ereadable format
 # i_ = 1
