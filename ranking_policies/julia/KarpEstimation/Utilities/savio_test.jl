@@ -72,6 +72,7 @@ addprocs(SlurmManager())
 # instantiate and precompile environment in all processes
 @everywhere begin
     println(@__DIR__)
+    println(Threads.nthreads())
     using Pkg; Pkg.activate(@__DIR__)
     Pkg.instantiate(); Pkg.precompile()
 end
