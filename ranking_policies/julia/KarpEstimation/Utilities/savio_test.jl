@@ -2,7 +2,13 @@
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 
-using Pkg; Pkg.activate(@__DIR__)
+using Pkg; 
+# Remote environment
+rm(String(@__DIR__, "/Manifest.toml"))
+rm(String(@__DIR__, "/Project.toml"))
+@info "Done removing environment files."
+# Resetup the environment
+Pkg.activate(@__DIR__)
 Pkg.add(["SMTPClient", "CSV", "Turing", "Optim"])
 Pkg.resolve()
 Pkg.precompile()
