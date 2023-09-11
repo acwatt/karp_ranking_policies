@@ -68,6 +68,7 @@
 
 #!/usr/bin/env julia
 using Distributed, SlurmClusterManager
+using BenchmarkTools
 addprocs(SlurmManager())
 # instantiate and precompile environment in all processes
 @everywhere begin
@@ -89,3 +90,4 @@ function distributed_test()
     return nothing
 end
 t = @benchmark distributed_test(); display(t)
+
