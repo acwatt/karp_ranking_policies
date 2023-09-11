@@ -1,4 +1,6 @@
 #!/usr/bin/env julia --threads=auto
+using Pkg
+@show Pkg.status()
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 
