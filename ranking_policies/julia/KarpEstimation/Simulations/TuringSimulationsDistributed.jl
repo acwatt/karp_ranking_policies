@@ -21,7 +21,10 @@ Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors",
 @info "Done creating new environment."
 
 # Instantiate/add environment in all processes
-@everywhere Pkg.activate(@__DIR__)
+@everywhere begin
+    using Pkg; Pkg.activate(@__DIR__)
+end
+@info "Done with project activation."
 
 @everywhere begin
     using Pkg
@@ -42,7 +45,7 @@ Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors",
     end
     act_int()
 end
-@info "Done with project activation."
+@info "Done with project instantiation."
 
 # Wait until all packages have been added, then load needed packages
 # Include files in global scope first, then everywhere according to https://github.com/JuliaLang/julia/issues/16788#issuecomment-226977022
