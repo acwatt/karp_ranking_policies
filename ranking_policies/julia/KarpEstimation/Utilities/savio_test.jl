@@ -1,4 +1,3 @@
-#!/usr/bin/env julia --threads=auto
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 
