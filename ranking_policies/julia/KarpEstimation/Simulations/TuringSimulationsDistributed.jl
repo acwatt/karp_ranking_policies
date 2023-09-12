@@ -1,6 +1,9 @@
 # This file is designed to create highly parallel simuluations and estimation of the model using Turing.
 # For distriubted computing on Savio cluster
-import Pkg; Pkg.add("SlurmClusterManager")
+#! will use .julia/environments/v1.9 as base environment
+#! Need to have SlurmClusterManager installed there
+#! Write a try catch that installs SlurmClusterManager if not installed then quits
+# Maybe use a second try-catch that will try `add` SlurmClusterManager, then catch `using SlurmClusterManager`
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())  # this will only work when run on Savio
 
