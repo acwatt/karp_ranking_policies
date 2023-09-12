@@ -15,8 +15,16 @@ Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors", "Dat
 # instantiate/add environment in all processes
 @everywhere begin
     using Pkg
-    Pkg.activate(@__DIR__)
-    Pkg.instantiate()
+    function act_int(;i=1)
+        try
+            Pkg.activate(@__DIR__)
+            Pkg.instantiate()
+        catch e
+            println("Error $i: ", e)
+            act_int(;i=i+1)
+        end
+    end
+    act_int()
     # include("Communications.jl")  # send_txt
 end
 @info "Done with project activation."
@@ -37,7 +45,7 @@ send_txt("savio_test start", "")
 function distributed_test!(df) 
     pmap(1:100) do i
         try
-            println("a = ", df[i, :a], ", b = ", df[i, :b], ", i = ", i)
+            println("a = ", df[i, :a], ", b = ", df[i, :b], ", i = ", i, "worker = ", myid())
             df[i, :c] = df[i, :a] + df[i, :b]
             sleep(1/100)
             true # success
