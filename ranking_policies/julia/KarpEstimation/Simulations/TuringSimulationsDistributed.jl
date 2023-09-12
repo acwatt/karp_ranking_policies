@@ -210,10 +210,10 @@ end
 @info "Setting up Simulation."
 # Simulation loop settings
 S = (;
-    Nsigma = 5,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
-    Nparam = 5,  # Number of true parameter samples, conditional on σα², σμ²
-    Nsim = 20,    # Number of simulated datasets per parameter sample
-    Nsearch = 20,   # Number of multistart seeds per simulated dataset to find MLE
+    Nsigma = 2,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
+    Nparam = 2,  # Number of true parameter samples, conditional on σα², σμ²
+    Nsim = 2,    # Number of simulated datasets per parameter sample
+    Nsearch = 4,   # Number of multistart seeds per simulated dataset to find MLE
 )
 
 # Create 2D grid for σα², σμ² simulations - log scale so many more points near 0
