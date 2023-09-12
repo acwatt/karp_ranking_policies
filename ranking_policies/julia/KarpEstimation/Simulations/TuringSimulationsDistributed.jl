@@ -28,7 +28,12 @@ Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors",
             println("Error $i: ", e)
             @info "Error $i: $e"
             sleep(0.1)
-            act_int(;i=i+1)
+            if i < 100
+                act_int(;i=i+1)
+            else
+                @error "Failed to instantiate environment after 10 tries"
+                @info "Failed to instantiate environment after 10 tries"
+            end
         end
     end
     act_int()
