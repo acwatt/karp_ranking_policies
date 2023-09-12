@@ -27,6 +27,7 @@ Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors",
         catch e
             println("Error $i: ", e)
             @info "Error $i: $e"
+            sleep(0.1)
             act_int(;i=i+1)
         end
     end
