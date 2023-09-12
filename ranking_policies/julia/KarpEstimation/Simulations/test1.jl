@@ -6,3 +6,9 @@ println(Pkg.project().path)
 #! precompile here
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())  # this will only work when run on Savio
+using Turing
+
+@info "using Turing in global"
+
+@everywhere using Turing
+@info "using Turing everywhere"
