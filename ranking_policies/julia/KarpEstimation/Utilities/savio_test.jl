@@ -1,15 +1,14 @@
 #!/usr/bin/env julia --threads=auto
-using Pkg
-Pkg.status()
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 
-# Remote environment
+# Remove environment
 rm(string(@__DIR__, "/Manifest.toml"))
 rm(string(@__DIR__, "/Project.toml"))
 @info "Done removing environment files."
 
 # Resetup the environment files
+using Pkg
 Pkg.activate(@__DIR__)
 Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
 @info "Done creating new environment."
@@ -23,18 +22,13 @@ Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
 end
 @info "Done with project activation."
 
-# Wait until all processes have activated their projects, then add packages
-# @everywhere begin
-#     Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
-# end
-# @info "Done with package installs."
-
 # Wait until all packages have been added, then load needed packages
+# Include files in global scope first, then everywhere according to https://github.com/JuliaLang/julia/issues/16788#issuecomment-226977022
+include("Communications.jl")  # send_txt
 @everywhere begin
     include("Communications.jl")  # send_txt
 end
-# include("Communications.jl")  # send_txt
-# send_txt("savio_test start", "")
+send_txt("savio_test start", "")
 @info "Done with package loads."
 
 # Test distributed computing and txting updates
