@@ -12,15 +12,13 @@ rm(string(@__DIR__, "/Project.toml"))
 # Resetup the environment files
 Pkg.activate(@__DIR__)
 Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
-# Pkg.resolve()
-# Pkg.precompile()
 @info "Done creating new environment."
 
-# instantiate/add environment packages in all processes
+# instantiate/add environment in all processes
 @everywhere begin
     using Pkg
     Pkg.activate(@__DIR__)
-    Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
+    Pkg.instantiate()
     # include("Communications.jl")  # send_txt
 end
 @info "Done with project activation."
@@ -35,8 +33,8 @@ end
 @everywhere begin
     include("Communications.jl")  # send_txt
 end
-include("Communications.jl")  # send_txt
-send_txt("savio_test start", "")
+# include("Communications.jl")  # send_txt
+# send_txt("savio_test start", "")
 @info "Done with package loads."
 
 # Test distributed computing and txting updates
