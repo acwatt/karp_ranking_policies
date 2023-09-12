@@ -9,18 +9,18 @@ rm(string(@__DIR__, "/Manifest.toml"))
 rm(string(@__DIR__, "/Project.toml"))
 @info "Done removing environment files."
 
-# Resetup the environment
+# Resetup the environment files
 Pkg.activate(@__DIR__)
 Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
 # Pkg.resolve()
 # Pkg.precompile()
 @info "Done creating new environment."
 
-# instantiate and precompile environment in all processes
+# instantiate/add environment packages in all processes
 @everywhere begin
     using Pkg
     Pkg.activate(@__DIR__)
-    Pkg.instantiate()
+    Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
     # include("Communications.jl")  # send_txt
 end
 @info "Done with project activation."
