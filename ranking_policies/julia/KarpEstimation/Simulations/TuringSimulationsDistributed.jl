@@ -17,15 +17,17 @@ try; rm(string(@__DIR__, "/Project.toml")); catch e; end
 using Pkg
 Pkg.activate(@__DIR__)
 Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors",
-         "DataFrames", "Dates", "ProgressMeter", "LoggingExtras", "Random"])
+         "DataFrames", "Dates", "ProgressMeter", "LoggingExtras", "Random",
+         "NamedArrays", "SciMLBase", "TuringOptimExt", "TuringDynamicHMCExt"])
 @info "Done creating new environment."
 
-# Instantiate/add environment in all processes
+# Activate environment in all processes
 @everywhere begin
     using Pkg; Pkg.activate(@__DIR__)
 end
 @info "Done with project activation."
 
+# Instantiate/install environment in all processes
 @everywhere begin
     using Pkg
     function act_int(;i=1)
@@ -77,6 +79,7 @@ end
 @info "Starting TuringSimulationsParallel.jl"
 
 ################################ Helper Functions ################################
+#! put all functions into loadable script
 """Convert a NamedTuple or NamedVector to a list of key-value pairs."""
 itemize(nt) = [(k, v) for (k, v) in zip(keys(nt), values(nt))]
 
@@ -217,6 +220,87 @@ function update_df_row!(df, opt)
             df["$(param)_est"] = est
         end
     end
+end
+
+@everywhere begin
+    """Convert a NamedTuple or NamedVector to a list of key-value pairs."""
+    itemize(nt) = [(k, v) for (k, v) in zip(keys(nt), values(nt))]
+
+    """Convert θ with b₀₁, b₀₂, b₀₃, b₀₄ to θ with b₀ vector"""
+    function param_vectorize(θin)
+        θ = isa(θin, DataFrame) ? first(θin) : θin
+        b₀ = [θ.b₀₁, θ.b₀₂, θ.b₀₃, θ.b₀₄]
+        θ2 = NamedTuple(p for p in itemize(θ) if !occursin("b₀", String(p[1])))
+        θ3 = (; b₀, θ2...)
+        return θ3
+    end
+
+    """Sample data from model given true parameters"""
+    data_sampler(θ) = TuringModels.karp_model5(missing, θ)
+
+    function try_catch_optim(m; maxiter=100, maxtime=60*60*24)
+        try
+            opt = optimize(
+                    m,  # model
+                    MLE(),  # parameter estimation method
+                    ConjugateGradient(),  # optimization algorithm
+                    Optim.Options(
+                        iterations=maxiter,
+                        store_trace=true,
+                        extended_trace=true,
+                        time_limit=maxtime
+                    )
+            )
+            return opt
+        catch e
+            println("Error: ", e)
+            println("Terminating optimization")
+            @error "Optimization Error caused optim termination"
+            @info "$e"
+            return missing
+        end
+    end
+
+    function get_estimated_params(opt)
+        # Get the estimated parameters from the optimization results
+        val = opt.values
+        name = map(s -> lstrip(s, ['θ','.']), String.(keys(opt.values.dicts[1])))
+        # Turn b0 params into an array for adding to the dataframe of results
+        b0 = [v for (n,v) in zip(name, val) if occursin("b₀", n)]
+        b0names = ["b₀₁", "b₀₂", "b₀₃", "b₀₄"]
+        d = Dict(zip(b0names,b0))
+        # Add the rest of the parameters to the dictionary
+        for (n,v) in zip(name, val)
+            if !occursin("b₀", n)
+                d[n] = v
+            end
+        end
+        return d
+    end
+
+    function update_df!(df, i, opt)
+        if ismissing(opt)
+            # If optimization failed, leave df entries as missing
+            return
+        else
+            # Update the dataframe with the optimization results
+            df[i, :LL] = opt.lp
+            df[i, :iterations] = opt.optim_result.iterations
+            df[i, :converged] = ~(any(opt.optim_result.stopped_by) || opt.optim_result.iteration_converged)
+            df[i, :runtime_sec] = opt.optim_result.time_run
+            # Get dictionary of parameter estimates
+            params = get_estimated_params(opt)
+            # Update the dataframe with the parameter estimates
+            for (param, est) in params
+                df[i, "$(param)_est"] = est
+            end
+        end
+    end
+
+
+
+
+
 end
 
 
