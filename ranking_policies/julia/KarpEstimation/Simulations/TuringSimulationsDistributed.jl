@@ -18,7 +18,7 @@ using Pkg
 Pkg.activate(@__DIR__)
 Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors",
          "DataFrames", "Dates", "ProgressMeter", "LoggingExtras", "Random",
-         "NamedArrays", "SciMLBase", "TuringOptimExt", "TuringDynamicHMCExt"])
+         "NamedArrays", "SciMLBase"])
 @info "Done creating new environment."
 
 # Activate environment in all processes
