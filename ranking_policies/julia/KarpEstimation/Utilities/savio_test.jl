@@ -3,8 +3,8 @@ using Distributed, SlurmClusterManager
 addprocs(SlurmManager())
 
 # Remove environment
-rm(string(@__DIR__, "/Manifest.toml"))
-rm(string(@__DIR__, "/Project.toml"))
+try; rm(string(@__DIR__, "/Manifest.toml")); catch e; end
+try; rm(string(@__DIR__, "/Project.toml")); catch e; end
 @info "Done removing environment files."
 
 # Resetup the environment files
