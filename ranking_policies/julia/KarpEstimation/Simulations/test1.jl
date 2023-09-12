@@ -7,7 +7,7 @@ println(Pkg.project().path)
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())  # this will only work when run on Savio
 
-Pkg.add("Turing")
+Pkg.add(["Turing", "NamedArrays"])
 using Turing
 @info "using Turing in global"
 
