@@ -1,6 +1,6 @@
 #!/bin/bash
 # Job name that will appear in the browser and terminal
-#SBATCH --job-name=savio_node_test4
+#SBATCH --job-name=savio_node_test5
 #
 # Account name who's credits will be charged
 #SBATCH --account=fc_rankpolicy
@@ -24,8 +24,8 @@
 #SBATCH --mail-user=aaron.watt@berkeley.edu
 #
 # Output and error files
-#SBATCH --output=savio-scripts/savio_node_test4_%j.out
-#SBATCH --error=savio-scripts/savio_node_test4_%j.err
+#SBATCH --output=savio-scripts/savio_node_test5_%j.out
+#SBATCH --error=savio-scripts/savio_node_test5_%j.err
 ##
 ## Command(s) to run:
 ## This file run from ranking_policies directory on Savio via SSH terminal: sbatch savio-scripts\savio4.sh
