@@ -242,7 +242,7 @@ df[!, :runtime_sec] = Array{Union{Missing, Float64}}(undef, nrow)
 
 # Optimization settings
 maxiter = 100_000
-maxtime = 60*60*24  # 24 hours
+maxtime = 60*60  # 1 hour for each optim run
 
 
 ################################ Simulation Loop ################################
@@ -301,70 +301,70 @@ send_txt("Starting Simulation Loop on UCBARE", "0 of Nparams")
 # end
 # df
 
-# simulation_results = @distributed (append!) for i in 1:Nparams
-#     # Get the ith row of the parameter dataframe
-#     df1 = deepcopy(df[i:i, :])
-#     θ = param_vectorize(df1)
-#     savefile = "$savedir/simulation_df-$(θ.nparam)-$(θ.nsim)-$(θ.nsearch).csv"
+simulation_results = @distributed (append!) for i in 1:Nparams
+    # Get the ith row of the parameter dataframe
+    df1 = deepcopy(df[i:i, :])
+    θ = param_vectorize(df1)
+    savefile = "$savedir/simulation_df-$(θ.nparam)-$(θ.nsim)-$(θ.nsearch).csv"
 
-#     # Check if this dataframe already exists
-#     if isfile(savefile)
-#         df2 = DataFrame(CSV.File(savefile))
-#         # Check if optimization has been run and converged
-#         if !ismissing(first(df2).converged) && first(df2).converged
-#             # If so, skip this row
-#             @info "Skipping row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)"
-#             # next!(p)
-#             continue
-#         end
-#     end  # If not, run the optimization
+    # Check if this dataframe already exists
+    if isfile(savefile)
+        df2 = DataFrame(CSV.File(savefile))
+        # Check if optimization has been run and converged
+        if !ismissing(first(df2).converged) && first(df2).converged
+            # If so, skip this row
+            @info "Skipping row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)"
+            # next!(p)
+            continue
+        end
+    end  # If not, run the optimization
 
-#     # Simulate the data
-#     Random.seed!(θ.nsim)
-#     Y = data_sampler(θ)().Y
+    # Simulate the data
+    Random.seed!(θ.nsim)
+    Y = data_sampler(θ)().Y
 
-#     # Initialize the model with simulated data, generated from θ and random seed
-#     Random.seed!(θ.nsearch)
-#     model_obj = TuringModels.karp_model5(Y, missing)
+    # Initialize the model with simulated data, generated from θ and random seed
+    Random.seed!(θ.nsearch)
+    model_obj = TuringModels.karp_model5(Y, missing)
 
-#     # Estimate the model
-#     opt = try_catch_optim(model_obj; maxiter=maxiter, maxtime)
+    # Estimate the model
+    opt = try_catch_optim(model_obj; maxiter=maxiter, maxtime)
 
-#     # Save the results
-#     update_df!(df1, 1, opt)
-#     CSV.write(savefile, df1)
+    # Save the results
+    update_df!(df1, 1, opt)
+    CSV.write(savefile, df1)
 
-#     # Update the progress bar
-#     @info "Finished row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)"
-#     # next!(p)
-#     # # Send text every 5% of iterations
-#     # (p.counter-1) % n10perc == 0 ? send_txt("Progress: $(p.counter)/$(p.n) = $(round(p.counter/p.n*100, digits=1))%", "") : nothing
+    # Update the progress bar
+    @info "Finished row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)"
+    # next!(p)
+    # # Send text every 5% of iterations
+    # (p.counter-1) % n10perc == 0 ? send_txt("Progress: $(p.counter)/$(p.n) = $(round(p.counter/p.n*100, digits=1))%", "") : nothing
 
-#     df1
-# end
-# @show simulation_results
-# @info "Finished simulation loop."
+    df1
+end
+@show simulation_results
+@info "Finished simulation loop."
 
-# # Append the saved dataframes to the main dataframe
-# for i in 1:size(df, 1)
-#     df1 = df[i, :]
-#     θ = param_vectorize(df1)
-#     savefile = "$savedir/simulation_df-$(θ.nparam)-$(θ.nsim)-$(θ.nsearch).csv"
-#     df2 = DataFrame(CSV.File(savefile))
-#     push!(df, df2[1,:])
-# end
-# @info "Finished appending saved dataframes."
+# Append the saved dataframes to the main dataframe
+for i in 1:size(df, 1)
+    df1 = df[i, :]
+    θ = param_vectorize(df1)
+    savefile = "$savedir/simulation_df-$(θ.nparam)-$(θ.nsim)-$(θ.nsearch).csv"
+    df2 = DataFrame(CSV.File(savefile))
+    push!(df, df2[1,:])
+end
+@info "Finished appending saved dataframes."
 
-# # Sort by nparam, nsim, nsearch, converged
-# sort!(df, [:nparam, :nsim, :nsearch, :converged, :LL])
-# # Drop rows with empty LL (no optimization)
-# df2 = df[.!ismissing.(df.LL), :]
-# # Keep uniuqe rows by nparam, nsim, nsearch, LL (in case there are multiple optim results)
-# df2 = unique(df2, [:nparam, :nsim, :nsearch, :LL])
+# Sort by nparam, nsim, nsearch, converged
+sort!(df, [:nparam, :nsim, :nsearch, :converged, :LL])
+# Drop rows with empty LL (no optimization)
+df2 = df[.!ismissing.(df.LL), :]
+# Keep uniuqe rows by nparam, nsim, nsearch, LL (in case there are multiple optim results)
+df2 = unique(df2, [:nparam, :nsim, :nsearch, :LL])
 
-# # Save to file
-# savefile = "$savedir/simulation_df.csv"
-# CSV.write(savefile, df2)
+# Save to file
+savefile = "$savedir/simulation_df.csv"
+CSV.write(savefile, df2)
 
-# @info "Finished saving simulation results to file."
-# @info "Finished TuringSimulationsParallel.jl"
+@info "Finished saving simulation results to file."
+@info "Finished TuringSimulationsParallel.jl"
