@@ -35,8 +35,8 @@ end
 @everywhere begin
     include("Communications.jl")  # send_txt
 end
-# include("Communications.jl")  # send_txt
-# send_txt("savio_test start", "")
+include("Communications.jl")  # send_txt
+send_txt("savio_test start", "")
 @info "Done with package loads."
 
 # Test distributed computing and txting updates
