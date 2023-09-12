@@ -8,10 +8,11 @@ addprocs(SlurmManager())
 rm(string(@__DIR__, "/Manifest.toml"))
 rm(string(@__DIR__, "/Project.toml"))
 @info "Done removing environment files."
+
 # Resetup the environment
 Pkg.activate(@__DIR__)
 Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
-Pkg.resolve()
+# Pkg.resolve()
 # Pkg.precompile()
 @info "Done creating new environment."
 
@@ -19,30 +20,26 @@ Pkg.resolve()
 @everywhere begin
     using Pkg
     Pkg.activate(@__DIR__)
-    # Pkg.status()
     Pkg.instantiate()
-    # Pkg.add(["SMTPClient", "CSV", "Turing"])
-    # Pkg.instantiate()
     # include("Communications.jl")  # send_txt
 end
 @info "Done with project activation."
 
 # Wait until all processes have activated their projects, then add packages
-@everywhere begin
-    Pkg.add(["SMTPClient", "CSV", "Turing", "Optim"])
-end
-@info "Done with package installs."
+# @everywhere begin
+#     Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors"])
+# end
+# @info "Done with package installs."
 
 # Wait until all packages have been added, then load needed packages
 @everywhere begin
     include("Communications.jl")  # send_txt
 end
-include("Communications.jl")  # send_txt
+# include("Communications.jl")  # send_txt
+# send_txt("savio_test start", "")
 @info "Done with package loads."
 
-#! do I need to use SMTPClient in global scope?
-send_txt("savio_test start", "")
-
+# Test distributed computing and txting updates
 function distributed_test() 
     pmap(1:100) do i
         try
@@ -58,5 +55,5 @@ end
 # t = @benchmark distributed_test(); display(t)
 distributed_test()
 @info "Done with distributed_test."
-send_txt("savio_test end", "")
+# send_txt("savio_test end", "")
 
