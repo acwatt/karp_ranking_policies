@@ -132,3 +132,17 @@ dmypy.json
 .Rproj.user
 .RData
 .Rhistory
+
+# VC Code files
+.vscode/
+*.code-workspace
+
+# Ignore data files
+data/
+
+# Ignore turing notebooks
+Turing notebooks/
+
+# Ignore password files
+passwords.jl
+
