@@ -525,7 +525,7 @@ function estimate_MLE(model, Nsim; θ=missing, maxiter=100_000, Nseeds=100, kwar
         # Initialize the model with simulated data, generated from θ and random seed
         model_obj = initialize_model(model; θ, seed, kwargs...)
         # Run MLE with `Nseeds` different random seeds to get multiple starting points
-        println("\nRuning Multistart Search for MLE")
+        println("\nRunning Multistart Search for MLE")
         ms_result = multistart_MLE(model_obj, Nseeds; maxiter)
 
         # Find best run (highest LL), and return that result
@@ -640,7 +640,7 @@ function test_functions()
     @show res
     return
 end
-@time test_functions()
+# @time test_functions()
 
 function test_turing_optimization()
     ###############################################
