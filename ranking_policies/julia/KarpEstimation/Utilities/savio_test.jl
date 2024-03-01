@@ -1,89 +1,52 @@
-#!/usr/bin/env julia --threads=auto --project=./julia/KarpEstimation
-# Test savio
-
-
-# using Distributed
-
-# @everywhere begin
-#     project_env = joinpath(splitpath(@__DIR__)[1:end-1])
-#     using Pkg; Pkg.activate(project_env)
-#     Pkg.instantiate(); Pkg.precompile()
-# end
-
-# @everywhere begin
-#     # import Pkg; Pkg.add("BenchmarkTools")
-#     using BenchmarkTools
-#     using ProgressMeter
-#     # Test parallel computing using Threads.@threads
-#     # @benchmark sort(data) setup=(data=rand(10))
-
-#     println("# of Threads:$(Threads.nthreads())")
-
-#     function parallel_test()
-#         Threads.@threads for i in 1:100
-#             sleep(1/100)
-#         end
-#     end
-# end
-
-
-
-# t = @benchmark parallel_test()
-# t = @benchmark distributed_test(); display(t)
-
-# using Distributed, SlurmClusterManager
-# # using BenchmarkTools
-# addprocs(SlurmManager())
-# # instantiate and precompile environment in all processes
-# @everywhere begin
-#     println(@__DIR__)
-#     using Pkg; Pkg.activate(@__DIR__)
-#     Pkg.instantiate(); Pkg.precompile()
-# end
-# @everywhere begin
-#     using Distributions
-# end
-
-# function distributed_test() 
-#     pmap(1:100) do i
-#         try
-#             sleep(1/100)
-#             true # success
-#         catch e
-#             false # failure
-#         end
-#     end
-#     return nothing
-# end
-
-# println("# of Threads:$(Threads.nthreads())")
-# println("# of workers:$(nprocs())")
-# @info "# of Threads:$(Threads.nthreads())"
-# @info "# of workers:$(nprocs())"
-
-# t = @benchmark distributed_test(); display(t)
-# @everywhere println("hello from $(myid()):$(gethostname()) with $(Threads.nthreads()) threads")
-
-# include("../KarpEstimation.jl")
-
-#!/usr/bin/env julia
 using Distributed, SlurmClusterManager
-using BenchmarkTools
 addprocs(SlurmManager())
-using Pkg; Pkg.activate(@__DIR__)
-Pkg.instantiate(); Pkg.precompile()
-# instantiate and precompile environment in all processes
+
+# Remove environment
+try; rm(string(@__DIR__, "/Manifest.toml")); catch e; end
+try; rm(string(@__DIR__, "/Project.toml")); catch e; end
+@info "Done removing environment files."
+
+# Resetup the environment files
+using Pkg
+Pkg.activate(@__DIR__)
+Pkg.add(["SMTPClient", "CSV", "Turing", "Optim", "DynamicHMC", "Bijectors", "DataFrames"])
+@info "Done creating new environment."
+
+# instantiate/add environment in all processes
 @everywhere begin
-    using Pkg; Pkg.activate(@__DIR__)
-    Pkg.instantiate()
+    using Pkg
+    function act_int(;i=1)
+        try
+            Pkg.activate(@__DIR__)
+            Pkg.instantiate()
+        catch e
+            println("Error $i: ", e)
+            act_int(;i=i+1)
+        end
+    end
+    act_int()
+    # include("Communications.jl")  # send_txt
 end
+@info "Done with project activation."
 
+# Wait until all packages have been added, then load needed packages
+# Include files in global scope first, then everywhere according to https://github.com/JuliaLang/julia/issues/16788#issuecomment-226977022
+using DataFrames
 include("Communications.jl")  # send_txt
+@everywhere begin
+    using DataFrames
+    include("Communications.jl")  # send_txt
+end
 send_txt("savio_test start", "")
+@info "Done with package loads."
 
-function distributed_test() 
+
+# Test distributed computing and txting updates
+function distributed_test!(df) 
     pmap(1:100) do i
         try
+            println("a = ", df[i, :a], ", b = ", df[i, :b], ", i = ", i, "worker = ", myid())
+            df[i, :c] = df[i, :a] + df[i, :b]
             sleep(1/100)
             true # success
         catch e
@@ -94,6 +57,10 @@ function distributed_test()
     return nothing
 end
 # t = @benchmark distributed_test(); display(t)
-distributed_test()
-send_txt("savio_test end", "")
+df = DataFrame(a = 1:100, b = 101:200, c = 201:300)
+distributed_test!(df)
+@show df
+
+@info "Done with distributed_test."
+# send_txt("savio_test end", "")
 
