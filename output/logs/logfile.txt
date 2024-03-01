@@ -1,0 +1,71 @@
+[Info 2023-09-11T07:40:03.267] Starting TuringSimulationsParallel.jl
+[Info 2023-09-11T07:54:23.808] ************************************************************
+[Info 2023-09-11T07:54:23.809] Starting TuringSimulationsParallel.jl
+[Info 2023-09-11T07:56:58.024] ************************************************************
+[Info 2023-09-11T07:56:58.025] Starting TuringSimulationsParallel.jl
+[Info 2023-09-11T07:56:58.985] Skipping row 1 of 32: 1-1-1
+[Info 2023-09-11T07:56:58.985] Skipping row 27 of 32: 7-2-1
+[Info 2023-09-11T07:56:58.985] Skipping row 25 of 32: 7-1-1
+[Info 2023-09-11T07:56:58.985] Skipping row 13 of 32: 4-1-1
+[Info 2023-09-11T07:56:58.985] Skipping row 21 of 32: 6-1-1
+[Info 2023-09-11T07:56:58.985] Skipping row 9 of 32: 3-1-1
+[Info 2023-09-11T07:56:58.985] Skipping row 19 of 32: 5-2-1
+[Info 2023-09-11T07:56:58.985] Skipping row 29 of 32: 8-1-1
+[Info 2023-09-11T07:56:58.985] Skipping row 31 of 32: 8-2-1
+[Info 2023-09-11T07:56:58.985] Skipping row 7 of 32: 2-2-1
+[Info 2023-09-11T07:56:58.985] Skipping row 11 of 32: 3-2-1
+[Info 2023-09-11T07:56:58.986] Skipping row 2 of 32: 1-1-2
+[Info 2023-09-11T07:56:58.985] Skipping row 23 of 32: 6-2-1
+[Info 2023-09-11T07:56:58.986] Skipping row 17 of 32: 5-1-1
+[Info 2023-09-11T07:56:58.986] Skipping row 15 of 32: 4-2-1
+[Info 2023-09-11T07:56:58.985] Skipping row 3 of 32: 1-2-1
+[Info 2023-09-11T07:56:58.986] Skipping row 5 of 32: 2-1-1
+[Info 2023-09-11T07:56:58.988] Skipping row 28 of 32: 7-2-2
+[Info 2023-09-11T07:56:58.988] Skipping row 24 of 32: 6-2-2
+[Info 2023-09-11T07:56:58.988] Skipping row 6 of 32: 2-1-2
+[Info 2023-09-11T07:56:58.988] Skipping row 18 of 32: 5-1-2
+[Info 2023-09-11T07:56:58.988] Skipping row 4 of 32: 1-2-2
+[Info 2023-09-11T07:56:58.988] Skipping row 16 of 32: 4-2-2
+[Info 2023-09-11T07:56:58.988] Skipping row 26 of 32: 7-1-2
+[Info 2023-09-11T07:56:58.988] Skipping row 14 of 32: 4-1-2
+[Info 2023-09-11T07:56:58.988] Skipping row 10 of 32: 3-1-2
+[Info 2023-09-11T07:56:58.988] Skipping row 30 of 32: 8-1-2
+[Info 2023-09-11T07:56:58.988] Skipping row 12 of 32: 3-2-2
+[Info 2023-09-11T07:56:58.988] Skipping row 20 of 32: 5-2-2
+[Info 2023-09-11T07:56:58.988] Skipping row 8 of 32: 2-2-2
+[Info 2023-09-11T07:56:58.988] Skipping row 22 of 32: 6-1-2
+[Info 2023-09-11T07:56:58.988] Skipping row 32 of 32: 8-2-2
+[Info 2023-09-11T11:06:42.068] ************************************************************
+[Info 2023-09-11T11:06:42.098] Starting TuringSimulationsParallel.jl
+[Info 2023-09-11T11:06:51.547] Skipping row 9 of 32: 3-1-1
+[Info 2023-09-11T11:06:51.547] Skipping row 17 of 32: 5-1-1
+[Info 2023-09-11T11:06:51.547] Skipping row 3 of 32: 1-2-1
+[Info 2023-09-11T11:06:51.547] Skipping row 27 of 32: 7-2-1
+[Info 2023-09-11T11:06:51.547] Skipping row 7 of 32: 2-2-1
+[Info 2023-09-11T11:06:51.547] Skipping row 13 of 32: 4-1-1
+[Info 2023-09-11T11:06:51.547] Skipping row 23 of 32: 6-2-1
+[Info 2023-09-11T11:06:51.547] Skipping row 5 of 32: 2-1-1
+[Info 2023-09-11T11:06:51.547] Skipping row 31 of 32: 8-2-1
+[Info 2023-09-11T11:06:51.547] Skipping row 21 of 32: 6-1-1
+[Info 2023-09-11T11:06:51.547] Skipping row 11 of 32: 3-2-1
+[Info 2023-09-11T11:06:51.547] Skipping row 15 of 32: 4-2-1
+[Info 2023-09-11T11:06:51.549] Skipping row 19 of 32: 5-2-1
+[Info 2023-09-11T11:06:52.264] Skipping row 29 of 32: 8-1-1
+[Info 2023-09-11T11:06:52.264] Skipping row 1 of 32: 1-1-1
+[Info 2023-09-11T11:06:52.271] Skipping row 32 of 32: 8-2-2
+[Info 2023-09-11T11:06:52.282] Skipping row 25 of 32: 7-1-1
+[Info 2023-09-11T11:06:52.549] Skipping row 24 of 32: 6-2-2
+[Info 2023-09-11T11:06:52.549] Skipping row 16 of 32: 4-2-2
+[Info 2023-09-11T11:06:52.549] Skipping row 26 of 32: 7-1-2
+[Info 2023-09-11T11:06:52.549] Skipping row 6 of 32: 2-1-2
+[Info 2023-09-11T11:06:52.549] Skipping row 28 of 32: 7-2-2
+[Info 2023-09-11T11:06:52.549] Skipping row 8 of 32: 2-2-2
+[Info 2023-09-11T11:06:52.549] Skipping row 22 of 32: 6-1-2
+[Info 2023-09-11T11:06:52.549] Skipping row 2 of 32: 1-1-2
+[Info 2023-09-11T11:06:52.549] Skipping row 10 of 32: 3-1-2
+[Info 2023-09-11T11:06:52.549] Skipping row 18 of 32: 5-1-2
+[Info 2023-09-11T11:06:52.549] Skipping row 4 of 32: 1-2-2
+[Info 2023-09-11T11:06:52.549] Skipping row 20 of 32: 5-2-2
+[Info 2023-09-11T11:06:52.549] Skipping row 12 of 32: 3-2-2
+[Info 2023-09-11T11:06:52.550] Skipping row 30 of 32: 8-1-2
+[Info 2023-09-11T11:06:52.550] Skipping row 14 of 32: 4-1-2

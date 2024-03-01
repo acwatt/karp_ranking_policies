@@ -60,8 +60,8 @@ How: Most of this script defines functions that represent equations from
     (1) the GLS parameters b₀ᵢ and β (time trend) as inputs to (2)
     (2) the MLE parameters ρ, σₐ², σᵤ²
 
-First, I test this on generated data that we know the parameter values
-    for to see how close the estimates are to the "true" values. I test
+First, I test the estimation method on simulated data where we know the parameter values
+    to see how close the estimates are to the "true" values. I test
     the estimates using different values of T, N, σₐ², σᵤ².
 
 Lastly, I (still need to) estimate the paramters on the actual data that
@@ -103,6 +103,7 @@ country2num = Dict("USA"=>1, "EU"=>2, "BRIC"=>3, "Other"=>4)
 # Reformat raw data into useful CSV
 # save_reformatted_data()
 
+#! Add in MB rho estimation here
 """Estimate autocorrelation parameter ρ"""
 function estimate_rho()
     filepath = "ts_allYears_nation.1751_2014.csv"
@@ -235,7 +236,7 @@ end
 
 
 """
-Roughly estimating the model parameters to put into DGP for testing.
+Roughly estimating the model parameters to put into simulated DGP for estimator testing.
 Also used to do final estimation...
 @param starting_params: dict with ρ, σₐ², σᵤ² starting values
 """
@@ -510,10 +511,10 @@ end
 
 
 #######################################################################
-#           Testing convergence properties of different dimensions
+#           Testing convergence properties along different dimensions
 #######################################################################
 
-
+"""Test the bias of the estimator for estimated values of the parameters."""
 function test_dgp_params_from_real(test_no_trends=false)
     N = 4; T = 60  # 1945-2005
     # parameters estimated from data
@@ -871,7 +872,12 @@ end
 #           Recursive LL maximization on grid
 #######################################################################
 
-"""Return 90th-percentile paramter boundaries on log likelihood surface."""
+"""Return xth-percentile paramter boundaries on log likelihood surface.
+where x is the critical percentile, and the boundaries are the xth percentile of the LL values.
+    This is used to create new grid boundaries for the next recursion of the LL function.
+    If the new boundaries are the same as the old boundaries, the critical percentile is
+    increased by 10% and the function is called again.
+"""
 function generate_boundaries(df, θLB, θUB, critical_percentile)
     # Filter data to max 10% of grid values from this recursion
     crit_LL = quantile(df.LL, critical_percentile)

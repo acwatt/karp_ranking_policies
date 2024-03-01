@@ -1,0 +1,183 @@
+<Job ID> <descriptions of change made before running this job>
+
+15201475 base
+	- SMTPClient precompile error: permission denied
+Error: Pkg.precompile error
+│   exception =
+│    SystemError: opening file "/global/home/users/aaronwatt/.julia/compiled/v1.9/SMTPClient/Bx8Fn_YbxJA.ji": Permission denied
+
+15201719 no instantiate in everywhere
+	- no output? but failed to complete
+
+15201727 added using SMTPClient to everywhere
+	- SMTPClient error persists
+
+15201730 added using SMTPClient to global scope
+	- SMTPClient error persists
+
+15202060 manual Pkg add of SMTPClient
+
++++++++++++++++++++++++++++++++++++++++++++++
+15202087 Manually deleting all compilied folders in /global/home/users/aaronwatt/.julia/compiled/v1.9
+	- after successful precompile and activation:
+	ERROR: LoadError: On worker 18:
+	`Turing=fce5fe82-541a-59a6-adf8-730c64b5f9a0` depends on `DynamicHMC=bbc10e6e-7c05-544b-b16e-64fede858acb`, 
+	but no such entry exists in the manifest.
+	- perhaps just need to make sure activation happens after any adding?
+	- but looks like a Turing install issue
+	- deleting the Project and Manefests
+
+15202437 adding send_txt load to everwhere
+	- same Turing LoadError
+
+15202707 manually add package list instead of using Pkg.instantiate()
+	- same Turing LoadError
+
+15202745 including communications in global scope to allow texting out of the loop
+	- same Turing LoadError
+
+15202774 Manually deleted Project and Manefest in Utilities directory
+	- LoadError: On worker 12:
+	TypeError: in typeassert, expected Vector{Any}, got a value of type Dict{String, Any}
+
+15202790 Added Turing to package adds
+	- 2nd Turing LoadError
+	LoadError: On worker 2:
+	`Turing=fce5fe82-541a-59a6-adf8-730c64b5f9a0` depends on `Optim=429524aa-4258-5aef-a3af-852621145aeb`, but 
+	no such entry exists in the manifest.
+
+15202818 Separating activation, adding, loading of packages
+	- same 2nd Turing LoadError
+
+15202874 Adding Optim to manual package adds
+	- same 2nd Turing LoadError
+
+15203193 Adding env activation, installation, resolve, precompile in global scope before activation in distributed
+	- same 2nd Turing LoadError
+
+15203373 Manually remove env files during each script run.
+	- LoadError: MethodError: no method matching String(::String, ::String)
+15203455 Fixed string error
+	- cancelled by SlurmClusterManager
+	- nested task error: launch_timeout exceeded
+	- the stacktrace says this line is the issue: addprocs(SlurmManager())
+	
+15203550 ran again because I thought it was cancelled by the BRC slurm manager
+	- cancelled again by SlurmClusterManager
+
+15203768 printing Pkg.status() to see which env is being used by Distributed, SlurmClusterManager
+	- using github/karp_ranking_policies/ranking_policies/julia/KarpEstimation/Project.toml
+	- this is the env set in savio3.sh
+	- back to 1st Turing LoadError
+
+15203984 Adding DynamicHMC to manual adds
+	- Got further that before, but got a Turing error based on missing Bijectors precompile.
+
+15204143 Adding Bijectors to manual adds
+	- Failed to precompile Bijectors, then LoadError because it didn't finish precompiling Bijectors
+	- remove precompile?
+
+15204250 Commented out global precompile
+	- file not found error in everywhere. May be caused by Pkg.status()
+
+15204502 Remove Pkg.Status()
+	- FileNotFound erorr for julia scratchspace -- machine specific info folder
+	- seems that a worker (perhaps on the other node) is trying to read information from a folder on machine of the global env setup
+
+15204841 Removing global resolve() in hopes of preventing machine specific info from being created
+	- This works!
+
+15204909 Replacing distributed instantiate with distributed add (maybe instantiate is trying to read from other node)
+	- this brought back other errors. Don't directly add in everywhere!
+
+15205087 Going back to just "no resolve() in global" + "activate + instantiate in everywhere"
+	- This works!
+
+15205189 Testing using communications in global to txt
+	- LoadError: On worker 6: SystemError: opening file "/global/...Utilities/Manifest.toml"
+
+15205201 test no hashbang
+	- LoadError: On worker 36: SystemError: close: Stale file handle
+
+15205238 test modifying dataframe from global scope
+	- This works! I think there's some randomness due to the workers trying to access the same files.
+	- may use try-catch loop?
+
+15205316 adding try-catch for activating project
+	- This works!
+
+
+15205697 Trying karp estimation code (without estimation loop, just to see if everything else runs
+	- Package SlurmClusterManager not found in current path.
+
+15205738 add import Pkg; Pkg.add("SlurmClusterManager") at top
+	- fixed the problem, but there was a different fileNotFound error during everywhere package install
+
+15205779 add in small estimation loop
+	- LoadError: On worker 12: SystemError: close: Stale file handle
+	- think the try-catch loop should resolve this
+
+15205839 add try-catch loop for package env instantiation
+	- turing precompile error... hrmm, just happens every once in a while?
+
+15205965 trying again...
+	- errors happen before package instantiation
+	- perhaps because I'm add("SlurmClusterManager") that forces a precompile
+	- LoadError: SystemError: opening file "/global/.../Bijectors
+	- LoadError: Failed to precompile Bijectors
+	- final error during project activation: LoadError: Failed to precompile Turing
+
+15205973 adding sleep before retry of env instantiation
+	- LoadError: Failed to precompile Turing
+
+15205999 adding limit to instantiation retries to avoid infinite loop
+	- LoadError: Failed to precompile Turing
+
+15206108 removed bash environment flag, deleted all in .julia/compiled/v1.9/
+	- LoadError: Failed to precompile Turing 
+15206115 copy
+
+15206274 test script that loads SlurmClusterManager from base env and prints base env
+	- just need to make sure to have SlurmClusterManager installed in .julia/environments/v1.9
+
+15206304 removed initial add SlurmClusterManager that (I thought) was triggering early precompile
+	- LoadError: Failed to precompile Turing  
+
+15206481 deleted all in .julia/compiled/v1.9/
+	- LoadError: Failed to precompile Turing  g  
+	- originates in expression starting at /global/home/users/aaronwatt/.julia/packages/Turing/LcjVL/src/Turing.jl:1
+
+15206487 @everywhere Pkg.activate(@__DIR__) before instantiating everywhere
+15206591 copy, fixing Pkg not being defined
+	- accidentally cancelled the job before I saw if it worked
+
+15206730 deleted /global/home/users/aaronwatt/.julia/packages/Turing and Bijectors
+	- LoadError: ArgumentError: Package NamedArrays
+	- LoadError: Failed to precompile Turing
+	- maybe it's because of the prior dependencies errors
+
+15206859 Manually adding Turing dependencies, adding function defs to everywhere
+	- some of the dependencies are not directly installable
+	- TuringDynamicHMCExt and TuringOptimExt cannot be resolved
+
+15206889 removed TuringDynamicHMCExt and TuringOptimExt installs
+	- LoadError: ArgumentError: Package NamedArrays at top
+
+15206893 Turing test in test1.jl
+15206968 added NamedArrays dependency
+
+increased size of estimation loop
+
+
+
+
+
+
+
+
+
+
+
+
+
+

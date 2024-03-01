@@ -35,3 +35,6 @@ https://github.com/tpapp/MultistartOptimization.jl
 
 Should I use a Hessian?
 http://julianlsolvers.github.io/Optim.jl/latest/#user/gradientsandhessians/#example
+
+Ongoing notes:
+https://docs.google.com/document/d/17ZyOMPmuz2MUdNK1LzS30kqZ25YvoQIKmIUSsoiPVmI/edit

@@ -3,7 +3,7 @@
 #! remove all in .julia/compiled/v1.9/
 using Pkg
 println(Pkg.project().path)
-#! precompile here
+#! Need to have SlurmClusterManager and NamedArrays installed in base env (given above)
 using Distributed, SlurmClusterManager
 addprocs(SlurmManager())  # this will only work when run on Savio
 
