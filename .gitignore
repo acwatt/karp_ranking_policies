@@ -132,3 +132,7 @@ dmypy.json
 .Rproj.user
 .RData
 .Rhistory
+data/temp/turing_simulation_output/Nsigma-param-sim-seed_2-2-2-2
+data/temp/turing_simulation_output/Nsigma-param-sim-seed_5-5-5-5
+data/temp/turing_simulation_output/Nsigma-param-sim-seed_10-10-10-10
+data/temp/turing_simulation_output/archive

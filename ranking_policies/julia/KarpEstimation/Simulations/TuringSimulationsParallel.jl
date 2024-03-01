@@ -4,7 +4,7 @@ println(@__DIR__)
 using Pkg; Pkg.activate(joinpath(@__DIR__, "turingSimulations"))
 # ]add Turing DataFrames Optim ProgressMeter Dates CSV NamedArrays LoggingExtras SMTPClient
 using Turing
-using DataFrames
+using DataFrames, DataFramesMeta
 using Dates
 # using LinearAlgebra
 using Optim
@@ -21,7 +21,8 @@ include("../Utilities/Communications.jl")  # send_txt
 
 ################################ logging ################################
 isdir("output/logs") || mkpath("output/logs")
-LOGFILE = "output/logs/logfile.txt"
+LOGFILE = "output/logs/logfile-$(Dates.format(Dates.now(), "yyyy-mm-dd")).txt"
+# LOGFILE = "output/logs/logfile.txt"
 if isa(global_logger(), ConsoleLogger)
     OLDLOGGER = global_logger()
 end
@@ -180,10 +181,10 @@ end
 ################################ Simulation Settings ################################
 # Simulation loop settings
 S = (;
-    Nsigma = 5,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
-    Nparam = 5,  # Number of true parameter samples, conditional on σα², σμ²
-    Nsim = 5,    # Number of simulated datasets per parameter sample
-    Nsearch = 5,   # Number of multistart seeds per simulated dataset to find MLE
+    Nsigma = 10,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
+    Nparam = 10,  # Number of true parameter samples, conditional on σα², σμ²
+    Nsim = 10,    # Number of simulated datasets per parameter sample
+    Nsearch = 10,   # Number of multistart seeds per simulated dataset to find MLE
 )
 
 # Create 2D grid for σα², σμ² simulations - log scale so many more points near 0
@@ -252,6 +253,7 @@ Threads.@threads for i in 1:size(df, 1)
         if !ismissing(first(df2).converged) && first(df2).converged
             # If so, skip this row
             @info "Skipping row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)"
+            println("Skipping row $(i) of $(size(df, 1)): $(θ.nparam)-$(θ.nsim)-$(θ.nsearch)")
             next!(p)
             continue
         end
@@ -297,3 +299,363 @@ savefile = "$savedir/simulation_df.csv"
 CSV.write(savefile, df2)
 
 global_logger(OLDLOGGER);
+
+
+
+################################ Analysis of Simulation Data ################################
+#! Start here
+# Switch environments to use Gadfly
+using Pkg
+env_path = joinpath(splitpath(@__DIR__)[1:end-1]..., "Utilities", "test")
+Pkg.activate(env_path)
+Pkg.add(["Gadfly", "DataFrames", "DataFramesMeta", "CSV", "Statistics", "ColorSchemes", "Colors"])
+using Gadfly
+using ColorSchemes, Colors
+using ColorSchemeTools
+using Compose
+using DataFrames, DataFramesMeta
+using CSV
+using Statistics
+
+# Copied settings from above simulations
+S = (;
+    Nsigma = 10,  # length(σα² array); Nsigma^2 = number of σα², σμ² grid points
+    Nparam = 10,  # Number of true parameter samples, conditional on σα², σμ²
+    Nsim = 10,    # Number of simulated datasets per parameter sample
+    Nsearch = 10,   # Number of multistart seeds per simulated dataset to find MLE
+)
+
+# Create 2D grid for σα², σμ² simulations - log scale so many more points near 0
+_x = range(-10, 10, length=S.Nsigma)
+xx = exp10.(_x)
+
+# Load the simulation data
+savedir = "../../data/temp/turing_simulation_output/Nsigma-param-sim-seed_$(S.Nsigma)-$(S.Nparam)-$(S.Nsim)-$(S.Nsearch)"
+savedir = joinpath(splitpath(@__DIR__)[1:end-4]..., "data", "temp", "turing_simulation_output", "Nsigma-param-sim-seed_$(S.Nsigma)-$(S.Nparam)-$(S.Nsim)-$(S.Nsearch)")
+isdir(savedir)
+savefile = "$savedir/simulation_df.csv"
+df = DataFrame(CSV.File(savefile))
+
+############ Bias of Parameter Estimates ############
+params = [:b₀₁, :b₀₂, :b₀₃, :b₀₄, :β₁, :β₂, :σα², :σμ², :ρ, :v0]
+
+for param in params
+    df = @transform(df, $"$(param)_est_bias" = $"$(param)_est" - $"$(param)")
+end
+
+############ Summary Statistics of Parameter Estimates ############
+# Select search with largest LL for each nparam, nsim
+df_best = @chain df begin
+    groupby([:nparam, :nsim])
+    @subset(:LL .== maximum(:LL))
+    groupby([:nparam, :nsim])
+    @subset(:iterations .== minimum(:iterations))
+end
+df_best = unique(df_best, [:nparam, :nsim])
+
+
+# Get the bias and standard error of the parameter estimates
+df_avg = @chain df_best begin
+    groupby([:σα², :σμ²])
+    @combine(
+        :σα²_est_mean = mean(:σα²_est),
+        :σα²_bias_mean = mean(:σα²_est_bias),
+        :σα²_absbias_mean = mean(abs.(:σα²_est_bias)),
+        :σα²_abspercbias_mean = mean(abs.(:σα²_est_bias / :σα²)),
+        :σα²_bias_std = std(:σα²_est_bias),
+        :σα²_bias_min = minimum(:σα²_est_bias),
+        :σα²_bias_max = maximum(:σα²_est_bias),
+        :σμ²_est_mean = mean(:σμ²_est),
+        :σμ²_bias_mean = mean(:σμ²_est_bias),
+        :σμ²_absbias_mean = mean(abs.(:σμ²_est_bias)),
+        :σμ²_abspercbias_mean = mean(abs.(:σμ²_est_bias / :σμ²)),
+        :σμ²_bias_std = std(:σμ²_est_bias),
+        :σμ²_bias_min = minimum(:σμ²_est_bias),
+        :σμ²_bias_max = maximum(:σμ²_est_bias),
+    )
+end
+
+
+
+
+# Drop all rows with ρ=1, and calculate bias and standard error of the parameter estimates
+sum(df_best.ρ_est .== 1) / nrow(df_best)
+df_avg_restricted = @chain df_best begin
+    @subset(:ρ_est .!= 1)
+    groupby([:σα², :σμ²])
+    @combine(
+        :count = length(:σα²),
+        :σα²_est_mean = mean(:σα²_est),
+        :σα²_bias_mean = mean(:σα²_est_bias),
+        :σα²_percbias_mean = mean(:σα²_est_bias / :σα²),
+        :σα²_absbias_mean = mean(abs.(:σα²_est_bias)),
+        :σα²_abspercbias_mean = mean(abs.(:σα²_est_bias / :σα²)),
+        :σα²_bias_std = std(:σα²_est_bias),
+        :σα²_bias_min = minimum(:σα²_est_bias),
+        :σα²_bias_max = maximum(:σα²_est_bias),
+        :σμ²_est_mean = mean(:σμ²_est),
+        :σμ²_bias_mean = mean(:σμ²_est_bias),
+        :σμ²_percbias_mean = mean(:σμ²_est_bias / :σμ²),
+        :σμ²_absbias_mean = mean(abs.(:σμ²_est_bias)),
+        :σμ²_abspercbias_mean = mean(abs.(:σμ²_est_bias / :σμ²)),
+        :σμ²_bias_std = std(:σμ²_est_bias),
+        :σμ²_bias_min = minimum(:σμ²_est_bias),
+        :σμ²_bias_max = maximum(:σμ²_est_bias),
+    )
+end
+
+
+
+
+
+# Restrict to ρ < 1 before selecting max LL and min iterations
+df_best_restricted = @chain df begin
+    @subset(:ρ_est .!= 1)
+    groupby([:nparam, :nsim])
+    @subset(:LL .== maximum(:LL))
+    groupby([:nparam, :nsim])
+    @subset(:iterations .== minimum(:iterations))
+end
+df_best_restricted = unique(df_best_restricted, [:nparam, :nsim])
+
+# Get the bias and standard error of the parameter estimates, restricted to ρ < 1
+df_avg_restricted = @chain df_best_restricted begin
+    groupby([:σα², :σμ²])
+    @combine(
+        :count = length(:σα²),
+        :σα²_est_mean = mean(:σα²_est),
+        :σα²_bias_mean = mean(:σα²_est_bias),
+        :σα²_absbias_mean = mean(abs.(:σα²_est_bias)),
+        :σα²_abspercbias_mean = mean(abs.(:σα²_est_bias / :σα²)),
+        :σα²_bias_std = std(:σα²_est_bias),
+        :σα²_bias_min = minimum(:σα²_est_bias),
+        :σα²_bias_max = maximum(:σα²_est_bias),
+        :σμ²_est_mean = mean(:σμ²_est),
+        :σμ²_bias_mean = mean(:σμ²_est_bias),
+        :σμ²_absbias_mean = mean(abs.(:σμ²_est_bias)),
+        :σμ²_abspercbias_mean = mean(abs.(:σμ²_est_bias / :σμ²)),
+        :σμ²_bias_std = std(:σμ²_est_bias),
+        :σμ²_bias_min = minimum(:σμ²_est_bias),
+        :σμ²_bias_max = maximum(:σμ²_est_bias),
+    )
+end
+
+
+# Select nsim datasets that get smallest σα²
+df_smallest = @chain df begin
+    # Filter to best estimate for each simulated dataset (Get MLE with maximim LL from the same simulated data with different starting search parameters)
+    groupby([:nparam, :nsim])
+    @subset(:LL .== maximum(:LL))
+    # Filter to smallest σα² est of all datasets from each true σα², σμ² pair 
+    groupby([:σα², :σμ²])
+    @subset(:σα²_est .== minimum(:σα²_est))
+    # If any duplicates, select largest LL
+    groupby([:σα², :σμ²])
+    @subset(:LL .== maximum(:LL))
+end
+
+
+
+
+
+################### Gadfly ###################
+
+
+
+# visualize data
+set_default_plot_size(17cm, 14cm)
+z_minmax = extrema(log10.(df_avg[!, :σα²_est_mean]))
+
+cs1 = ColorScheme(reverse(Colors.sequential_palette(300, 100, logscale=true)))
+
+terrain_data = (
+        (0.00, (0.2, 0.2, 0.6)),
+        (0.15, (0.0, 0.6, 1.0)),
+        (0.25, (0.0, 0.8, 0.4)),
+        (0.50, (1.0, 1.0, 0.6)),
+        (0.75, (0.5, 0.36, 0.33)),
+        (1.00, (1.0, 1.0, 1.0)))
+terrain = make_colorscheme(terrain_data, length = 50)
+d = (
+        (z_minmax[1], (0.2, 0.2, 0.6)),
+        (0, (1, 1, 1)),
+        (z_minmax[2], (0.0, 0.8, 0.4)))
+t = make_colorscheme(d, length = 50)
+
+rng = z_minmax[2] - z_minmax[1]
+zero_fraction = abs(z_minmax[1]) / rng
+
+zmax = 150
+zmin = -50
+zero_fraction = abs(zmin) / (zmax - zmin)
+# zero_fraction = 0.2
+dx_l = zero_fraction/10
+dx_r = (1-zero_fraction)/100
+least_intensity = 0.9
+most_intensity = 0.4
+
+
+cdict = Dict(:blue   => ((0.0,  most_intensity,  most_intensity),
+                        (zero_fraction,  least_intensity,  1.0),
+                        (zero_fraction+dx_r, 0,  0),
+                        (1.0,  0,  0)),
+             :green => ((0.0,  0.0,  0.0),
+                        (zero_fraction-dx_l, 0,  0),
+                        (zero_fraction, 1,  1),
+                        (zero_fraction+dx_r, 0,  0),
+                        (1.0,  0,  0)),
+             :red  => ((0.0,  0.0,  0.0),
+                        (zero_fraction-dx_l, 0,  0),
+                        (zero_fraction, 1,  least_intensity),
+                        (1.0,  most_intensity,  most_intensity))
+)
+divergent_scheme = make_colorscheme(cdict; length=1000)
+
+function mylog(x)
+    if x == 0
+        return -100
+    elseif log10(x) < -100
+        return -100
+    elseif log10(x) > 100
+        return 100
+    else
+        return log10(x)
+    end
+end
+
+# 
+function plot_heatmap(df, zcol)
+    df.z = mylog.(df[!, zcol])
+    # z_minmax = extrema(df.z)
+    # z_absmax = minimum(abs.(z_minmax))
+    # Truncate z values to either negative or positive max, whichever is smaller, to make symmetrical color scale
+    # z = max.(z, -z_absmax)
+    # z = min.(z, z_absmax)
+    p = Gadfly.plot(
+        df,
+        x = :σα²,
+        y = :σμ²,
+        color = :z,
+        Scale.x_log10, Scale.y_log10,
+        Geom.rectbin,
+        Scale.ContinuousColorScale(
+            palette -> get(divergent_scheme, palette)
+            # vlag 
+        ),
+        # Guide.xticks( # Don't use this -- it used all the memory on the server last time
+        #     ticks=[minimum(df.σα²):maximum(df.σα²);]
+        # ),
+        # Set axis limits
+        Coord.cartesian(xmin=-10.5, xmax=10.5, ymin=-10.5, ymax=10.5),
+        # set font size for colorbar, and background color
+        Theme(background_color = "white", key_label_font_size=10pt, key_title_font_size=10pt),
+        # Colorbar title
+        Guide.colorkey(title="log10($zcol)"),
+        # Add annotations
+        Guide.annotation(
+            compose(
+                context(),
+                text(
+                    log10.(df.σα²),  # x var
+                    log10.(df.σμ²),  # y var
+                    string.(round.(df.z, digits=2)),  # z var
+                    repeat([hcenter], nrow(df)),  # dataframe
+                    repeat([vcenter], nrow(df)),
+                ),
+                fontsize(7pt),
+                stroke("black"),
+            ),
+        )
+    )
+    return p
+end
+
+# p = plot_heatmap(df_avg, :σα²_bias_mean)
+# p = plot_heatmap(df_avg_restricted, :σα²_est_mean)
+p2 = plot_heatmap(df_smallest, :σα²_est)
+
+
+
+
+
+# Build rectangular z array for heatmap
+function build_logz(df, param, stat_suffix="bias_mean")
+    z = zeros(S.Nsigma, S.Nsigma)
+    for i in 1:S.Nsigma, j in 1:S.Nsigma
+        σα² = xx[j]  # x (columns)
+        σμ² = xx[i]  # y (rows)
+        z[i,j] = @chain df begin
+            @subset(:σα² .== σα²)
+            @subset(:σμ² .== σμ²)
+            @select($"$(param)_$(stat_suffix)")
+            mylog(first(_)[1])
+        end
+    end
+    return z
+end
+
+σα²_bias_mean = build_z(df_avg, :σα², "bias_mean")
+σα²_abspercbias_mean = build_z(df_avg, :σα², "abspercbias_mean")
+σα²_est_mean = build_logz(df_avg_restricted, :σα², "est_mean")
+σα²_est_small = build_logz(df_smallest, :σα², "est")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############ Plotting with Plots (doesn't work on server) ############
+
+
+using Plots
+gr()
+heatmap(xx, xx, σα²_bias_mean; xscale=:log10, yscale=:log10, title="Mean σα² Bias")
+Plots.heatmap(randn(10,10))
+
+heatmap(xx, xx, mean(results_nt.σα².mean_se, dims=3)[:,:,1]; xscale=:log10, yscale=:log10, title="Mean σα² Standard Error")
+heatmap(xx, xx, mean(results_nt.σα².mean_bias, dims=3)[:,:,1]; xscale=:log10, yscale=:log10, title="Mean σα² Bias")
+heatmap(xx, xx, mean(results_nt.σα².mean_abs_bias, dims=3)[:,:,1]; xscale=:log10, yscale=:log10, title="Mean σα² Absolute Bias")
+
+
+
+using Plots
+gr()
+data = rand(21,100)
+heatmap(1:size(data,1),
+    1:size(data,2), data,
+    c=cgrad([:blue, :white,:red, :yellow]),
+    xlabel="x values", ylabel="y values",
+    title="My title"
+)
+
+using Pkg
+pkg"add GR_jll"
+using GR_jll
+Pkg.status()
+
+
+ENV["PYTHON"]=""
+Pkg.add("PyCall")
+Pkg.build("PyCall")
+
+using PyPlot
+# use x = linspace(0,2*pi,1000) in Julia 0.6
+x = range(0; stop=2*pi, length=1000); y = sin.(3 * x + 4 * cos.(2 * x));
+plot(x, y, color="red", linewidth=2.0, linestyle="--")
+title("A sinusoidally modulated sinusoid")
+
+#################### matplotlib ####################
+import seaborn as sns
+import matplotlib.pylab as plt
+
+uniform_data = np.random.rand(10, 12)
+ax = sns.heatmap(uniform_data, linewidth=0.5)
+plt.show()
